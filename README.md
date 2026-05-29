@@ -10,6 +10,7 @@ Interactive wheel and tyre fitment calculator. Enter your current and new wheel/
 - **Camber rendering** — enter positive or negative degrees and the wheel tilts in the diagram
 - **2D cross-section diagram** — overlaid tyre profiles on a shared hub, with diameter callouts and poke measurement rows
 - **Hover tooltips** — plain-English explanation of every measurement
+- **Offline / PWA** — installable on desktop and mobile; works fully without a network connection after first load
 - **Zero client dependencies** — pure vanilla JS, no build step needed in dev
 
 ## Local dev

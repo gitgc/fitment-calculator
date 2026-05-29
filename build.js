@@ -30,7 +30,7 @@ function ratio(before, after) {
 
 async function build() {
 	const start = Date.now();
-	console.log('Building src/ → public/ …\n');
+	console.log('Building src/ -> public/ ...\n');
 
 	// Clean and recreate output dir
 	fs.rmSync(DIST, { recursive: true, force: true });
@@ -43,7 +43,7 @@ async function build() {
 	const cssHash = contentHash(cssResult.styles);
 	const cssFile = `style.${cssHash}.css`;
 	fs.writeFileSync(path.join(DIST, cssFile), cssResult.styles);
-	console.log(`  style.css   ${kib(srcCSS)} → ${kib(cssResult.styles)}  ${ratio(srcCSS, cssResult.styles)}  → ${cssFile}`);
+	console.log(`  style.css   ${kib(srcCSS)} -> ${kib(cssResult.styles)}  ${ratio(srcCSS, cssResult.styles)}  -> ${cssFile}`);
 
 	// ── JS ────────────────────────────────────────────────────────────────────
 	const srcJS = fs.readFileSync(path.join(SRC, 'app.js'), 'utf8');
@@ -56,40 +56,73 @@ async function build() {
 	const jsHash = contentHash(jsResult.code);
 	const jsFile = `app.${jsHash}.js`;
 	fs.writeFileSync(path.join(DIST, jsFile), jsResult.code);
-	console.log(`  app.js      ${kib(srcJS)} → ${kib(jsResult.code)}  ${ratio(srcJS, jsResult.code)}  → ${jsFile}`);
+	console.log(`  app.js      ${kib(srcJS)} -> ${kib(jsResult.code)}  ${ratio(srcJS, jsResult.code)}  -> ${jsFile}`);
 
 	// ── HTML (with hashed asset refs injected) ────────────────────────────────
 	const srcHTML = fs.readFileSync(path.join(SRC, 'index.html'), 'utf8');
-	const htmlWithHashes = srcHTML
+	const htmlWithRefs = srcHTML
 		.replace('href="style.css"', `href="${cssFile}"`)
 		.replace('src="app.js"',     `src="${jsFile}"`);
-	const htmlMin = await minifyHTML(htmlWithHashes, {
-		collapseWhitespace:           true,
-		removeComments:               true,
-		removeAttributeQuotes:        true,
-		removeRedundantAttributes:    true,
-		removeScriptTypeAttributes:   true,
+	const htmlMin = await minifyHTML(htmlWithRefs, {
+		collapseWhitespace:            true,
+		removeComments:                true,
+		removeAttributeQuotes:         true,
+		removeRedundantAttributes:     true,
+		removeScriptTypeAttributes:    true,
 		removeStyleLinkTypeAttributes: true,
-		minifyCSS:                    true,
-		minifyJS:                     true,
-		useShortDoctype:              true,
+		minifyCSS:                     true,
+		minifyJS:                      true,
+		useShortDoctype:               true,
 	});
 	fs.writeFileSync(path.join(DIST, 'index.html'), htmlMin);
-	console.log(`  index.html  ${kib(srcHTML)} → ${kib(htmlMin)}  ${ratio(srcHTML, htmlMin)}`);
+	console.log(`  index.html  ${kib(srcHTML)} -> ${kib(htmlMin)}  ${ratio(srcHTML, htmlMin)}`);
+
+	// ── Service worker (inject cache name + precache list, then minify) ───────
+	const precache = ['/', `/${cssFile}`, `/${jsFile}`, '/manifest.json', '/icon.svg'];
+	// Derive cache name from asset hashes so it bumps on every build that changes files
+	const cacheVersion = contentHash(cssHash + jsHash);
+	const swSrc = fs.readFileSync(path.join(SRC, 'sw.js'), 'utf8');
+	const swInjected = swSrc
+		.replace(/"fitment-dev"/, `"fitment-${cacheVersion}"`)
+		.replace(/\["\/"\]/, JSON.stringify(precache));
+	const swResult = await minifyJS(swInjected, {
+		compress: { passes: 2 },
+		mangle: true,
+		format: { comments: false },
+	});
+	if (!swResult.code) throw new Error('SW minification produced empty output');
+	fs.writeFileSync(path.join(DIST, 'sw.js'), swResult.code);
+	console.log(`  sw.js       ${kib(swSrc)} -> ${kib(swResult.code)}  ${ratio(swSrc, swResult.code)}`);
+
+	// ── Manifest and icon (copied verbatim) ───────────────────────────────────
+	fs.copyFileSync(path.join(SRC, 'manifest.json'), path.join(DIST, 'manifest.json'));
+	fs.copyFileSync(path.join(SRC, 'icon.svg'),      path.join(DIST, 'icon.svg'));
+	console.log('  manifest.json + icon.svg  copied');
 
 	// ── Cloudflare _headers ───────────────────────────────────────────────────
+	// sw.js must never be cached — browsers must always fetch the latest version.
+	// Hashed app assets (app.*.js, style.*.css) are safe to cache forever.
+	// manifest.json and icon.svg use a short TTL so changes propagate within a day.
 	const headers = [
-		'# index.html — no cache (always fresh)',
 		'/index.html',
 		'  Cache-Control: public, max-age=0, must-revalidate',
 		'  X-Content-Type-Options: nosniff',
 		'  X-Frame-Options: DENY',
 		'  Referrer-Policy: strict-origin-when-cross-origin',
 		'',
-		'# hashed assets — immutable forever',
-		'/*.css',
+		'/sw.js',
+		'  Cache-Control: no-store',
+		'',
+		'/manifest.json',
+		'  Cache-Control: public, max-age=3600',
+		'',
+		'/icon.svg',
+		'  Cache-Control: public, max-age=86400',
+		'',
+		'/style.*.css',
 		'  Cache-Control: public, max-age=31536000, immutable',
-		'/*.js',
+		'',
+		'/app.*.js',
 		'  Cache-Control: public, max-age=31536000, immutable',
 	].join('\n');
 	fs.writeFileSync(path.join(DIST, '_headers'), headers);

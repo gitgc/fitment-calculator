@@ -4,6 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Wheels Fitment — Wheel Fitment Calculator</title>
+  <meta name="description" content="Compare wheel and tyre fitment setups side by side — diameter, poke, speedo error, ride height and more.">
+  <meta name="theme-color" content="#f0b429">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Fitment">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -73,5 +80,6 @@
   </div>
 </main>
 <script src="app.js"></script>
+<script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
 </body>
 </html>
