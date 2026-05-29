@@ -4,3 +4,6 @@ services:
     ports:
       - "80:80"
     restart: unless-stopped
+    volumes:
+      - ./public:/srv:ro
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro

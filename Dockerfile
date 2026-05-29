@@ -1,6 +1,6 @@
 FROM caddy:2
 
 COPY Caddyfile /etc/caddy/Caddyfile
-COPY src/ /srv/
+COPY public/ /srv/
 
 EXPOSE 80
