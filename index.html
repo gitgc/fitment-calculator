@@ -128,6 +128,9 @@ canvas { display: block; margin: 0 auto; max-width: 100%; border-radius: 8px; }
       <p class="section-label">Tyre</p>
       <div class="field"><label>Width (mm)</label><input type="number" id="o-tw" value="225" step="5"></div>
       <div class="field"><label>Profile (%)</label><input type="number" id="o-pr" value="45" step="5"></div>
+      <p class="section-label">Optional</p>
+      <div class="field"><label>Spacer (mm)</label><input type="number" id="o-sp" value="0" step="1" min="0"></div>
+      <div class="field"><label>Camber (°)</label><input type="number" id="o-cam" value="0" step="0.5"></div>
     </div>
     <div class="card new">
       <h2>New Setup</h2>
@@ -138,6 +141,9 @@ canvas { display: block; margin: 0 auto; max-width: 100%; border-radius: 8px; }
       <p class="section-label">Tyre</p>
       <div class="field"><label>Width (mm)</label><input type="number" id="n-tw" value="235" step="5"></div>
       <div class="field"><label>Profile (%)</label><input type="number" id="n-pr" value="40" step="5"></div>
+      <p class="section-label">Optional</p>
+      <div class="field"><label>Spacer (mm)</label><input type="number" id="n-sp" value="0" step="1" min="0"></div>
+      <div class="field"><label>Camber (°)</label><input type="number" id="n-cam" value="0" step="0.5"></div>
     </div>
   </div>
 
@@ -173,15 +179,17 @@ canvas { display: block; margin: 0 auto; max-width: 100%; border-radius: 8px; }
 <script>
 function v(id) { return parseFloat(document.getElementById(id).value) || 0; }
 
-function calc(rimIn, rimWin, et, tw, pr) {
+function calc(rimIn, rimWin, et, tw, pr, spacer) {
   const rimDmm = rimIn * 25.4;
   const rimWmm = rimWin * 25.4;
   const sw = tw * pr / 100;
   const od = rimDmm + 2 * sw;
   const circ = Math.PI * od;
-  const inset = rimWmm / 2 + et;
-  const poke = rimWmm / 2 - et;
-  return { rimIn, rimDmm, rimWin, rimWmm, et, tw, pr, sw, od, circ, inset, poke };
+  const sp = spacer || 0;
+  const effectiveET = et - sp;
+  const inset = rimWmm / 2 + effectiveET;
+  const poke  = rimWmm / 2 - effectiveET;
+  return { rimIn, rimDmm, rimWin, rimWmm, et, sp, effectiveET, tw, pr, sw, od, circ, inset, poke };
 }
 
 function fmt(n, d = 1) { return n.toFixed(d); }
@@ -197,8 +205,10 @@ function diffHTML(diff, unit, negGood = false) {
 }
 
 function calculate() {
-  const o = calc(v('o-d'), v('o-w'), v('o-et'), v('o-tw'), v('o-pr'));
-  const n = calc(v('n-d'), v('n-w'), v('n-et'), v('n-tw'), v('n-pr'));
+  const o = calc(v('o-d'), v('o-w'), v('o-et'), v('o-tw'), v('o-pr'), v('o-sp'));
+  const n = calc(v('n-d'), v('n-w'), v('n-et'), v('n-tw'), v('n-pr'), v('n-sp'));
+  const oCam = v('o-cam');
+  const nCam = v('n-cam');
 
   const speedoErr = (o.circ - n.circ) / n.circ * 100;
   const r30 = 30 * o.circ / n.circ;
@@ -242,7 +252,7 @@ function calculate() {
   ).join('');
 
   document.getElementById('results').classList.add('show');
-  drawDiagram(o, n);
+  drawDiagram(o, n, oCam, nCam);
 }
 
 function rrPath(ctx, x, y, w, h, r) {
@@ -295,19 +305,26 @@ function tyrePath(ctx, rimCX, cy, tHW, tHH, rHW, rHH) {
 }
 
 // Draw one tyre/rim cross-section. Hub mounting face is at hubX.
-function drawSetup(ctx, w, hubX, cy, scale, color) {
+function drawSetup(ctx, w, hubX, cy, scale, color, camberDeg) {
   const tHW   = w.tw     / 2 * scale;
   const tHH   = w.od     / 2 * scale;
   const rHW   = w.rimWmm / 2 * scale;
-  const rHH   = w.rimDmm   / 2 * scale;
-  const rimCX = hubX - w.et * scale;
+  const rHH   = w.rimDmm / 2 * scale;
+  const rimCX = hubX - w.effectiveET * scale;
+
+  ctx.save();
+  if (camberDeg) {
+    ctx.translate(rimCX, cy);
+    ctx.rotate(camberDeg * Math.PI / 180);
+    ctx.translate(-rimCX, -cy);
+  }
 
   // ── Tyre rubber fill ──────────────────────────────────────
   ctx.fillStyle = color + '20';
   tyrePath(ctx, rimCX, cy, tHW, tHH, rHW, rHH);
   ctx.fill();
 
-  // ── Tread pattern (clipped to tyre shape to respect rounded shoulders) ─
+  // ── Tread pattern (clipped to tyre shape) ─────────────────
   ctx.save();
   tyrePath(ctx, rimCX, cy, tHW, tHH, rHW, rHH);
   ctx.clip();
@@ -316,8 +333,8 @@ function drawSetup(ctx, w, hubX, cy, scale, color) {
   const bandH   = treadD / nGroove;
   ctx.fillStyle = color + '2e';
   for (let i = 1; i < nGroove; i += 2) {
-    ctx.fillRect(rimCX - tHW, cy - tHH + i * bandH,     tHW * 2, bandH); // top
-    ctx.fillRect(rimCX - tHW, cy + tHH - (i+1) * bandH, tHW * 2, bandH); // bottom
+    ctx.fillRect(rimCX - tHW, cy - tHH + i * bandH,     tHW * 2, bandH);
+    ctx.fillRect(rimCX - tHW, cy + tHH - (i+1) * bandH, tHW * 2, bandH);
   }
   ctx.restore();
 
@@ -336,6 +353,7 @@ function drawSetup(ctx, w, hubX, cy, scale, color) {
   ctx.fill();
   ctx.stroke();
 
+  ctx.restore(); // undo camber rotation
 }
 
 // Horizontal measurement row.
@@ -387,7 +405,7 @@ function drawHub(ctx, hubX, cy, rHH) {
   ctx.beginPath(); ctx.moveTo(hubX, cy - fR - 10); ctx.lineTo(hubX, cy + fR + 10); ctx.stroke();
 }
 
-function drawDiagram(o, n) {
+function drawDiagram(o, n, oCam, nCam) {
   const canvas = document.getElementById('cv');
   const W = canvas.width, H = canvas.height;
   const ctx = canvas.getContext('2d');
@@ -404,8 +422,8 @@ function drawDiagram(o, n) {
   const availW = W - 2 * sidePad;
   const availH = H - topPad - botPad;
 
-  const maxIn  = Math.max(o.tw/2 + o.et, n.tw/2 + n.et);
-  const maxOut = Math.max(o.tw/2 - o.et, n.tw/2 - n.et);
+  const maxIn  = Math.max(o.tw/2 + o.effectiveET, n.tw/2 + n.effectiveET);
+  const maxOut = Math.max(o.tw/2 - o.effectiveET, n.tw/2 - n.effectiveET);
   const maxOD  = Math.max(o.od, n.od);
 
   const scale = Math.min(availW / (maxIn + maxOut), availH / maxOD);
@@ -415,8 +433,8 @@ function drawDiagram(o, n) {
   const cy     = topPad + availH / 2;
 
   // ── Tyres ─────────────────────────────────────────────────
-  drawSetup(ctx, o, hubX, cy, scale, '#58a6ff');
-  drawSetup(ctx, n, hubX, cy, scale, '#f78166');
+  drawSetup(ctx, o, hubX, cy, scale, '#58a6ff', oCam);
+  drawSetup(ctx, n, hubX, cy, scale, '#f78166', nCam);
 
   const oTH   = o.od * scale;
   const nTH   = n.od * scale;
@@ -427,8 +445,8 @@ function drawDiagram(o, n) {
   drawHub(ctx, hubX, cy, avgRHH);
 
   // ── Diameter callouts — vertical arrows, labels at mid-height
-  const oRimCX = hubX - o.et * scale;
-  const nRimCX = hubX - n.et * scale;
+  const oRimCX = hubX - o.effectiveET * scale;
+  const nRimCX = hubX - n.effectiveET * scale;
 
   const oDLeft = oRimCX - o.tw/2 * scale;
   const aL = oDLeft - 26;
@@ -468,10 +486,12 @@ function drawDiagram(o, n) {
   const py1 = cy + maxTH/2 + 28;
   const py2 = py1 + 44;
 
+  const oETlabel = o.sp ? 'ET' + o.et + ' -' + o.sp + 'sp' : 'ET' + o.et;
+  const nETlabel = n.sp ? 'ET' + n.et + ' -' + n.sp + 'sp' : 'ET' + n.et;
   pokeRow(ctx, hubX, oRimCX + o.rimWmm/2 * scale, py1,
-    '#58a6ff', 'Current', o.tw + ' mm wide   ET' + o.et + '   poke ' + o.poke.toFixed(1) + ' mm', W - 8);
+    '#58a6ff', 'Current', o.tw + ' mm wide   ' + oETlabel + '   poke ' + o.poke.toFixed(1) + ' mm', W - 8);
   pokeRow(ctx, hubX, nRimCX + n.rimWmm/2 * scale, py2,
-    '#f78166', 'New', n.tw + ' mm wide   ET' + n.et + '   poke ' + n.poke.toFixed(1) + ' mm', W - 8);
+    '#f78166', 'New', n.tw + ' mm wide   ' + nETlabel + '   poke ' + n.poke.toFixed(1) + ' mm', W - 8);
 
   // ── Legend ────────────────────────────────────────────────
   ctx.font = 'bold 16px sans-serif'; ctx.textAlign = 'center';
