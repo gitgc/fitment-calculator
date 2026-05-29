@@ -11,6 +11,51 @@ const { minify: minifyHTML } = require('html-minifier-terser');
 const SRC  = path.join(__dirname, 'src');
 const DIST = path.join(__dirname, 'public');
 
+// ── SEO tag generation ────────────────────────────────────────────────────────
+
+function loadSiteConfig() {
+	const cfgPath = path.join(__dirname, 'site.config.json');
+	try {
+		return JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
+	} catch (err) {
+		throw new Error(`site.config.json: ${err.message}`);
+	}
+}
+
+function esc(str) {
+	return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function buildSeoTags(cfg) {
+	const t = [];
+
+	// Core
+	if (cfg.title)        t.push(`<title>${esc(cfg.title)}</title>`);
+	if (cfg.description)  t.push(`<meta name="description" content="${esc(cfg.description)}">`);
+	if (cfg.author)       t.push(`<meta name="author" content="${esc(cfg.author)}">`);
+	if (cfg.keywords)     t.push(`<meta name="keywords" content="${esc(cfg.keywords)}">`);
+	if (cfg.canonicalUrl) t.push(`<link rel="canonical" href="${esc(cfg.canonicalUrl)}">`);
+
+	// Open Graph
+	if (cfg.title || cfg.description) {
+		t.push('<meta property="og:type" content="website">');
+		if (cfg.title)        t.push(`<meta property="og:title" content="${esc(cfg.title)}">`);
+		if (cfg.description)  t.push(`<meta property="og:description" content="${esc(cfg.description)}">`);
+		if (cfg.canonicalUrl) t.push(`<meta property="og:url" content="${esc(cfg.canonicalUrl)}">`);
+		if (cfg.ogImage)      t.push(`<meta property="og:image" content="${esc(cfg.ogImage)}">`);
+	}
+
+	// Twitter Card
+	if (cfg.twitterCard) {
+		t.push(`<meta name="twitter:card" content="${esc(cfg.twitterCard)}">`);
+		if (cfg.title)       t.push(`<meta name="twitter:title" content="${esc(cfg.title)}">`);
+		if (cfg.description) t.push(`<meta name="twitter:description" content="${esc(cfg.description)}">`);
+		if (cfg.ogImage)     t.push(`<meta name="twitter:image" content="${esc(cfg.ogImage)}">`);
+	}
+
+	return t.join('\n  ');
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function contentHash(str) {
@@ -22,8 +67,10 @@ function kib(str) {
 }
 
 function ratio(before, after) {
-	const pct = (100 - (Buffer.byteLength(after) / Buffer.byteLength(before)) * 100).toFixed(0);
-	return `\x1b[32m-${pct}%\x1b[0m`;
+	const pct = Math.round(100 - (Buffer.byteLength(after) / Buffer.byteLength(before)) * 100);
+	return pct >= 0
+		? `\x1b[32m-${pct}%\x1b[0m`
+		: `\x1b[33m+${-pct}%\x1b[0m`;
 }
 
 // ── Build ─────────────────────────────────────────────────────────────────────
@@ -31,6 +78,11 @@ function ratio(before, after) {
 async function build() {
 	const start = Date.now();
 	console.log('Building src/ -> public/ ...\n');
+
+	// ── Site config (SEO) ─────────────────────────────────────────────────────
+	const siteConfig = loadSiteConfig();
+	const seoTags    = buildSeoTags(siteConfig);
+	console.log(`  site.config.json  loaded (title: "${siteConfig.title || '(none)'}")`);
 
 	// Clean and recreate output dir
 	fs.rmSync(DIST, { recursive: true, force: true });
@@ -60,7 +112,9 @@ async function build() {
 
 	// ── HTML (with hashed asset refs injected) ────────────────────────────────
 	const srcHTML = fs.readFileSync(path.join(SRC, 'index.html'), 'utf8');
+	if (!srcHTML.includes('<!-- %SEO% -->')) throw new Error('src/index.html is missing the <!-- %SEO% --> placeholder');
 	const htmlWithRefs = srcHTML
+		.replace('<!-- %SEO% -->', seoTags)
 		.replace('href="style.css"', `href="${cssFile}"`)
 		.replace('src="app.js"',     `src="${jsFile}"`);
 	const htmlMin = await minifyHTML(htmlWithRefs, {

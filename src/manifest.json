@@ -1,18 +1,18 @@
 {
-	"name": "Fitment Calculator",
-	"short_name": "Fitment",
-	"description": "Compare wheel and tyre fitment setups side by side.",
-	"start_url": "/",
-	"display": "standalone",
-	"background_color": "#0d1117",
-	"theme_color": "#f0b429",
-	"orientation": "any",
-	"icons": [
-		{
-			"src": "icon.svg",
-			"sizes": "any",
-			"type": "image/svg+xml",
-			"purpose": "any maskable"
-		}
-	]
+    "name": "Fitment Calculator",
+    "short_name": "Fitment",
+    "description": "Compare wheel and tyre fitment setups side by side.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0d1117",
+    "theme_color": "#f0b429",
+    "orientation": "any",
+    "icons": [
+        {
+            "src": "icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ]
 }
