@@ -148,12 +148,21 @@ function calculate() {
     document.getElementById("tbody").innerHTML = rows
         .map(
             ([label, ov, nv, dv]) =>
-                `<tr><td data-tip="${tips[label] || ""}">${label}</td><td>${ov}</td><td>${nv}</td><td>${dv}</td></tr>`,
+                `<tr><th scope="row" data-tip="${tips[label] || ""}" title="${tips[label] || ""}">${label}</th><td>${ov}</td><td>${nv}</td><td>${dv}</td></tr>`,
         )
         .join("");
 
     document.getElementById("results").classList.add("show");
     drawDiagram(o, n, oCam, nCam);
+
+    document.getElementById("cv").setAttribute(
+        "aria-label",
+        `Cross-section comparison: current setup ${fmt(o.od)} mm diameter, new setup ${fmt(n.od)} mm diameter. ` +
+        `Current poke ${fmt(o.poke)} mm, new poke ${fmt(n.poke)} mm.`,
+    );
+
+    document.getElementById("calc-status").textContent =
+        "Fitment results calculated. Scroll down to view the comparison table and diagram.";
 }
 
 // ── Canvas helpers ────────────────────────────────────────────────────────────
@@ -439,21 +448,20 @@ function drawDiagram(o, n, oCam, nCam) {
 
 const tip = document.createElement("div");
 tip.id = "tip";
+tip.setAttribute("role", "tooltip");
+tip.setAttribute("aria-hidden", "true");
 document.body.appendChild(tip);
 
-document.addEventListener("mouseover", (e) => {
-    const el = e.target.closest("[data-tip]");
-    if (!el?.dataset.tip) return;
-    tip.textContent = el.dataset.tip;
+function showTip(text) {
+    tip.textContent = text;
     tip.style.opacity = "1";
-});
+}
 
-document.addEventListener("mouseout", (e) => {
-    if (e.target.closest("[data-tip]")) tip.style.opacity = "0";
-});
+function hideTip() {
+    tip.style.opacity = "0";
+}
 
-document.addEventListener("mousemove", (e) => {
-    if (tip.style.opacity === "0") return;
+function positionTipAtMouse(e) {
     const pad = 12;
     const tw = tip.offsetWidth,
         th = tip.offsetHeight;
@@ -467,6 +475,44 @@ document.addEventListener("mousemove", (e) => {
             : e.clientY + pad;
     tip.style.left = `${x}px`;
     tip.style.top = `${y}px`;
+}
+
+function positionTipAtElement(el) {
+    const rect = el.getBoundingClientRect();
+    const pad = 8;
+    const x = Math.min(rect.left, window.innerWidth - tip.offsetWidth - pad);
+    const y =
+        rect.bottom + pad + tip.offsetHeight > window.innerHeight
+            ? rect.top - tip.offsetHeight - pad
+            : rect.bottom + pad;
+    tip.style.left = `${Math.max(pad, x)}px`;
+    tip.style.top = `${y}px`;
+}
+
+document.addEventListener("mouseover", (e) => {
+    const el = e.target.closest("[data-tip]");
+    if (!el?.dataset.tip) return;
+    showTip(el.dataset.tip);
+});
+
+document.addEventListener("mouseout", (e) => {
+    if (e.target.closest("[data-tip]")) hideTip();
+});
+
+document.addEventListener("mousemove", (e) => {
+    if (tip.style.opacity === "0") return;
+    positionTipAtMouse(e);
+});
+
+document.addEventListener("focusin", (e) => {
+    const el = e.target.closest("[data-tip]");
+    if (!el?.dataset.tip) return;
+    showTip(el.dataset.tip);
+    positionTipAtElement(el);
+});
+
+document.addEventListener("focusout", (e) => {
+    if (e.target.closest("[data-tip]")) hideTip();
 });
 
 // ── Init ──────────────────────────────────────────────────────────────────────
