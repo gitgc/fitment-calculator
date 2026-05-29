@@ -1,0 +1,19 @@
+{
+  "name": "fitment-calculator",
+  "version": "1.0.0",
+  "description": "Interactive wheel and tyre fitment calculator — static single-page app",
+  "scripts": {
+    "start": "node server.js",
+    "caddy": "caddy run --config Caddyfile --watch",
+    "check": "biome check --write ."
+  },
+  "dependencies": {
+    "express": "^4.22.2"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.16"
+  }
+}
