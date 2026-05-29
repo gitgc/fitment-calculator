@@ -3,3 +3,7 @@
 *.md
 node_modules
 npm-debug.log*
+src/
+server.js
+build.js
+biome.json

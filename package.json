@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node server.js",
     "caddy": "caddy run --config Caddyfile --watch",
-    "check": "biome check --write ."
+    "check": "biome check --write .",
+    "publish": "node build.js"
   },
   "dependencies": {
     "express": "^4.22.2"
@@ -14,6 +15,9 @@
     "node": ">=18"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.16"
+    "@biomejs/biome": "2.4.16",
+    "clean-css": "^5.3.3",
+    "html-minifier-terser": "^7.2.0",
+    "terser": "^5.48.0"
   }
 }
