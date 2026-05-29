@@ -112,6 +112,8 @@ async function build() {
 	const srcHTML = fs.readFileSync(path.join(SRC, 'index.html'), 'utf8');
 	if (!srcHTML.includes('<!-- %SEO% -->')) throw new Error('src/index.html is missing the <!-- %SEO% --> placeholder');
 	const htmlWithRefs = srcHTML
+		// Strip the dev-only fallback title — the SEO block supplies the real one from site.config.json
+		.replace(/<title>[^<]*<\/title>\n?/, '')
 		.replace('<!-- %SEO% -->', seoTags)
 		// Inline CSS — replaces the <link> with a <style> block, removing the blocking request
 		.replace('<link rel="stylesheet" href="style.css">', `<style>${cssResult.styles}</style>`)

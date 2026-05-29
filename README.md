@@ -112,6 +112,15 @@ fitment-calculator/
 | `npm run caddy`    | Caddy dev server on `:80`, serves `src/`         |
 | `npm run publish`  | Build `src/` -> `public/` (minify, hash assets) |
 | `npm run check`    | Biome lint + format                              |
+| `npm run a11y`     | Axe-core accessibility scan against `:3000`      |
+
+`npm run a11y` requires the dev server to be running (`npm start`). Pass a URL to scan a different target:
+
+```sh
+npm start &
+npm run a11y                            # scans http://localhost:3000
+npm run a11y -- https://wheelsfitment.com  # scans production
+```
 
 ## Inputs
 
