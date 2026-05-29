@@ -2,6 +2,8 @@
 	root * /srv
 	file_server
 
+	redir /favicon.ico /icon.svg 301
+
 	encode gzip zstd
 
 	header {

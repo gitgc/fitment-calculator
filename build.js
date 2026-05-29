@@ -88,14 +88,12 @@ async function build() {
 	fs.rmSync(DIST, { recursive: true, force: true });
 	fs.mkdirSync(DIST, { recursive: true });
 
-	// ── CSS ───────────────────────────────────────────────────────────────────
+	// ── CSS (minify, then inline — eliminates the render-blocking request) ────
 	const srcCSS = fs.readFileSync(path.join(SRC, 'style.css'), 'utf8');
 	const cssResult = new CleanCSS({ level: 2 }).minify(srcCSS);
 	if (cssResult.errors.length) throw new Error(`CSS:\n${cssResult.errors.join('\n')}`);
 	const cssHash = contentHash(cssResult.styles);
-	const cssFile = `style.${cssHash}.css`;
-	fs.writeFileSync(path.join(DIST, cssFile), cssResult.styles);
-	console.log(`  style.css   ${kib(srcCSS)} -> ${kib(cssResult.styles)}  ${ratio(srcCSS, cssResult.styles)}  -> ${cssFile}`);
+	console.log(`  style.css   ${kib(srcCSS)} -> ${kib(cssResult.styles)}  ${ratio(srcCSS, cssResult.styles)}  (inlined)`);
 
 	// ── JS ────────────────────────────────────────────────────────────────────
 	const srcJS = fs.readFileSync(path.join(SRC, 'app.js'), 'utf8');
@@ -110,13 +108,15 @@ async function build() {
 	fs.writeFileSync(path.join(DIST, jsFile), jsResult.code);
 	console.log(`  app.js      ${kib(srcJS)} -> ${kib(jsResult.code)}  ${ratio(srcJS, jsResult.code)}  -> ${jsFile}`);
 
-	// ── HTML (with hashed asset refs injected) ────────────────────────────────
+	// ── HTML ──────────────────────────────────────────────────────────────────
 	const srcHTML = fs.readFileSync(path.join(SRC, 'index.html'), 'utf8');
 	if (!srcHTML.includes('<!-- %SEO% -->')) throw new Error('src/index.html is missing the <!-- %SEO% --> placeholder');
 	const htmlWithRefs = srcHTML
 		.replace('<!-- %SEO% -->', seoTags)
-		.replace('href="style.css"', `href="${cssFile}"`)
-		.replace('src="app.js"',     `src="${jsFile}"`);
+		// Inline CSS — replaces the <link> with a <style> block, removing the blocking request
+		.replace('<link rel="stylesheet" href="style.css">', `<style>${cssResult.styles}</style>`)
+		// Hashed JS filename + defer so it never blocks the parser
+		.replace('src="app.js"', `src="${jsFile}" defer`);
 	const htmlMin = await minifyHTML(htmlWithRefs, {
 		collapseWhitespace:            true,
 		removeComments:                true,
@@ -131,9 +131,9 @@ async function build() {
 	fs.writeFileSync(path.join(DIST, 'index.html'), htmlMin);
 	console.log(`  index.html  ${kib(srcHTML)} -> ${kib(htmlMin)}  ${ratio(srcHTML, htmlMin)}`);
 
-	// ── Service worker (inject cache name + precache list, then minify) ───────
-	const precache = ['/', `/${cssFile}`, `/${jsFile}`, '/manifest.json', '/icon.svg'];
-	// Derive cache name from asset hashes so it bumps on every build that changes files
+	// ── Service worker ────────────────────────────────────────────────────────
+	// CSS is now inlined, so only JS needs to be precached separately.
+	const precache = ['/', `/${jsFile}`, '/manifest.json', '/icon.svg'];
 	const cacheVersion = contentHash(cssHash + jsHash);
 	const swSrc = fs.readFileSync(path.join(SRC, 'sw.js'), 'utf8');
 	const swInjected = swSrc
@@ -154,9 +154,6 @@ async function build() {
 	console.log('  manifest.json + icon.svg  copied');
 
 	// ── Cloudflare _headers ───────────────────────────────────────────────────
-	// sw.js must never be cached — browsers must always fetch the latest version.
-	// Hashed app assets (app.*.js, style.*.css) are safe to cache forever.
-	// manifest.json and icon.svg use a short TTL so changes propagate within a day.
 	const headers = [
 		'/index.html',
 		'  Cache-Control: public, max-age=0, must-revalidate',
@@ -172,9 +169,6 @@ async function build() {
 		'',
 		'/icon.svg',
 		'  Cache-Control: public, max-age=86400',
-		'',
-		'/style.*.css',
-		'  Cache-Control: public, max-age=31536000, immutable',
 		'',
 		'/app.*.js',
 		'  Cache-Control: public, max-age=31536000, immutable',
