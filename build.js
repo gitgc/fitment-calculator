@@ -155,6 +155,10 @@ async function build() {
 	fs.copyFileSync(path.join(SRC, 'icon.svg'),      path.join(DIST, 'icon.svg'));
 	console.log('  manifest.json + icon.svg  copied');
 
+	// -- Cloudflare wrangler json (copied verbatim) ─────────────────────────────
+	fs.copyFileSync(path.join(SRC, 'wrangler.jsonc'), path.join(DIST, 'wrangler.jsonc'));
+	console.log('  wrangler.jsonc  copied');
+
 	// ── Cloudflare _headers ───────────────────────────────────────────────────
 	const headers = [
 		'/index.html',
