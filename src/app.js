@@ -155,11 +155,13 @@ function calculate() {
     document.getElementById("results").classList.add("show");
     drawDiagram(o, n, oCam, nCam);
 
-    document.getElementById("cv").setAttribute(
-        "aria-label",
-        `Cross-section comparison: current setup ${fmt(o.od)} mm diameter, new setup ${fmt(n.od)} mm diameter. ` +
-        `Current poke ${fmt(o.poke)} mm, new poke ${fmt(n.poke)} mm.`,
-    );
+    document
+        .getElementById("cv")
+        .setAttribute(
+            "aria-label",
+            `Cross-section comparison: current setup ${fmt(o.od)} mm diameter, new setup ${fmt(n.od)} mm diameter. ` +
+                `Current poke ${fmt(o.poke)} mm, new poke ${fmt(n.poke)} mm.`,
+        );
 
     document.getElementById("calc-status").textContent =
         "Fitment results calculated. Scroll down to view the comparison table and diagram.";
