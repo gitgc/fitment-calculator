@@ -16,7 +16,7 @@
     },
     "linter": {
         "enabled": true,
-        "includes": ["src/**/*"],
+        "includes": ["src/**/*", "*.js"],
         "rules": {
             "recommended": true
         }

@@ -1,5 +1,3 @@
-'use strict';
-
 const { chromium } = require('playwright');
 const { AxeBuilder } = require('@axe-core/playwright');
 
