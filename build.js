@@ -1,5 +1,3 @@
-'use strict';
-
 const fs     = require('node:fs');
 const path   = require('node:path');
 const crypto = require('node:crypto');
@@ -154,6 +152,10 @@ async function build() {
 	fs.copyFileSync(path.join(SRC, 'manifest.json'), path.join(DIST, 'manifest.json'));
 	fs.copyFileSync(path.join(SRC, 'icon.svg'),      path.join(DIST, 'icon.svg'));
 	console.log('  manifest.json + icon.svg  copied');
+
+	// -- Cloudflare wrangler json (copied verbatim) ─────────────────────────────
+	fs.copyFileSync(path.join(SRC, 'wrangler.jsonc'), path.join(DIST, 'wrangler.jsonc'));
+	console.log('  wrangler.jsonc  copied');
 
 	// ── Cloudflare _headers ───────────────────────────────────────────────────
 	const headers = [
