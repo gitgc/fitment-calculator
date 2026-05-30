@@ -1,7 +1,7 @@
 {
-    "name": "Fitment Calculator",
+    "name": "Fix That Gap!",
     "short_name": "Fitment",
-    "description": "Compare wheel and tyre fitment setups side by side.",
+    "description": "Compare wheel and tire fitment setups side by side.",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#0d1117",
