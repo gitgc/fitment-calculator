@@ -267,8 +267,8 @@ function drawSetup(ctx, w, hubX, cy, scale, color, camberDeg) {
 // ── Hub (mounting flange + mounting-face line) ───────────────────────────────
 
 function drawHub(ctx, hubX, cy, rHH) {
-    const fR = rHH * 0.42;                // flange half-height
-    const fD = Math.max(10, rHH * 0.1);   // flange thickness
+    const fR = rHH * 0.42; // flange half-height
+    const fD = Math.max(10, rHH * 0.1); // flange thickness
 
     // Hub flange — the face the wheel bolts to
     ctx.fillStyle = "#253044";
