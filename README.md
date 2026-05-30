@@ -49,7 +49,7 @@ Reads `src/`, runs these steps in order, and writes everything to `public/`:
 6. **`_headers`** — Cloudflare cache rules written
 
 ```text
-  site.config.json  loaded (title: "Wheels Fitment — Wheel Fitment Calculator")
+  site.config.json  loaded (title: "Fix That Gap! — Wheel Fitment Calculator")
   style.css   7.3 KiB -> 4.3 KiB  -41%  (inlined)
   app.js      17.1 KiB -> 8.4 KiB  -51%  -> app.d996e001.js
   index.html  4.3 KiB -> 9.1 KiB  +109%
@@ -80,8 +80,8 @@ Edit [`site.config.json`](site.config.json) to configure metadata injected at bu
 {
   "title": "...",
   "description": "...",
-  "canonicalUrl": "https://wheelsfitment.com",
-  "ogImage": "https://wheelsfitment.com/icon.svg",
+  "canonicalUrl": "https://fixthatgap.com",
+  "ogImage": "https://fixthatgap.com/icon.svg",
   "twitterCard": "summary",
   "author": "",
   "keywords": "..."
@@ -162,7 +162,7 @@ fitment-calculator/
 ```sh
 npm start &
 npm run a11y                               # scans http://localhost:3000
-npm run a11y -- https://wheelsfitment.com  # scans production
+npm run a11y -- https://fixthatgap.com  # scans production
 ```
 
 ## CI
