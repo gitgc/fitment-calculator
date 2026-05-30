@@ -264,35 +264,28 @@ function drawSetup(ctx, w, hubX, cy, scale, color, camberDeg) {
     ctx.restore(); // undo camber rotation
 }
 
-// ── Hub cross-section (axle stub + flange + mounting face line) ───────────────
+// ── Hub (mounting flange + mounting-face line) ───────────────────────────────
 
 function drawHub(ctx, hubX, cy, rHH) {
-    const fR = rHH * 0.44;
-    const fD = Math.max(12, rHH * 0.08);
-    const hR = rHH * 0.19;
-    const hD = rHH * 0.52;
+    const fR = rHH * 0.42; // flange half-height
+    const fD = Math.max(10, rHH * 0.1); // flange thickness
 
-    // Axle stub
-    ctx.fillStyle = "#161f2e";
-    ctx.strokeStyle = "#2d3748";
-    ctx.lineWidth = 1;
-    ctx.fillRect(hubX - fD - hD, cy - hR, hD, hR * 2);
-    ctx.strokeRect(hubX - fD - hD, cy - hR, hD, hR * 2);
-
-    // Hub flange
+    // Hub flange — the face the wheel bolts to
     ctx.fillStyle = "#253044";
     ctx.strokeStyle = "#4a6080";
     ctx.lineWidth = 1.5;
-    ctx.fillRect(hubX - fD, cy - fR, fD, fR * 2);
-    ctx.strokeRect(hubX - fD, cy - fR, fD, fR * 2);
+    ctx.beginPath();
+    ctx.rect(hubX - fD, cy - fR, fD, fR * 2);
+    ctx.fill();
+    ctx.stroke();
 
-    // Mounting face line
-    ctx.strokeStyle = "rgba(255,255,255,0.55)";
+    // Mounting-face line (where the wheel meets the hub)
+    ctx.strokeStyle = "rgba(255,255,255,0.5)";
     ctx.lineWidth = 2;
     ctx.setLineDash([]);
     ctx.beginPath();
-    ctx.moveTo(hubX, cy - fR - 10);
-    ctx.lineTo(hubX, cy + fR + 10);
+    ctx.moveTo(hubX, cy - fR - 6);
+    ctx.lineTo(hubX, cy + fR + 6);
     ctx.stroke();
 }
 
@@ -324,6 +317,128 @@ function pokeRow(ctx, hubX, outerX, y, color, tag, detail, maxX) {
     ctx.fillText(detail, lx, y + 5);
 }
 
+// ── Suspension components (illustrative) ─────────────────────────────────────
+
+function drawSuspension(ctx, hubX, cy, avgRHH, topPad) {
+    const fR = avgRHH * 0.44;
+    const fD = Math.max(12, avgRHH * 0.08);
+    const hD = avgRHH * 0.52;
+
+    const col = "rgba(148, 163, 184, 0.82)";
+    const lw = Math.max(2, avgRHH * 0.03);
+
+    ctx.save();
+    ctx.strokeStyle = col;
+    ctx.fillStyle = col;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    // ── Knuckle (upright) ─────────────────────────────────────────────────────
+    // Sits just inboard of the hub flange. The hub, lower arm and strut all
+    // join the knuckle; the lower ball joint is at its base.
+    const kX = hubX - fD - lw * 2;
+    const kTopY = cy - fR * 0.6; // just above hub centre
+    const kBotY = cy + fR * 1.1; // lower ball joint — strut + arm attach here
+
+    // Knuckle body: vertical bar
+    ctx.lineWidth = lw * 3.5;
+    ctx.beginPath();
+    ctx.moveTo(kX, kTopY);
+    ctx.lineTo(kX, kBotY);
+    ctx.stroke();
+
+    // Lower ball-joint tab
+    ctx.lineWidth = lw * 1.5;
+    const tab = lw * 3;
+    ctx.beginPath();
+    ctx.moveTo(kX - tab, kBotY);
+    ctx.lineTo(kX + tab, kBotY);
+    ctx.stroke();
+
+    // ── Lower wishbone (A-arm) — from lower ball joint inboard ────────────────
+    const m1X = kX - hD * 2.2;
+    const m1Y = kBotY + fR * 0.28;
+    const m2X = kX - hD * 2.2;
+    const m2Y = kBotY + fR * 0.0;
+
+    ctx.lineWidth = lw;
+    ctx.beginPath();
+    ctx.moveTo(kX, kBotY);
+    ctx.lineTo(m1X, m1Y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(kX, kBotY);
+    ctx.lineTo(m2X, m2Y);
+    ctx.stroke();
+
+    // Joints (lower ball joint + two inner pivots)
+    for (const [x, y, r] of [
+        [kX, kBotY, lw * 2.2],
+        [m1X, m1Y, lw * 1.8],
+        [m2X, m2Y, lw * 1.8],
+    ]) {
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // ── MacPherson strut — rises from the lower ball joint, leaning inboard ──
+    const strutBX = kX;
+    const strutBY = kBotY;
+    const strutTopY = topPad + 12;
+    const strutTX = kX - hD * 2.6; // modest, proportional inboard lean
+
+    const dx = strutTX - strutBX;
+    const dy = strutTopY - strutBY;
+    const dist = Math.hypot(dx, dy);
+    const px = -dy / dist; // perpendicular direction for spring
+    const py = dx / dist;
+
+    // Damper body (lower 35%, thick)
+    const splitT = 0.35;
+    const midX = strutBX + dx * splitT;
+    const midY = strutBY + dy * splitT;
+    ctx.lineWidth = lw * 4.5;
+    ctx.beginPath();
+    ctx.moveTo(strutBX, strutBY);
+    ctx.lineTo(midX, midY);
+    ctx.stroke();
+
+    // Piston rod (upper 65%, thin)
+    ctx.lineWidth = lw * 1.5;
+    ctx.beginPath();
+    ctx.moveTo(midX, midY);
+    ctx.lineTo(strutTX, strutTopY);
+    ctx.stroke();
+
+    // Coil spring (zigzag perpendicular to strut axis)
+    const amp = lw * 3.8;
+    const coils = 9;
+    const sStart = splitT + 0.04;
+    const sEnd = 0.9;
+    ctx.lineWidth = lw * 0.9;
+    ctx.beginPath();
+    for (let i = 0; i <= coils; i++) {
+        const t = sStart + (sEnd - sStart) * (i / coils);
+        const side = i % 2 === 0 ? 1 : -1;
+        const x = strutBX + dx * t + px * amp * side;
+        const y = strutBY + dy * t + py * amp * side;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    // Top mount plate (perpendicular bar at body attachment)
+    const mw = lw * 7;
+    ctx.lineWidth = lw * 2.5;
+    ctx.beginPath();
+    ctx.moveTo(strutTX - px * mw, strutTopY - py * mw);
+    ctx.lineTo(strutTX + px * mw, strutTopY + py * mw);
+    ctx.stroke();
+
+    ctx.restore();
+}
+
 // ── Main diagram ──────────────────────────────────────────────────────────────
 
 function drawDiagram(o, n, oCam, nCam) {
@@ -351,6 +466,10 @@ function drawDiagram(o, n, oCam, nCam) {
     const hubX = (W - drawnW) / 2 + maxIn * scale;
     const cy = topPad + availH / 2;
 
+    // Suspension (drawn first so wheels render on top where they overlap)
+    const avgRHH = ((o.rimDmm / 2 + n.rimDmm / 2) / 2) * scale;
+    drawSuspension(ctx, hubX, cy, avgRHH, topPad);
+
     // Wheel assemblies
     drawSetup(ctx, o, hubX, cy, scale, "#58a6ff", oCam);
     drawSetup(ctx, n, hubX, cy, scale, "#f78166", nCam);
@@ -360,7 +479,6 @@ function drawDiagram(o, n, oCam, nCam) {
     const maxTH = Math.max(oTH, nTH);
 
     // Hub
-    const avgRHH = ((o.rimDmm / 2 + n.rimDmm / 2) / 2) * scale;
     drawHub(ctx, hubX, cy, avgRHH);
 
     // Diameter callouts — vertical arrows with label at mid-height
