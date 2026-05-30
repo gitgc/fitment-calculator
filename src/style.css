@@ -175,7 +175,11 @@ main {
 /* ── Button ─────────────────────────────────────────────── */
 
 .btn-row {
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
     margin-bottom: 2rem;
 }
 .calc-btn {
@@ -202,6 +206,34 @@ main {
 }
 .calc-btn:focus-visible {
     outline: 3px solid var(--accent);
+    outline-offset: 3px;
+}
+
+.share-btn {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.8rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition:
+        border-color 0.15s,
+        color 0.15s;
+}
+.share-btn:hover {
+    border-color: var(--text);
+    color: var(--text);
+}
+.share-btn.copied {
+    border-color: var(--pos);
+    color: var(--pos);
+}
+.share-btn:focus-visible {
+    outline: 2px solid var(--accent);
     outline-offset: 3px;
 }
 
