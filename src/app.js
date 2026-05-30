@@ -517,6 +517,80 @@ document.addEventListener("focusout", (e) => {
     if (e.target.closest("[data-tip]")) hideTip();
 });
 
+// ── URL share ────────────────────────────────────────────────────────────────
+
+// Short param names for clean URLs
+const PARAMS = {
+    "o-d": "od",
+    "o-w": "ow",
+    "o-et": "oet",
+    "o-tw": "otw",
+    "o-pr": "opr",
+    "o-sp": "osp",
+    "o-cam": "ocam",
+    "n-d": "nd",
+    "n-w": "nw",
+    "n-et": "net",
+    "n-tw": "ntw",
+    "n-pr": "npr",
+    "n-sp": "nsp",
+    "n-cam": "ncam",
+};
+
+function buildShareUrl() {
+    const p = new URLSearchParams();
+    for (const [id, key] of Object.entries(PARAMS)) {
+        p.set(key, document.getElementById(id).value);
+    }
+    return `${location.origin}${location.pathname}?${p}`;
+}
+
+function loadFromParams() {
+    const p = new URLSearchParams(location.search);
+    const reverse = Object.fromEntries(
+        Object.entries(PARAMS).map(([id, key]) => [key, id]),
+    );
+    for (const [key, id] of Object.entries(reverse)) {
+        const val = p.get(key);
+        if (val !== null) document.getElementById(id).value = val;
+    }
+}
+
+function _share() {
+    const url = buildShareUrl();
+    const btn = document.getElementById("share-btn");
+
+    function confirm() {
+        btn.textContent = "Copied!";
+        btn.classList.add("copied");
+        setTimeout(() => {
+            btn.textContent = "Share";
+            btn.classList.remove("copied");
+        }, 2000);
+    }
+
+    if (navigator.share) {
+        navigator.share({ title: document.title, url }).catch(() => {});
+    } else {
+        navigator.clipboard
+            .writeText(url)
+            .then(confirm)
+            .catch(() => {
+                // Final fallback: select a temporary input
+                const tmp = document.createElement("input");
+                tmp.value = url;
+                document.body.appendChild(tmp);
+                tmp.select();
+                document.execCommand("copy");
+                tmp.remove();
+                confirm();
+            });
+    }
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 
-window.onload = calculate;
+window.onload = () => {
+    loadFromParams();
+    calculate();
+};
