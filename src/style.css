@@ -271,6 +271,24 @@ tbody tr:hover {
     background: rgba(255, 255, 255, 0.025);
 }
 
+@media (max-width: 500px) {
+    table {
+        font-size: 0.72rem;
+    }
+    th,
+    td,
+    th[scope="row"] {
+        padding: 0.5rem 0.35rem;
+    }
+    /* Pin label column to ~30% so data columns get equal shares of the rest */
+    th:first-child,
+    th[scope="row"] {
+        width: 30%;
+        overflow-wrap: break-word;
+        font-size: 0.72rem;
+    }
+}
+
 .pos {
     color: var(--pos);
 }
