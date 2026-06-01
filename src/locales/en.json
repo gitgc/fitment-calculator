@@ -29,6 +29,7 @@
     "colNew": "New",
     "colDifference": "Difference",
     "crossSectionTitle": "Cross Section Comparison",
+    "faceTitle": "Wheel Face Comparison",
     "legendCurrent": "Current Setup",
     "legendNew": "New Setup",
     "canvasAriaLabelStatic": "Cross-section diagram comparing current and new wheel and tyre setups",

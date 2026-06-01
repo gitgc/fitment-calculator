@@ -29,6 +29,7 @@
     "colNew": "Ny",
     "colDifference": "Skillnad",
     "crossSectionTitle": "Tvärsnittsjämförelse",
+    "faceTitle": "Vy framifrån",
     "legendCurrent": "Nuvarande konfiguration",
     "legendNew": "Ny konfiguration",
     "canvasAriaLabelStatic": "Tvärsnittsdiagram som jämför nuvarande och ny hjul- och däckkonfiguration",

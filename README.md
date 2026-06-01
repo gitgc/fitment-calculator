@@ -8,7 +8,7 @@ Interactive wheel and tyre fitment calculator. Enter your current and new wheel/
 - **Speedometer correction** — shows actual speed at reference speeds (mph for UK/US, km/h for all other locales)
 - **Spacer support** — adjusts effective ET automatically; reflected in diagram and poke calculation
 - **Camber rendering** — enter positive or negative degrees and the wheel tilts in the diagram
-- **2D cross-section diagram** — overlaid tyre profiles on a shared hub, with diameter callouts and poke measurement rows
+- **Two 2D diagrams** — a cross-section (overlaid tyre profiles on a shared hub, with diameter callouts and poke rows) plus a face-on view (concentric tyre/rim circles, camber foreshortened into an ellipse)
 - **Hover tooltips** — plain-English explanation of every measurement
 - **Offline / PWA** — installable on desktop and mobile; works fully without a network connection after first load
 - **Fully accessible** — skip link, labelled form groups, `role="status"` live region, axe-core clean
@@ -112,7 +112,7 @@ Builds the project, installs Playwright Chromium if needed, then runs all specs.
 | File | What it covers |
 | ---- | -------------- |
 | `test/locales.spec.js` | Locale JSON completeness (all required keys, speed units, placeholders, no empty strings); build output HTML (`lang`/`dir` attrs, `window.L` values, hreflang tags + exact href targets, redirect scripts, shared JS bundle); `_headers` cache + security headers (CSP, HSTS, COOP, frame control, Cloudflare Analytics allowances) |
-| `test/calculator.spec.js` | Default inputs and values; input constraint attributes; results table (row count, OD, poke, labels, speedo precision); boundary calculations at min/max limits; out-of-range clamping; spacer maths; canvas rendering; tooltips; share button; URL parameter pre-fill |
+| `test/calculator.spec.js` | Default inputs and values; input constraint attributes; results table (row count, OD, poke, labels, speedo precision); boundary calculations at min/max limits; out-of-range clamping; spacer maths; both canvas diagrams (cross-section + face-on view); tooltips; share button URL round-trip; URL parameter pre-fill |
 | `test/i18n.spec.js` | Per-locale rendering (`lang` attr, h1, button labels, speed unit/reference value, tooltip-attribute escaping, no JS errors); language switcher (open/close, all locales listed, active state, Escape key, click-outside) |
 | `test/autodetect.spec.js` | Auto-detection on `/`: browser locale and stored preference redirect to the right locale; English/unsupported stay on `/` |
 | `test/csp.spec.js` | Loads pages under the exact production CSP from `_headers` and asserts the app triggers zero policy violations (LTR + RTL) |

@@ -29,6 +29,7 @@
     "colNew": "Novo",
     "colDifference": "Razlika",
     "crossSectionTitle": "Usporedba poprečnog presjeka",
+    "faceTitle": "Pogled sprijeda",
     "legendCurrent": "Trenutna konfiguracija",
     "legendNew": "Nova konfiguracija",
     "canvasAriaLabelStatic": "Dijagram poprečnog presjeka koji uspoređuje trenutnu i novu konfiguraciju kotača i gume",

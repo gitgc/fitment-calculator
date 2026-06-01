@@ -29,6 +29,7 @@
     "colNew": "Nouveau",
     "colDifference": "Différence",
     "crossSectionTitle": "Comparaison en coupe transversale",
+    "faceTitle": "Vue de face",
     "legendCurrent": "Configuration actuelle",
     "legendNew": "Nouvelle configuration",
     "canvasAriaLabelStatic": "Diagramme en coupe transversale comparant les configurations de jante et pneu actuelle et nouvelle",

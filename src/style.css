@@ -452,6 +452,10 @@ tbody tr:hover {
     border-radius: 12px;
     padding: 1.25rem;
 }
+/* Same gap between stacked diagrams as between the table and the first diagram */
+.diagram-wrap + .diagram-wrap {
+    margin-top: 1.5rem;
+}
 .diagram-wrap h3 {
     text-align: center;
     font-size: 0.75rem;
