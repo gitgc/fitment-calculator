@@ -27,7 +27,7 @@
         }
     },
     "html": {
-        "experimentalFullSupportEnabled": false,
+        "experimentalFullSupportEnabled": true,
         "formatter": {
             "enabled": false
         },
