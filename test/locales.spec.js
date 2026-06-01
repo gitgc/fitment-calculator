@@ -21,7 +21,7 @@ function escapeRegExp(s) {
 }
 
 const REQUIRED_KEYS = [
-	'lang', 'flag', 'siteTitle', 'pageTitle', 'metaDescription', 'footerText',
+	'lang', 'flag', 'siteTitle', 'pageTitle', 'metaDescription', 'footerText', 'disclaimer',
 	'skipToMain', 'subtitle', 'currentSetup', 'newSetup',
 	'rimSection', 'tireSection', 'optionalSection',
 	'diameterInches', 'widthInches', 'offsetET', 'tireWidth', 'profile', 'spacer', 'camber',
