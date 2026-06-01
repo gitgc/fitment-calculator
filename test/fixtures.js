@@ -1,4 +1,4 @@
-'use strict';
+
 
 const { test: base, expect } = require('@playwright/test');
 const http = require('node:http');

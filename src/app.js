@@ -76,6 +76,17 @@ function signed(val, unit, d = 1) {
     return `${sign}${fmt(val, d)} ${unit}`;
 }
 
+// Escape localized text before placing it in an HTML string. Needed because some
+// locales contain literal double quotes (e.g. Hebrew "מ\"מ"), which would
+// otherwise break out of the data-tip/title attributes.
+function escapeHTML(s) {
+    return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+}
+
 // ── Main calculate ────────────────────────────────────────────────────────────
 
 function calculate() {
@@ -169,10 +180,12 @@ function calculate() {
 
     document.getElementById("tbody").innerHTML = trustedHTML(
         rows
-            .map(
-                ([label, ov, nv, dv]) =>
-                    `<tr><th scope="row" data-tip="${tips[label] || ""}" title="${tips[label] || ""}">${label}</th><td>${ov}</td><td>${nv}</td><td>${dv}</td></tr>`,
-            )
+            .map(([label, ov, nv, dv]) => {
+                // label and tip are localized text → escape. ov/nv/dv contain
+                // intentional <span> markup from signed() → leave as-is.
+                const tip = escapeHTML(tips[label] || "");
+                return `<tr><th scope="row" data-tip="${tip}" title="${tip}">${escapeHTML(label)}</th><td>${ov}</td><td>${nv}</td><td>${dv}</td></tr>`;
+            })
             .join(""),
     );
 

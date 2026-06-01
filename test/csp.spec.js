@@ -1,4 +1,4 @@
-'use strict';
+
 
 // Verifies the app runs cleanly under the production Content-Security-Policy,
 // including `require-trusted-types-for 'script'`. The shared fixture server in

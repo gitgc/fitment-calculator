@@ -16,7 +16,14 @@
     },
     "linter": {
         "enabled": true,
-        "includes": ["src/**/*", "*.js"],
+        "includes": [
+            "src/**/*",
+            "test/**/*.js",
+            "server.js",
+            "build.js",
+            "a11y.js",
+            "playwright.config.js"
+        ],
         "rules": {
             "recommended": true
         }

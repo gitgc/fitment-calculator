@@ -1,4 +1,4 @@
-'use strict';
+
 
 const { test, expect, LOCALES, localeUrl } = require('./fixtures');
 
@@ -41,6 +41,24 @@ for (const L of LOCALES) {
 
 			const ref1Cell = `${L.refSpeed1.toFixed(1)} ${L.speedUnit}`;
 			await expect(page.locator('#tbody td').filter({ hasText: ref1Cell })).toBeVisible();
+		});
+
+		test('tooltip attributes preserve localized text including embedded quotes', async () => {
+			await page.click('button.calc-btn');
+			// Every rendered data-tip must round-trip to the exact source string.
+			// Locales like Hebrew embed a literal " (מ"מ); if it isn't escaped the
+			// attribute is truncated and won't match.
+			const expected = new Set([
+				L.tipDiameter, L.tipCircumference, L.tipPoke, L.tipInset,
+				L.tipSpeedoError, L.tipAt1, L.tipAt2, L.tipRideHeight, L.tipArchGap,
+			]);
+			const rendered = await page.$$eval('#tbody th[scope="row"]', (els) =>
+				els.map((e) => e.getAttribute('data-tip')),
+			);
+			expect(rendered).toHaveLength(9);
+			for (const tip of rendered) {
+				expect(expected.has(tip), `unexpected/truncated tip: "${tip}"`).toBe(true);
+			}
 		});
 
 		test('no JS errors on load', async () => {

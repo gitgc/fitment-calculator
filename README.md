@@ -43,6 +43,11 @@ docker compose up
 npm run publish
 ```
 
+> `public/` is a build artifact — it is **gitignored, not committed**. Cloudflare
+> Pages (and CI, Docker, and the test suite) regenerate it from `src/` with
+> `npm run publish`. Run the build once locally before `npm start`, `docker build`,
+> or serving `public/` directly.
+
 Reads `src/`, runs these steps in order, and writes everything to `public/`:
 
 1. **CSS** — minified with clean-css, then **inlined** into the HTML (eliminates the render-blocking request)

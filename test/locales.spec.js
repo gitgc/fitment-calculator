@@ -1,4 +1,4 @@
-'use strict';
+
 
 const { test, expect } = require('@playwright/test');
 const fs   = require('node:fs');
