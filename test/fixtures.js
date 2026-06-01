@@ -56,6 +56,7 @@ function localeUrl(lang) {
 
 const test = base.extend({
 	// Static file server — one instance per worker, shared across all tests in the worker
+	// biome-ignore lint/correctness/noEmptyPattern: Playwright fixtures require the (fixtures, use) signature; this fixture has no dependencies
 	server: [async ({}, use) => {
 		const srv = await startServer();
 		await use(srv);
