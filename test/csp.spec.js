@@ -1,9 +1,9 @@
 
 
-// Verifies the app runs cleanly under the production Content-Security-Policy,
-// including `require-trusted-types-for 'script'`. The shared fixture server in
-// fixtures.js does not send security headers, so this spec runs its own server
-// that applies the exact CSP shipped in public/_headers.
+// Verifies the app runs cleanly under the production Content-Security-Policy.
+// The shared fixture server in fixtures.js does not send security headers, so
+// this spec runs its own server that applies the exact CSP shipped in
+// public/_headers and asserts the app triggers no policy violations.
 
 const { test, expect } = require('@playwright/test');
 const http = require('node:http');

@@ -12,8 +12,13 @@ const DIST = path.join(__dirname, 'public');
 // Content-Security-Policy applied to every response (see _headers and Caddyfile).
 // 'unsafe-inline' is required because this build deliberately inlines CSS and
 // emits per-page inline scripts (window.L, language auto-detect) and inline
-// style/onclick attributes. Trusted Types (require-trusted-types-for) still
-// hardens the DOM-injection sinks — app.js routes them through the 'ftg' policy.
+// style/onclick attributes.
+//
+// Trusted Types (require-trusted-types-for) is intentionally NOT used: it blocks
+// third-party innerHTML assignments site-wide, which breaks Cloudflare's own
+// edge-injected bot-management script (/cdn-cgi/challenge-platform/…) as well as
+// Google Translate and DOM-modifying extensions. app.js still escapes its only
+// innerHTML sink, so the real XSS surface stays covered.
 const CSP = [
 	"default-src 'self'",
 	"base-uri 'self'",
@@ -28,8 +33,6 @@ const CSP = [
 	"connect-src 'self' https://cloudflareinsights.com",
 	"worker-src 'self'",
 	"manifest-src 'self'",
-	"require-trusted-types-for 'script'",
-	"trusted-types ftg",
 	"upgrade-insecure-requests",
 ].join('; ');
 
