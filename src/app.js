@@ -1,7 +1,14 @@
 // ── Input helper ──────────────────────────────────────────────────────────────
 
 function v(id) {
-    return parseFloat(document.getElementById(id).value) || 0;
+    const el  = document.getElementById(id);
+    let   val = parseFloat(el.value);
+    if (isNaN(val)) val = 0;
+    const lo = parseFloat(el.min);
+    const hi = parseFloat(el.max);
+    if (!isNaN(lo) && val < lo) val = lo;
+    if (!isNaN(hi) && val > hi) val = hi;
+    return val;
 }
 
 // ── Core calculation ──────────────────────────────────────────────────────────
@@ -40,11 +47,11 @@ function fmt(n, d = 1) {
     return n.toFixed(d);
 }
 
-function signed(val, unit) {
+function signed(val, unit, d = 1) {
     const r = Math.round(val * 10) / 10;
     if (Math.abs(r) < 0.05) return '<span class="neu">—</span>';
     const sign = val > 0 ? "+" : "";
-    return `${sign}${fmt(val)} ${unit}`;
+    return `${sign}${fmt(val, d)} ${unit}`;
 }
 
 // ── Main calculate ────────────────────────────────────────────────────────────
@@ -120,7 +127,7 @@ function calculate() {
             L.rowSpeedoError,
             "0.00 %",
             `${fmt(speedoErr, 2)} %`,
-            signed(speedoErr, "%"),
+            signed(speedoErr, "%", 2),
         ],
         [
             L.rowAt1,
