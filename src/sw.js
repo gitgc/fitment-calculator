@@ -28,6 +28,10 @@ self.addEventListener("activate", (ev) => {
 
 self.addEventListener("fetch", (ev) => {
     if (ev.request.method !== "GET") return;
+    // Only handle same-origin requests. Cross-origin ones (e.g. Google Translate
+    // loading assets from gstatic.com) pass straight through to the network —
+    // intercepting them just triggers needless fetches and CSP connect-src errors.
+    if (new URL(ev.request.url).origin !== self.location.origin) return;
     ev.respondWith(
         caches.match(ev.request).then((hit) => {
             if (hit) return hit;

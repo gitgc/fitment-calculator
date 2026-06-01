@@ -1,4 +1,4 @@
-'use strict';
+
 
 const { test, expect } = require('@playwright/test');
 const fs   = require('node:fs');
@@ -224,5 +224,18 @@ test.describe('Build output — HTML files', () => {
 		for (const { code } of locales.filter(l => l.code !== 'en')) {
 			expect(headers, `/${code}/index.html rule`).toContain(`/${code}/index.html`);
 		}
+	});
+
+	test('_headers ships the expected security headers', () => {
+		const headers = fs.readFileSync(path.join(PUB_DIR, '_headers'), 'utf8');
+		expect(headers).toContain('Content-Security-Policy:');
+		expect(headers).toContain('Strict-Transport-Security:');
+		expect(headers).toContain('Cross-Origin-Opener-Policy: same-origin');
+		expect(headers).toContain('X-Frame-Options: DENY');
+		expect(headers).toContain("require-trusted-types-for 'script'");
+		expect(headers).toContain("frame-ancestors 'none'");
+		// Cloudflare Web Analytics must remain permitted by the CSP
+		expect(headers, 'CSP must allow the Cloudflare beacon script').toContain('https://static.cloudflareinsights.com');
+		expect(headers, 'CSP must allow the Cloudflare RUM beacon').toContain('https://cloudflareinsights.com');
 	});
 });

@@ -9,6 +9,30 @@ const { minify: minifyHTML } = require('html-minifier-terser');
 const SRC  = path.join(__dirname, 'src');
 const DIST = path.join(__dirname, 'public');
 
+// Content-Security-Policy applied to every response (see _headers and Caddyfile).
+// 'unsafe-inline' is required because this build deliberately inlines CSS and
+// emits per-page inline scripts (window.L, language auto-detect) and inline
+// style/onclick attributes. Trusted Types (require-trusted-types-for) still
+// hardens the DOM-injection sinks — app.js routes them through the 'ftg' policy.
+const CSP = [
+	"default-src 'self'",
+	"base-uri 'self'",
+	"object-src 'none'",
+	"frame-ancestors 'none'",
+	"form-action 'none'",
+	"img-src 'self' data:",
+	"style-src 'self' 'unsafe-inline'",
+	// static.cloudflareinsights.com serves the Cloudflare Web Analytics beacon
+	"script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com",
+	// cloudflareinsights.com receives the Web Analytics RUM beacon
+	"connect-src 'self' https://cloudflareinsights.com",
+	"worker-src 'self'",
+	"manifest-src 'self'",
+	"require-trusted-types-for 'script'",
+	"trusted-types ftg",
+	"upgrade-insecure-requests",
+].join('; ');
+
 // ── Locale loading ────────────────────────────────────────────────────────────
 
 // Right-to-left scripts: Arabic, Hebrew, Urdu, Farsi.
@@ -293,27 +317,19 @@ async function build() {
 	console.log('  wrangler.jsonc  copied');
 
 	// ── Cloudflare _headers ───────────────────────────────────────────────────
-	const indexRules = [
-		'/index.html',
-		'  Cache-Control: public, max-age=0, must-revalidate',
+	// Security headers go in a /* catch-all so they apply to every path —
+	// including the root "/" and the locale roots "/de/" which Cloudflare Pages
+	// serves without an explicit index.html in the request path.
+	const headers = [
+		'/*',
+		`  Content-Security-Policy: ${CSP}`,
+		'  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload',
+		'  Cross-Origin-Opener-Policy: same-origin',
 		'  X-Content-Type-Options: nosniff',
 		'  X-Frame-Options: DENY',
 		'  Referrer-Policy: strict-origin-when-cross-origin',
 		'',
-	];
-	// Add cache rules for each locale's index.html
-	for (const locale of locales.filter(l => l.code !== 'en')) {
-		indexRules.push(
-			`/${locale.code}/index.html`,
-			'  Cache-Control: public, max-age=0, must-revalidate',
-			'  X-Content-Type-Options: nosniff',
-			'  X-Frame-Options: DENY',
-			'  Referrer-Policy: strict-origin-when-cross-origin',
-			'',
-		);
-	}
-	const headers = [
-		...indexRules,
+		// Cache rules (security headers above already cover these paths)
 		'/sw.js',
 		'  Cache-Control: no-store',
 		'',
@@ -325,9 +341,20 @@ async function build() {
 		'',
 		'/app.*.js',
 		'  Cache-Control: public, max-age=31536000, immutable',
-	].join('\n');
-	fs.writeFileSync(path.join(DIST, '_headers'), headers);
-	console.log('  _headers    cache rules written');
+		'',
+		'/index.html',
+		'  Cache-Control: public, max-age=0, must-revalidate',
+	];
+	// HTML is revalidated on every request so a new build is picked up promptly
+	for (const locale of locales.filter(l => l.code !== 'en')) {
+		headers.push(
+			'',
+			`/${locale.code}/index.html`,
+			'  Cache-Control: public, max-age=0, must-revalidate',
+		);
+	}
+	fs.writeFileSync(path.join(DIST, '_headers'), headers.join('\n'));
+	console.log('  _headers    security + cache rules written');
 
 	console.log(`\n✓ Done in ${Date.now() - start}ms`);
 }

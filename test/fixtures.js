@@ -1,4 +1,4 @@
-'use strict';
+
 
 const { test: base, expect } = require('@playwright/test');
 const http = require('node:http');
@@ -27,7 +27,14 @@ function startServer() {
 	const server = http.createServer((req, res) => {
 		let p = req.url.split('?')[0];
 		if (p.endsWith('/')) p += 'index.html';
+		// path.join normalizes `..`; confine the result to PUBLIC so a crafted
+		// path can't escape the served directory
 		const file = path.join(PUBLIC, p);
+		if (file !== PUBLIC && !file.startsWith(PUBLIC + path.sep)) {
+			res.writeHead(403);
+			res.end();
+			return;
+		}
 		try {
 			const data = fs.readFileSync(file);
 			res.writeHead(200, { 'Content-Type': MIME[path.extname(file)] || 'application/octet-stream' });
@@ -49,6 +56,7 @@ function localeUrl(lang) {
 
 const test = base.extend({
 	// Static file server — one instance per worker, shared across all tests in the worker
+	// biome-ignore lint/correctness/noEmptyPattern: Playwright fixtures require the (fixtures, use) signature; this fixture has no dependencies
 	server: [async ({}, use) => {
 		const srv = await startServer();
 		await use(srv);

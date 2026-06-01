@@ -1,3 +1,25 @@
+// ── Trusted Types ─────────────────────────────────────────────────────────────
+// The CSP sets `require-trusted-types-for 'script'`, so DOM-injection sinks
+// (Element.innerHTML, ServiceWorker registration) must receive Trusted* values
+// rather than plain strings. All such strings here are built from app code and
+// localized data — never from user input — so the policy is a pass-through.
+// Browsers without Trusted Types fall back to plain strings.
+
+const ttPolicy = window.trustedTypes?.createPolicy
+    ? window.trustedTypes.createPolicy("ftg", {
+          createHTML: (s) => s,
+          createScriptURL: (s) => s,
+      })
+    : null;
+
+function trustedHTML(s) {
+    return ttPolicy ? ttPolicy.createHTML(s) : s;
+}
+
+function trustedScriptURL(s) {
+    return ttPolicy ? ttPolicy.createScriptURL(s) : s;
+}
+
 // ── Input helper ──────────────────────────────────────────────────────────────
 
 function v(id) {
@@ -52,6 +74,17 @@ function signed(val, unit, d = 1) {
     if (Math.abs(r) < 0.05) return '<span class="neu">—</span>';
     const sign = val > 0 ? "+" : "";
     return `${sign}${fmt(val, d)} ${unit}`;
+}
+
+// Escape localized text before placing it in an HTML string. Needed because some
+// locales contain literal double quotes (e.g. Hebrew "מ\"מ"), which would
+// otherwise break out of the data-tip/title attributes.
+function escapeHTML(s) {
+    return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
 }
 
 // ── Main calculate ────────────────────────────────────────────────────────────
@@ -145,12 +178,16 @@ function calculate() {
         [L.rowArchGap, "0.0 mm", `${fmt(rhGain)} mm`, signed(rhGain, "mm")],
     ];
 
-    document.getElementById("tbody").innerHTML = rows
-        .map(
-            ([label, ov, nv, dv]) =>
-                `<tr><th scope="row" data-tip="${tips[label] || ""}" title="${tips[label] || ""}">${label}</th><td>${ov}</td><td>${nv}</td><td>${dv}</td></tr>`,
-        )
-        .join("");
+    document.getElementById("tbody").innerHTML = trustedHTML(
+        rows
+            .map(([label, ov, nv, dv]) => {
+                // label and tip are localized text → escape. ov/nv/dv contain
+                // intentional <span> markup from signed() → leave as-is.
+                const tip = escapeHTML(tips[label] || "");
+                return `<tr><th scope="row" data-tip="${tip}" title="${tip}">${escapeHTML(label)}</th><td>${ov}</td><td>${nv}</td><td>${dv}</td></tr>`;
+            })
+            .join(""),
+    );
 
     document.getElementById("results").classList.add("show");
     drawDiagram(o, n, oCam, nCam);
@@ -764,3 +801,13 @@ window.onload = () => {
     calculate();
     initLangSwitcher();
 };
+
+// ── Service worker registration ───────────────────────────────────────────────
+// Moved out of an inline <script> so the registration URL can be wrapped as a
+// TrustedScriptURL under the Trusted Types CSP.
+
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker
+        .register(trustedScriptURL("/sw.js"))
+        .catch(() => {});
+}

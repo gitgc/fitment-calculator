@@ -1,4 +1,4 @@
-'use strict';
+
 
 const { test, expect, localeUrl } = require('./fixtures');
 
@@ -153,7 +153,7 @@ test.describe('Results table', () => {
 		const allCells = await page.locator('#tbody td').allTextContents();
 		const pctCells = allCells.filter(t => t.includes('%') && !t.startsWith('—'));
 		for (const cell of pctCells) {
-			const num      = cell.replace(/^[+−\-]/, '').replace(' %', '').trim();
+			const num      = cell.replace(/^[+−-]/, '').replace(' %', '').trim();
 			const decimals = num.split('.')[1]?.length ?? 0;
 			expect(decimals, `"${cell}" should have 2 decimal places`).toBe(2);
 		}
