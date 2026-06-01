@@ -22,8 +22,10 @@ const CSP = [
 	"form-action 'none'",
 	"img-src 'self' data:",
 	"style-src 'self' 'unsafe-inline'",
-	"script-src 'self' 'unsafe-inline'",
-	"connect-src 'self'",
+	// static.cloudflareinsights.com serves the Cloudflare Web Analytics beacon
+	"script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com",
+	// cloudflareinsights.com receives the Web Analytics RUM beacon
+	"connect-src 'self' https://cloudflareinsights.com",
 	"worker-src 'self'",
 	"manifest-src 'self'",
 	"require-trusted-types-for 'script'",
