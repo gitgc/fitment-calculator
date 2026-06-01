@@ -31,7 +31,7 @@ body {
 .skip-link {
     position: absolute;
     top: -100%;
-    left: 1rem;
+    inset-inline-start: 1rem;
     z-index: 1000;
     padding: 0.5rem 1.25rem;
     background: var(--accent);
@@ -135,7 +135,7 @@ header p {
 .lang-menu {
     display: none;
     position: absolute;
-    right: 0;
+    inset-inline-end: 0;
     top: calc(100% + 6px);
     background: var(--surface);
     border: 1px solid var(--border);
@@ -189,7 +189,7 @@ header p {
         justify-self: center;
     }
     .lang-menu {
-        right: auto;
+        inset-inline-end: auto;
         left: 50%;
         transform: translateX(-50%);
     }
@@ -380,12 +380,12 @@ th {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.07em;
-    text-align: right;
+    text-align: end;
     color: var(--muted);
 }
 th:first-child,
 th[scope="row"] {
-    text-align: left;
+    text-align: start;
 }
 th.old {
     color: var(--old);
@@ -398,7 +398,7 @@ th.diff {
 }
 td {
     padding: 0.7rem 1rem;
-    text-align: right;
+    text-align: end;
     border-top: 1px solid var(--border);
     font-variant-numeric: tabular-nums;
 }

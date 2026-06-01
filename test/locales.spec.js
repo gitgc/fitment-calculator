@@ -128,6 +128,16 @@ test.describe('Build output — HTML files', () => {
 		}
 	});
 
+	test('<html dir> is rtl for RTL scripts, ltr otherwise', () => {
+		const RTL = new Set(['ar', 'he', 'ur', 'fa']);
+		for (const { code } of locales) {
+			const content = html(code);
+			if (!content) return;
+			const expectedDir = RTL.has(code) ? 'rtl' : 'ltr';
+			expect(content, `${code} dir attr`).toMatch(new RegExp(`<html[^>]*dir=${expectedDir}[^a-z]`));
+		}
+	});
+
 	test('window.L embeds correct speed values', () => {
 		for (const { code } of locales) {
 			const content = html(code);

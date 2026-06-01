@@ -11,6 +11,9 @@ const DIST = path.join(__dirname, 'public');
 
 // ── Locale loading ────────────────────────────────────────────────────────────
 
+// Right-to-left scripts: Arabic, Hebrew, Urdu, Farsi.
+const RTL_LANGS = new Set(['ar', 'he', 'ur', 'fa']);
+
 function loadLocales() {
 	const localesDir = path.join(SRC, 'locales');
 	return fs.readdirSync(localesDir)
@@ -21,10 +24,13 @@ function loadLocales() {
 			if (b === 'en.json') return 1;
 			return a.localeCompare(b);
 		})
-		.map(f => ({
-			code: f.replace('.json', ''),
-			data: JSON.parse(fs.readFileSync(path.join(localesDir, f), 'utf8')),
-		}));
+		.map(f => {
+			const code = f.replace('.json', '');
+			const data = JSON.parse(fs.readFileSync(path.join(localesDir, f), 'utf8'));
+			// Derive text direction so every locale has a `dir` for the template.
+			data.dir = RTL_LANGS.has(code) ? 'rtl' : 'ltr';
+			return { code, data };
+		});
 }
 
 // ── SEO tag generation ────────────────────────────────────────────────────────
