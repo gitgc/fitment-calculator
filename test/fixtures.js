@@ -1,5 +1,3 @@
-
-
 const { test: base, expect } = require('@playwright/test');
 const http = require('node:http');
 const fs   = require('node:fs');
@@ -23,6 +21,16 @@ const LOCALES = fs.readdirSync(localesDir)
 	.filter(f => f.endsWith('.json'))
 	.map(f => JSON.parse(fs.readFileSync(path.join(localesDir, f), 'utf8')));
 
+// The exact production Content-Security-Policy, pulled from the built _headers so
+// every browser test runs with the same policy the deployed site sends. Reading
+// it from the artifact keeps the tests in lock-step with what actually ships.
+const CSP = (() => {
+	const headers = fs.readFileSync(path.join(PUBLIC, '_headers'), 'utf8');
+	const m = headers.match(/Content-Security-Policy:\s*(.+)/);
+	if (!m) throw new Error('No Content-Security-Policy found in public/_headers');
+	return m[1].trim();
+})();
+
 function startServer() {
 	const server = http.createServer((req, res) => {
 		let p = req.url.split('?')[0];
@@ -37,7 +45,10 @@ function startServer() {
 		}
 		try {
 			const data = fs.readFileSync(file);
-			res.writeHead(200, { 'Content-Type': MIME[path.extname(file)] || 'application/octet-stream' });
+			const headers = { 'Content-Type': MIME[path.extname(file)] || 'application/octet-stream' };
+			// Apply the production CSP to HTML so every test exercises it
+			if (file.endsWith('.html')) headers['Content-Security-Policy'] = CSP;
+			res.writeHead(200, headers);
 			res.end(data);
 		} catch {
 			res.writeHead(404);
@@ -94,4 +105,4 @@ const test = base.extend({
 	},
 });
 
-module.exports = { test, expect, LOCALES, localeUrl };
+module.exports = { test, expect, LOCALES, localeUrl, CSP };

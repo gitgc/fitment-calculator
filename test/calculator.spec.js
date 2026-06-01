@@ -1,5 +1,3 @@
-
-
 const { test, expect, localeUrl } = require('./fixtures');
 
 // ── Shared constants ──────────────────────────────────────────────────────────
@@ -8,10 +6,15 @@ const { test, expect, localeUrl } = require('./fixtures');
 //   Current: 17" rim, 7.5" wide, ET45, 225/45 tyre
 //   New:     18" rim, 8.5" wide, ET40, 235/40 tyre
 const DEFAULTS = {
-	currentOD:   '634.3 mm',  // (17×25.4) + 2×(225×0.45)
-	newOD:       '645.2 mm',  // (18×25.4) + 2×(235×0.40)
-	currentPoke: '50.3 mm',   // 7.5×25.4/2 − 45 = 50.25 → toFixed(1)
-	newPoke:     '67.9 mm',   // 8.5×25.4/2 − 40 = 67.95 → toFixed(1)
+	currentOD:    '634.3 mm',   // (17×25.4) + 2×(225×0.45)
+	newOD:        '645.2 mm',   // (18×25.4) + 2×(235×0.40)
+	currentPoke:  '50.3 mm',    // 7.5×25.4/2 − 45 = 50.25 → toFixed(1)
+	newPoke:      '67.9 mm',    // 8.5×25.4/2 − 40 = 67.95 → toFixed(1)
+	currentCirc:  '1992.7 mm',  // π × 634.3
+	newCirc:      '2027.0 mm',  // π × 645.2
+	speedoError:  '-1.69 %',    // (oCirc − nCirc) / nCirc × 100
+	reading30:    '29.5 mph',   // 30 × oCirc / nCirc
+	rideHeight:   '5.5 mm',     // (nOD − oOD) / 2
 };
 
 // Required min/max attributes for every numeric input
@@ -30,12 +33,15 @@ const FIELDS = {
 //            Reading1(5) Reading2(6) RideHeight(7) ArchGap(8)
 // Columns: current(0) new(1) diff(2)
 const TD = {
-	currentOD:    0,   // Diameter  current
-	newOD:        1,   // Diameter  new
-	currentPoke:  6,   // Poke      current
-	newPoke:      7,   // Poke      new
-	speedoNew:    13,  // SpeedoError new
-	rideNew:      22,  // RideHeight  new
+	currentOD:    0,   // Diameter     current
+	newOD:        1,   // Diameter     new
+	currentCirc:  3,   // Circumference current
+	newCirc:      4,   // Circumference new
+	currentPoke:  6,   // Poke         current
+	newPoke:      7,   // Poke         new
+	speedoNew:    13,  // SpeedoError  new
+	reading1New:  16,  // Reading@ref1 new
+	rideNew:      22,  // RideHeight   new
 };
 
 // Fills all OD-affecting fields to the same values on both setups so the
@@ -122,6 +128,16 @@ test.describe('Results table', () => {
 	test('poke values are correct', async () => {
 		await expect(page.locator('#tbody td').filter({ hasText: DEFAULTS.currentPoke })).toBeVisible();
 		await expect(page.locator('#tbody td').filter({ hasText: DEFAULTS.newPoke })).toBeVisible();
+	});
+
+	test('derived metrics match known values for default inputs', async () => {
+		// Locks the core maths: circumference, speedo correction, reading, ride height.
+		const td = page.locator('#tbody td');
+		await expect(td.nth(TD.currentCirc)).toHaveText(DEFAULTS.currentCirc);
+		await expect(td.nth(TD.newCirc)).toHaveText(DEFAULTS.newCirc);
+		await expect(td.nth(TD.speedoNew)).toHaveText(DEFAULTS.speedoError);
+		await expect(td.nth(TD.reading1New)).toHaveText(DEFAULTS.reading30);
+		await expect(td.nth(TD.rideNew)).toHaveText(DEFAULTS.rideHeight);
 	});
 
 	test('all 9 English row labels are present', async () => {
@@ -423,6 +439,37 @@ test.describe('Share button', () => {
 		await expect(page.locator('#share-btn')).toHaveClass(/copied/);
 		await expect(page.locator('#share-btn')).toHaveText('Share', { timeout: 4000 });
 		await expect(page.locator('#share-btn')).not.toHaveClass(/copied/);
+	});
+
+	test('copies a URL that encodes the inputs and round-trips back to them', async () => {
+		// Set distinctive non-default values across both setups
+		await page.fill('#o-d',  '19');
+		await page.fill('#o-tw', '205');
+		await page.fill('#n-et', '42');
+		await page.fill('#n-sp', '7');
+
+		// Capture what _share() writes to the clipboard (makePage stubbed it to a no-op)
+		await page.evaluate(() => {
+			window.__copied = null;
+			navigator.clipboard.writeText = (t) => {
+				window.__copied = t;
+				return Promise.resolve();
+			};
+		});
+		await page.click('#share-btn');
+
+		const url = await page.evaluate(() => window.__copied);
+		expect(url).toContain('od=19');
+		expect(url).toContain('otw=205');
+		expect(url).toContain('net=42');
+		expect(url).toContain('nsp=7');
+
+		// Round-trip: loading that URL restores the same input values
+		await page.goto(url, { waitUntil: 'domcontentloaded' });
+		await expect(page.locator('#o-d')).toHaveValue('19');
+		await expect(page.locator('#o-tw')).toHaveValue('205');
+		await expect(page.locator('#n-et')).toHaveValue('42');
+		await expect(page.locator('#n-sp')).toHaveValue('7');
 	});
 });
 
