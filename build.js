@@ -131,13 +131,13 @@ function ratio(before, after) {
 		: `\x1b[33m+${-pct}%\x1b[0m`;
 }
 
-// ── Substitute {{KEY}} placeholders with HTML-escaped locale values ───────────
+// ── Substitute {{ KEY }} placeholders with HTML-escaped locale values ───────────
 
 function applyLocale(html, localeData) {
 	let out = html;
 	for (const [key, value] of Object.entries(localeData)) {
 		if (typeof value === 'string') {
-			out = out.split(`{{${key}}}`).join(esc(value));
+			out = out.split(`{{ ${key} }}`).join(esc(value));
 		}
 	}
 	return out;
@@ -227,7 +227,7 @@ async function build() {
 
 		let html = htmlBase;
 
-		// Substitute all {{KEY}} text placeholders
+		// Substitute all {{ KEY }} text placeholders
 		html = applyLocale(html, L);
 
 		// Inject block placeholders
