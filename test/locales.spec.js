@@ -8,6 +8,18 @@ const ROOT    = path.join(__dirname, '..');
 const SRC_DIR = path.join(ROOT, 'src', 'locales');
 const PUB_DIR = path.join(ROOT, 'public');
 
+const siteConfig = JSON.parse(fs.readFileSync(path.join(ROOT, 'site.config.json'), 'utf8'));
+const SITE_BASE  = siteConfig.canonicalUrl.replace(/\/$/, '');
+
+// Expected hreflang href for a locale, computed from the ROOT site base.
+function expectedHref(code) {
+	return code === 'en' ? `${SITE_BASE}/` : `${SITE_BASE}/${code}/`;
+}
+
+function escapeRegExp(s) {
+	return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 const REQUIRED_KEYS = [
 	'lang', 'flag', 'siteTitle', 'pageTitle', 'metaDescription', 'footerText',
 	'skipToMain', 'subtitle', 'currentSetup', 'newSetup',
@@ -133,10 +145,41 @@ test.describe('Build output — HTML files', () => {
 		const expected = locales.length + 1;
 		for (const { code } of locales) {
 			const content = html(code);
-			if (!content) return;
+			expect(content, `${code} page exists`).not.toBeNull();
 			const count = (content.match(/hreflang=/g) || []).length;
 			expect(count, `${code} hreflang count`).toBe(expected);
 			expect(content, `${code} x-default`).toContain('hreflang=x-default');
+		}
+	});
+
+	test('hreflang hrefs point at root locale paths, never nested under the current locale', () => {
+		for (const { code: pageCode } of locales) {
+			const content = html(pageCode);
+			expect(content, `${pageCode} page exists`).not.toBeNull();
+
+			// Every alternate href must be the ROOT path for that locale,
+			// regardless of which page we're on.
+			for (const { code: altCode } of locales) {
+				const href = escapeRegExp(expectedHref(altCode));
+				const re   = new RegExp(`hreflang=${altCode}\\s+href=${href}[\\s>"]`);
+				expect(content, `${pageCode} page → hreflang ${altCode} = ${expectedHref(altCode)}`).toMatch(re);
+			}
+
+			// x-default must be the site root, not e.g. /ja/
+			const xdHref = escapeRegExp(`${SITE_BASE}/`);
+			expect(content, `${pageCode} x-default href`).toMatch(
+				new RegExp(`hreflang=x-default\\s+href=${xdHref}[\\s>"]`),
+			);
+
+			// Regression guard: no alternate may nest one locale under another
+			// (the /ja/de/ class of bug). Check every ordered pair.
+			for (const { code: a } of locales) {
+				for (const { code: b } of locales) {
+					if (a === 'en' || b === 'en') continue;
+					expect(content, `${pageCode} page must not contain nested /${a}/${b}/`)
+						.not.toContain(`${SITE_BASE}/${a}/${b}/`);
+				}
+			}
 		}
 	});
 

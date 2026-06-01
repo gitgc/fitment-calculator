@@ -42,9 +42,11 @@ function esc(str) {
 	return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-function buildSeoTags(cfg, locales) {
+// `siteBase` is the ROOT canonical URL (e.g. https://fixthatgap.com). hreflang
+// alternates are always computed from it, never from the per-locale canonicalUrl
+// in `cfg` — otherwise a /ja/ page would emit /ja/de/, /ja/ja/, etc.
+function buildSeoTags(cfg, locales, siteBase) {
 	const t = [];
-	const base = cfg.canonicalUrl.replace(/\/$/, '');
 
 	if (cfg.title)        t.push(`<title>${esc(cfg.title)}</title>`);
 	if (cfg.description)  t.push(`<meta name="description" content="${esc(cfg.description)}">`);
@@ -69,8 +71,9 @@ function buildSeoTags(cfg, locales) {
 		if (cfg.ogImage)     t.push(`<meta name="twitter:image" content="${esc(cfg.ogImage)}">`);
 	}
 
-	// hreflang alternates for all locales
-	if (locales) {
+	// hreflang alternates for all locales — only when a root site base is known
+	if (locales && siteBase) {
+		const base = siteBase.replace(/\/$/, '');
 		for (const locale of locales) {
 			const href = locale.code === 'en' ? `${base}/` : `${base}/${locale.code}/`;
 			t.push(`<link rel="alternate" hreflang="${esc(locale.code)}" href="${esc(href)}">`);
@@ -83,6 +86,10 @@ function buildSeoTags(cfg, locales) {
 
 // ── Language switcher HTML ────────────────────────────────────────────────────
 
+// The switcher is a disclosure button revealing a list of navigation links —
+// not a value-selection listbox, so it uses a <nav> + plain links rather than
+// role="listbox"/role="option" (which would require the option itself to be the
+// focusable element). The active link is marked with aria-current="page".
 function buildLangSwitcher(locales, currentCode) {
 	const current = locales.find(l => l.code === currentCode);
 	const label   = current?.data.switchLang || 'Language';
@@ -91,13 +98,16 @@ function buildLangSwitcher(locales, currentCode) {
 		const href      = l.code === 'en' ? '/' : `/${l.code}/`;
 		const isCurrent = l.code === currentCode;
 		const cls       = isCurrent ? 'lang-option lang-option--active' : 'lang-option';
-		const ariaSel   = isCurrent ? ' aria-selected="true"' : ' aria-selected="false"';
-		return `<li role="option"${ariaSel}><a href="${esc(href)}" class="${cls}" onclick="localStorage.setItem('ftg-lang','${l.code}')">${l.data.flag} ${esc(l.data.langName)}</a></li>`;
+		const ariaCur   = isCurrent ? ' aria-current="page"' : '';
+		// l.code is a locale filename (e.g. "de", "pt-br"); JSON.stringify guards
+		// the inline handler against any unexpected characters.
+		const onclick   = esc(`localStorage.setItem('ftg-lang',${JSON.stringify(l.code)})`);
+		return `<li><a href="${esc(href)}" class="${cls}"${ariaCur} onclick="${onclick}">${l.data.flag} ${esc(l.data.langName)}</a></li>`;
 	}).join('');
 
-	const trigger = `<button class="lang-trigger" aria-haspopup="listbox" aria-expanded="false" aria-label="${esc(label)}">${current?.data.flag || ''}<span class="lang-chevron" aria-hidden="true">▾</span></button>`;
+	const trigger = `<button class="lang-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="lang-menu" aria-label="${esc(label)}">${current?.data.flag || ''}<span class="lang-chevron" aria-hidden="true">▾</span></button>`;
 
-	return `<div class="lang-switcher">${trigger}<ul class="lang-menu" role="listbox">${items}</ul></div>`;
+	return `<nav class="lang-switcher" aria-label="${esc(label)}">${trigger}<ul id="lang-menu" class="lang-menu">${items}</ul></nav>`;
 }
 
 // ── Auto-detect / locale-store scripts ───────────────────────────────────────
@@ -192,7 +202,9 @@ async function build() {
 		.replace('<link rel="stylesheet" href="style.css">', `<style>${cssResult.styles}</style>`);
 
 	const nonDefaultCodes = locales.filter(l => l.code !== 'en').map(l => l.code);
-	const base = siteConfig.canonicalUrl.replace(/\/$/, '');
+	// canonicalUrl is optional; when absent there is no root base and per-locale
+	// canonical/hreflang tags are simply omitted.
+	const base = siteConfig.canonicalUrl ? siteConfig.canonicalUrl.replace(/\/$/, '') : '';
 
 	const htmlMinOptions = {
 		collapseWhitespace:            true,
@@ -214,11 +226,15 @@ async function build() {
 
 		if (!isDefault) fs.mkdirSync(localeDir, { recursive: true });
 
-		// Per-locale SEO config: override title, description, canonical URL
-		const canonicalUrl = isDefault ? `${base}/` : `${base}/${locale.code}/`;
+		// Per-locale SEO config: override title, description, canonical URL.
+		// When there is no root base, leave canonicalUrl undefined so no
+		// canonical/og:url tag is emitted (rather than a bare relative path).
+		const canonicalUrl = base
+			? (isDefault ? `${base}/` : `${base}/${locale.code}/`)
+			: undefined;
 		const localeSEOCfg = { ...siteConfig, title: L.pageTitle, description: L.metaDescription, canonicalUrl };
 
-		const seoTags       = buildSeoTags(localeSEOCfg, locales);
+		const seoTags       = buildSeoTags(localeSEOCfg, locales, base);
 		const autoDetect    = isDefault
 			? buildAutoDetectScript(nonDefaultCodes)
 			: buildLocaleStoreScript(locale.code);
