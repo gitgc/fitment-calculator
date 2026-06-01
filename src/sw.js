@@ -38,7 +38,11 @@ self.addEventListener("fetch", (ev) => {
                     // consumed — otherwise the async cache write throws
                     // "Response body is already used".
                     const copy = res.clone();
-                    caches.open(CACHE).then((c) => c.put(ev.request, copy));
+                    // Tie the write to the event lifetime so it isn't terminated
+                    // when the response is delivered, and so failures surface.
+                    ev.waitUntil(
+                        caches.open(CACHE).then((c) => c.put(ev.request, copy)),
+                    );
                     return res;
                 })
                 .catch(() => caches.match("/"));
