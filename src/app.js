@@ -69,80 +69,78 @@ function calculate() {
     const oCam = v("o-cam");
     const nCam = v("n-cam");
 
+    const L = window.L;
+    const ref1 = L.refSpeed1;
+    const ref2 = L.refSpeed2;
+    const unit = L.speedUnit;
+
     const speedoErr = ((o.circ - n.circ) / n.circ) * 100;
-    const r30 = (30 * o.circ) / n.circ;
-    const r60 = (60 * o.circ) / n.circ;
+    const r1 = (ref1 * o.circ) / n.circ;
+    const r2 = (ref2 * o.circ) / n.circ;
     const rhGain = (n.od - o.od) / 2;
 
     const tips = {
-        Diameter:
-            "Total outer diameter of the tyre from tread to tread (mm). A taller tyre increases this value.",
-        Circumference:
-            "Total rolling circumference of the tyre (mm). Determines distance per wheel revolution — directly drives speedo accuracy.",
-        Poke: "How far the outer rim edge extends beyond the hub mounting face (mm). Positive = wheel pokes outward. Too much and the tyre fouls the arch.",
-        Inset: "Distance from the inner rim lip to the hub mounting face — also called backspacing (mm). Too little and the wheel fouls inner suspension.",
-        "Speedo Error":
-            "How much the speedometer reads relative to actual speed with the new tyres. Negative = speedo under-reads (shows less than actual).",
-        "Reading at 30 mph":
-            "What your speedometer shows when actually doing 30 mph with the new tyres. A larger tyre means fewer revolutions and a lower speedo reading.",
-        "Reading at 60 mph":
-            "What your speedometer shows when actually doing 60 mph with the new tyres.",
-        "Ride Height Gain":
-            "How much the car body rises due to the change in tyre radius (mm). Affects handling geometry and headlight aim.",
-        "Arch Gap Loss":
-            "Reduction in clearance between outer tyre tread and wheel arch liner (mm). Positive = less gap — watch for rubbing on bumps.",
+        [L.rowDiameter]:      L.tipDiameter,
+        [L.rowCircumference]: L.tipCircumference,
+        [L.rowPoke]:          L.tipPoke,
+        [L.rowInset]:         L.tipInset,
+        [L.rowSpeedoError]:   L.tipSpeedoError,
+        [L.rowAt1]:           L.tipAt1,
+        [L.rowAt2]:           L.tipAt2,
+        [L.rowRideHeight]:    L.tipRideHeight,
+        [L.rowArchGap]:       L.tipArchGap,
     };
 
     const rows = [
         [
-            "Diameter",
+            L.rowDiameter,
             `${fmt(o.od)} mm`,
             `${fmt(n.od)} mm`,
             signed(n.od - o.od, "mm"),
         ],
         [
-            "Circumference",
+            L.rowCircumference,
             `${fmt(o.circ)} mm`,
             `${fmt(n.circ)} mm`,
             signed(n.circ - o.circ, "mm"),
         ],
         [
-            "Poke",
+            L.rowPoke,
             `${fmt(o.poke)} mm`,
             `${fmt(n.poke)} mm`,
             signed(n.poke - o.poke, "mm"),
         ],
         [
-            "Inset",
+            L.rowInset,
             `${fmt(o.inset)} mm`,
             `${fmt(n.inset)} mm`,
             signed(n.inset - o.inset, "mm"),
         ],
         [
-            "Speedo Error",
+            L.rowSpeedoError,
             "0.00 %",
             `${fmt(speedoErr, 2)} %`,
             signed(speedoErr, "%"),
         ],
         [
-            "Reading at 30 mph",
-            "30.0 mph",
-            `${fmt(r30, 1)} mph`,
-            signed(r30 - 30, "mph"),
+            L.rowAt1,
+            `${fmt(ref1, 1)} ${unit}`,
+            `${fmt(r1, 1)} ${unit}`,
+            signed(r1 - ref1, unit),
         ],
         [
-            "Reading at 60 mph",
-            "60.0 mph",
-            `${fmt(r60, 1)} mph`,
-            signed(r60 - 60, "mph"),
+            L.rowAt2,
+            `${fmt(ref2, 1)} ${unit}`,
+            `${fmt(r2, 1)} ${unit}`,
+            signed(r2 - ref2, unit),
         ],
         [
-            "Ride Height Gain",
+            L.rowRideHeight,
             "0.0 mm",
             `${fmt(rhGain)} mm`,
             signed(rhGain, "mm"),
         ],
-        ["Arch Gap Loss", "0.0 mm", `${fmt(rhGain)} mm`, signed(rhGain, "mm")],
+        [L.rowArchGap, "0.0 mm", `${fmt(rhGain)} mm`, signed(rhGain, "mm")],
     ];
 
     document.getElementById("tbody").innerHTML = rows
@@ -159,12 +157,14 @@ function calculate() {
         .getElementById("cv")
         .setAttribute(
             "aria-label",
-            `Cross-section comparison: current setup ${fmt(o.od)} mm diameter, new setup ${fmt(n.od)} mm diameter. ` +
-                `Current poke ${fmt(o.poke)} mm, new poke ${fmt(n.poke)} mm.`,
+            L.canvasAriaLabelDynamic
+                .replace("{oDiameter}", fmt(o.od))
+                .replace("{nDiameter}", fmt(n.od))
+                .replace("{oPoke}", fmt(o.poke))
+                .replace("{nPoke}", fmt(n.poke)),
         );
 
-    document.getElementById("calc-status").textContent =
-        "Fitment results calculated. Scroll down to view the comparison table and diagram.";
+    document.getElementById("calc-status").textContent = L.calcStatus;
 }
 
 // ── Canvas helpers ────────────────────────────────────────────────────────────
@@ -534,14 +534,15 @@ function drawDiagram(o, n, oCam, nCam) {
     const oETlabel = o.sp ? `ET${o.et} -${o.sp}sp` : `ET${o.et}`;
     const nETlabel = n.sp ? `ET${n.et} -${n.sp}sp` : `ET${n.et}`;
 
+    const L = window.L;
     pokeRow(
         ctx,
         hubX,
         oRimCX + (o.rimWmm / 2) * scale,
         py1,
         "#58a6ff",
-        "Current",
-        `${o.tw} mm wide   ${oETlabel}   poke ${o.poke.toFixed(1)} mm`,
+        L.canvasCurrent,
+        `${o.tw} mm ${L.canvasWide}   ${oETlabel}   ${L.canvasPoke} ${o.poke.toFixed(1)} mm`,
         W - 8,
     );
     pokeRow(
@@ -550,8 +551,8 @@ function drawDiagram(o, n, oCam, nCam) {
         nRimCX + (n.rimWmm / 2) * scale,
         py2,
         "#f78166",
-        "New",
-        `${n.tw} mm wide   ${nETlabel}   poke ${n.poke.toFixed(1)} mm`,
+        L.canvasNew,
+        `${n.tw} mm ${L.canvasWide}   ${nETlabel}   ${L.canvasPoke} ${n.poke.toFixed(1)} mm`,
         W - 8,
     );
 
@@ -559,9 +560,9 @@ function drawDiagram(o, n, oCam, nCam) {
     ctx.font = "bold 16px sans-serif";
     ctx.textAlign = "center";
     ctx.fillStyle = "#58a6ff";
-    ctx.fillText("■ Current", W / 2 - 60, 28);
+    ctx.fillText(`■ ${L.canvasCurrent}`, W / 2 - 60, 28);
     ctx.fillStyle = "#f78166";
-    ctx.fillText("■ New", W / 2 + 48, 28);
+    ctx.fillText(`■ ${L.canvasNew}`, W / 2 + 48, 28);
 }
 
 // ── Floating tooltip ──────────────────────────────────────────────────────────
@@ -676,12 +677,13 @@ function loadFromParams() {
 function _share() {
     const url = buildShareUrl();
     const btn = document.getElementById("share-btn");
+    const L = window.L;
 
-    function confirm() {
-        btn.textContent = "Copied!";
+    function copied() {
+        btn.textContent = L.shareCopied;
         btn.classList.add("copied");
         setTimeout(() => {
-            btn.textContent = "Share";
+            btn.textContent = L.shareBtn;
             btn.classList.remove("copied");
         }, 2000);
     }
@@ -691,7 +693,7 @@ function _share() {
     } else {
         navigator.clipboard
             .writeText(url)
-            .then(confirm)
+            .then(copied)
             .catch(() => {
                 const tmp = document.createElement("input");
                 tmp.value = url;
@@ -699,9 +701,38 @@ function _share() {
                 tmp.select();
                 document.execCommand("copy");
                 tmp.remove();
-                confirm();
+                copied();
             });
     }
+}
+
+// ── Language switcher dropdown ────────────────────────────────────────────────
+
+function initLangSwitcher() {
+    const switcher = document.querySelector(".lang-switcher");
+    const trigger  = switcher && switcher.querySelector(".lang-trigger");
+    if (!trigger) return;
+
+    trigger.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const open = switcher.classList.toggle("open");
+        trigger.setAttribute("aria-expanded", String(open));
+    });
+
+    document.addEventListener("click", () => {
+        if (switcher.classList.contains("open")) {
+            switcher.classList.remove("open");
+            trigger.setAttribute("aria-expanded", "false");
+        }
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && switcher.classList.contains("open")) {
+            switcher.classList.remove("open");
+            trigger.setAttribute("aria-expanded", "false");
+            trigger.focus();
+        }
+    });
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
@@ -709,4 +740,5 @@ function _share() {
 window.onload = () => {
     loadFromParams();
     calculate();
+    initLangSwitcher();
 };

@@ -1,98 +1,105 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{lang}}">
 <head>
   <meta charset="UTF-8">
+  <!-- %AUTO_DETECT% -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fix That Gap! — Wheel Fitment Calculator</title>
+  <title>Fix That Gap!</title>
   <!-- %SEO% -->
   <meta name="theme-color" content="#f0b429">
-  <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icon.svg">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Fitment">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<a href="#main-content" class="skip-link">Skip to main content</a>
+<a href="#main-content" class="skip-link">{{skipToMain}}</a>
 <header>
-  <h1>Fix That Gap!</h1>
-  <p>Wheel &amp; Tire Fitment Calculator</p>
+  <div class="header-inner">
+    <div class="header-text">
+      <h1>{{siteTitle}}</h1>
+      <p>{{subtitle}}</p>
+    </div>
+    <!-- %LANG_SWITCHER% -->
+  </div>
 </header>
 <main id="main-content">
   <div class="inputs">
 
     <div class="card old" role="group" aria-labelledby="current-heading">
-      <h2 id="current-heading">Current Setup</h2>
-      <h3 class="section-label">Rim</h3>
-      <div class="field"><label for="o-d">Diameter (inches)</label><input type="number" id="o-d" value="17" step="1" min="12" max="25"></div>
-      <div class="field"><label for="o-w">Width (inches)</label><input type="number" id="o-w" value="7.5" step="0.5"></div>
-      <div class="field"><label for="o-et">Offset / ET (mm)</label><input type="number" id="o-et" value="45" step="1"></div>
-      <h3 class="section-label">Tire</h3>
-      <div class="field"><label for="o-tw">Width (mm)</label><input type="number" id="o-tw" value="225" step="5"></div>
-      <div class="field"><label for="o-pr">Profile (%)</label><input type="number" id="o-pr" value="45" step="5"></div>
-      <h3 class="section-label">Optional</h3>
-      <div class="field"><label for="o-sp">Spacer (mm)</label><input type="number" id="o-sp" value="0" step="1" min="0"></div>
-      <div class="field"><label for="o-cam">Camber (&deg;)</label><input type="number" id="o-cam" value="0" step="0.1"></div>
+      <h2 id="current-heading">{{currentSetup}}</h2>
+      <h3 class="section-label">{{rimSection}}</h3>
+      <div class="field"><label for="o-d">{{diameterInches}}</label><input type="number" id="o-d" value="17" step="1" min="12" max="25"></div>
+      <div class="field"><label for="o-w">{{widthInches}}</label><input type="number" id="o-w" value="7.5" step="0.5"></div>
+      <div class="field"><label for="o-et">{{offsetET}}</label><input type="number" id="o-et" value="45" step="1"></div>
+      <h3 class="section-label">{{tireSection}}</h3>
+      <div class="field"><label for="o-tw">{{tireWidth}}</label><input type="number" id="o-tw" value="225" step="5"></div>
+      <div class="field"><label for="o-pr">{{profile}}</label><input type="number" id="o-pr" value="45" step="5"></div>
+      <h3 class="section-label">{{optionalSection}}</h3>
+      <div class="field"><label for="o-sp">{{spacer}}</label><input type="number" id="o-sp" value="0" step="1" min="0"></div>
+      <div class="field"><label for="o-cam">{{camber}}</label><input type="number" id="o-cam" value="0" step="0.1"></div>
     </div>
 
     <div class="card new" role="group" aria-labelledby="new-heading">
-      <h2 id="new-heading">New Setup</h2>
-      <h3 class="section-label">Rim</h3>
-      <div class="field"><label for="n-d">Diameter (inches)</label><input type="number" id="n-d" value="18" step="1" min="12"></div>
-      <div class="field"><label for="n-w">Width (inches)</label><input type="number" id="n-w" value="8.5" step="0.5"></div>
-      <div class="field"><label for="n-et">Offset / ET (mm)</label><input type="number" id="n-et" value="40" step="1"></div>
-      <h3 class="section-label">Tire</h3>
-      <div class="field"><label for="n-tw">Width (mm)</label><input type="number" id="n-tw" value="235" step="5"></div>
-      <div class="field"><label for="n-pr">Profile (%)</label><input type="number" id="n-pr" value="40" step="5"></div>
-      <h3 class="section-label">Optional</h3>
-      <div class="field"><label for="n-sp">Spacer (mm)</label><input type="number" id="n-sp" value="0" step="1" min="0"></div>
-      <div class="field"><label for="n-cam">Camber (&deg;)</label><input type="number" id="n-cam" value="0" step="0.1"></div>
+      <h2 id="new-heading">{{newSetup}}</h2>
+      <h3 class="section-label">{{rimSection}}</h3>
+      <div class="field"><label for="n-d">{{diameterInches}}</label><input type="number" id="n-d" value="18" step="1" min="12"></div>
+      <div class="field"><label for="n-w">{{widthInches}}</label><input type="number" id="n-w" value="8.5" step="0.5"></div>
+      <div class="field"><label for="n-et">{{offsetET}}</label><input type="number" id="n-et" value="40" step="1"></div>
+      <h3 class="section-label">{{tireSection}}</h3>
+      <div class="field"><label for="n-tw">{{tireWidth}}</label><input type="number" id="n-tw" value="235" step="5"></div>
+      <div class="field"><label for="n-pr">{{profile}}</label><input type="number" id="n-pr" value="40" step="5"></div>
+      <h3 class="section-label">{{optionalSection}}</h3>
+      <div class="field"><label for="n-sp">{{spacer}}</label><input type="number" id="n-sp" value="0" step="1" min="0"></div>
+      <div class="field"><label for="n-cam">{{camber}}</label><input type="number" id="n-cam" value="0" step="0.1"></div>
     </div>
 
   </div>
 
   <div class="btn-row">
-    <button class="calc-btn" type="button" onclick="calculate()">Calculate Fitment</button>
-    <button class="share-btn" type="button" id="share-btn" onclick="_share()" aria-label="Copy share link">Share</button>
+    <button class="calc-btn" type="button" onclick="calculate()">{{calcBtn}}</button>
+    <button class="share-btn" type="button" id="share-btn" onclick="_share()" aria-label="{{shareBtnAriaLabel}}">{{shareBtn}}</button>
   </div>
 
   <div role="status" class="sr-only" id="calc-status"></div>
   <div id="results">
     <div class="table-wrap">
-      <table aria-label="Fitment comparison measurements">
+      <table aria-label="{{tableAriaLabel}}">
         <thead>
           <tr>
-            <th scope="col">Measurement</th>
-            <th scope="col" class="old">Current</th>
-            <th scope="col" class="new">New</th>
-            <th scope="col" class="diff">Difference</th>
+            <th scope="col">{{colMeasurement}}</th>
+            <th scope="col" class="old">{{colCurrent}}</th>
+            <th scope="col" class="new">{{colNew}}</th>
+            <th scope="col" class="diff">{{colDifference}}</th>
           </tr>
         </thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
     <div class="diagram-wrap">
-      <h3>Cross Section Comparison</h3>
+      <h3>{{crossSectionTitle}}</h3>
       <div class="legend" aria-hidden="true">
-        <div class="legend-item"><div class="swatch" style="background:var(--old)"></div>Current Setup</div>
-        <div class="legend-item"><div class="swatch" style="background:var(--new)"></div>New Setup</div>
+        <div class="legend-item"><div class="swatch" style="background:var(--old)"></div>{{legendCurrent}}</div>
+        <div class="legend-item"><div class="swatch" style="background:var(--new)"></div>{{legendNew}}</div>
       </div>
       <canvas id="cv" width="900" height="620"
         role="img"
-        aria-label="Cross-section diagram comparing current and new wheel and tire setups"></canvas>
+        aria-label="{{canvasAriaLabelStatic}}"></canvas>
     </div>
   </div>
 </main>
 <footer>
-  <p>Made with ❤️ and Miatas by Gio Coia</p>
-  <a href="https://github.com/gitgc/fitment-calculator" target="_blank" rel="noopener noreferrer" aria-label="View source on GitHub">
+  <p>{{footerText}}</p>
+  <a href="https://github.com/gitgc/fitment-calculator" target="_blank" rel="noopener noreferrer" aria-label="{{githubAriaLabel}}">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
       <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
     </svg>
   </a>
 </footer>
+<!-- %LOCALE% -->
 <script src="app.js"></script>
 <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
 </body>
