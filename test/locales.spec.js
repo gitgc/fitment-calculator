@@ -25,7 +25,7 @@ const REQUIRED_KEYS = [
 	'diameterInches', 'widthInches', 'offsetET', 'tireWidth', 'profile', 'spacer', 'camber',
 	'calcBtn', 'shareBtn', 'shareBtnAriaLabel',
 	'tableAriaLabel', 'colMeasurement', 'colCurrent', 'colNew', 'colDifference',
-	'crossSectionTitle', 'legendCurrent', 'legendNew',
+	'crossSectionTitle', 'faceTitle', 'legendCurrent', 'legendNew',
 	'canvasAriaLabelStatic', 'githubAriaLabel', 'switchLang', 'langName',
 	'shareCopied',
 	'rowDiameter', 'rowCircumference', 'rowPoke', 'rowInset', 'rowSpeedoError',

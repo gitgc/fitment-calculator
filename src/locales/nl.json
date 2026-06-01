@@ -29,6 +29,7 @@
     "colNew": "Nieuw",
     "colDifference": "Verschil",
     "crossSectionTitle": "Dwarsdoorsnedevergelijking",
+    "faceTitle": "Vooraanzicht",
     "legendCurrent": "Huidige configuratie",
     "legendNew": "Nieuwe configuratie",
     "canvasAriaLabelStatic": "Dwarsdoorsnedediagram dat de huidige en nieuwe wiel- en bandenconfiguratie vergelijkt",

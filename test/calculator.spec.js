@@ -397,6 +397,21 @@ test.describe('Canvas diagram', () => {
 	test('aria-label is updated with mm measurements', async () => {
 		await expect(page.locator('#cv')).toHaveAttribute('aria-label', /mm/);
 	});
+
+	test('face-view canvas renders with pixel data and a labelled diameter', async () => {
+		const dims = await page.$eval('#cv2', el => ({ w: el.width, h: el.height }));
+		expect(dims).toEqual({ w: 900, h: 620 });
+
+		const hasPixels = await page.evaluate(() => {
+			const cv  = document.getElementById('cv2');
+			const ctx = cv.getContext('2d');
+			return Array.from(ctx.getImageData(0, 0, cv.width, cv.height).data).some(v => v > 0);
+		});
+		expect(hasPixels).toBe(true);
+
+		// aria-label carries both diameters (Ø…mm) for the face view
+		await expect(page.locator('#cv2')).toHaveAttribute('aria-label', /Ø.*mm.*Ø.*mm/);
+	});
 });
 
 // ── Tooltips ──────────────────────────────────────────────────────────────────

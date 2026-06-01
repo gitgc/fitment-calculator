@@ -269,6 +269,32 @@
                         aria-label="{{ canvasAriaLabelStatic }}"
                     ></canvas>
                 </div>
+                <div class="diagram-wrap">
+                    <h3>{{ faceTitle }}</h3>
+                    <div class="legend" aria-hidden="true">
+                        <div class="legend-item">
+                            <div
+                                class="swatch"
+                                style="background:var(--old)"
+                            ></div>
+                            {{ legendCurrent }}
+                        </div>
+                        <div class="legend-item">
+                            <div
+                                class="swatch"
+                                style="background:var(--new)"
+                            ></div>
+                            {{ legendNew }}
+                        </div>
+                    </div>
+                    <canvas
+                        id="cv2"
+                        width="900"
+                        height="620"
+                        role="img"
+                        aria-label="{{ faceTitle }}"
+                    ></canvas>
+                </div>
             </div>
         </main>
         <footer>

@@ -29,6 +29,7 @@
     "colNew": "Nowe",
     "colDifference": "Różnica",
     "crossSectionTitle": "Porównanie przekroju",
+    "faceTitle": "Widok z przodu",
     "legendCurrent": "Obecna konfiguracja",
     "legendNew": "Nowa konfiguracja",
     "canvasAriaLabelStatic": "Diagram przekroju porównujący obecną i nową konfigurację koła oraz opony",

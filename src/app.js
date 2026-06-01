@@ -167,6 +167,7 @@ function calculate() {
 
     document.getElementById("results").classList.add("show");
     drawDiagram(o, n, oCam, nCam);
+    drawFaceDiagram(o, n, oCam, nCam);
 
     document
         .getElementById("cv")
@@ -177,6 +178,13 @@ function calculate() {
                 .replace("{nDiameter}", fmt(n.od))
                 .replace("{oPoke}", fmt(o.poke))
                 .replace("{nPoke}", fmt(n.poke)),
+        );
+
+    document
+        .getElementById("cv2")
+        .setAttribute(
+            "aria-label",
+            `${L.faceTitle}: ${L.canvasCurrent} Ø${fmt(o.od, 0)} mm, ${L.canvasNew} Ø${fmt(n.od, 0)} mm`,
         );
 
     document.getElementById("calc-status").textContent = L.calcStatus;
@@ -598,6 +606,140 @@ function drawDiagram(o, n, oCam, nCam) {
     ctx.fillText(`■ ${L.canvasCurrent}`, W / 2 - 60, 28);
     ctx.fillStyle = "#f78166";
     ctx.fillText(`■ ${L.canvasNew}`, W / 2 + 48, 28);
+}
+
+// ── Face-on view ───────────────────────────────────────────────────────────────
+// The same comparison rotated 90° about the vertical axis: we now look at the
+// wheel face, so each setup is a set of concentric circles (tyre outer = OD,
+// inner = rim). Camber foreshortens the circle vertically into an ellipse.
+
+function drawFace(ctx, w, cx, cy, scale, color, camberDeg) {
+    const rOD = (w.od / 2) * scale;
+    const rRim = (w.rimDmm / 2) * scale;
+
+    ctx.save();
+    if (camberDeg) {
+        ctx.translate(cx, cy);
+        ctx.scale(1, Math.cos((camberDeg * Math.PI) / 180));
+        ctx.translate(-cx, -cy);
+    }
+
+    // Tyre rubber fill — annulus between rim and outer diameter
+    ctx.fillStyle = `${color}20`;
+    ctx.beginPath();
+    ctx.arc(cx, cy, rOD, 0, Math.PI * 2);
+    ctx.arc(cx, cy, rRim, 0, Math.PI * 2, true);
+    ctx.fill();
+
+    // Tread — concentric grooves just inside the outer edge
+    const treadD = Math.min(16, (rOD - rRim) * 0.22);
+    const nGroove = 4;
+    ctx.strokeStyle = `${color}2e`;
+    ctx.lineWidth = Math.max(1, (treadD / nGroove) * 0.6);
+    for (let i = 1; i < nGroove; i++) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, rOD - (i * treadD) / nGroove, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+
+    // Tyre outline
+    ctx.strokeStyle = `${color}cc`;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.arc(cx, cy, rOD, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Rim face
+    ctx.fillStyle = `${color}14`;
+    ctx.strokeStyle = `${color}55`;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(cx, cy, rRim, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.restore(); // undo camber foreshorten
+}
+
+function drawFaceDiagram(o, n, oCam, nCam) {
+    const canvas = document.getElementById("cv2");
+    if (!canvas) return;
+    const W = canvas.width,
+        H = canvas.height;
+    const ctx = canvas.getContext("2d");
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = "#0d1117";
+    ctx.fillRect(0, 0, W, H);
+
+    const sidePad = 90;
+    const topPad = 46;
+    const botPad = 46;
+    const availW = W - 2 * sidePad;
+    const availH = H - topPad - botPad;
+
+    const maxOD = Math.max(o.od, n.od);
+    const scale = Math.min(availW / maxOD, availH / maxOD);
+    const cx = W / 2;
+    const cy = topPad + availH / 2;
+
+    // Concentric wheel faces — current then new
+    drawFace(ctx, o, cx, cy, scale, "#58a6ff", oCam);
+    drawFace(ctx, n, cx, cy, scale, "#f78166", nCam);
+
+    // Shared hub centre
+    const hubR = Math.max(8, (Math.min(o.rimDmm, n.rimDmm) / 2) * scale * 0.16);
+    ctx.fillStyle = "#253044";
+    ctx.strokeStyle = "#4a6080";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(cx, cy, hubR, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Diameter callouts — current left, new right
+    const oR = (o.od / 2) * scale;
+    const nR = (n.od / 2) * scale;
+    const oRv = oR * Math.cos((oCam * Math.PI) / 180);
+    const nRv = nR * Math.cos((nCam * Math.PI) / 180);
+    const maxR = Math.max(oR, nR);
+
+    drawDiameterTick(ctx, cx, cy, oRv, maxR, "#58a6ff", -1, o.od);
+    drawDiameterTick(ctx, cx, cy, nRv, maxR, "#f78166", +1, n.od);
+
+    // Legend
+    const L = window.L;
+    ctx.font = "bold 16px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#58a6ff";
+    ctx.fillText(`■ ${L.canvasCurrent}`, W / 2 - 60, 28);
+    ctx.fillStyle = "#f78166";
+    ctx.fillText(`■ ${L.canvasNew}`, W / 2 + 48, 28);
+}
+
+// Vertical Ø arrow + dashed leaders at the side of a face-view circle.
+// `side` = -1 (left/current) or +1 (right/new).
+function drawDiameterTick(ctx, cx, cy, rv, maxR, color, side, odMm) {
+    const ax = cx + side * (maxR + 26);
+
+    // Dashed leaders from the circle's vertical extremes (cx, cy ± rv) to the arrow
+    ctx.save();
+    ctx.setLineDash([2, 4]);
+    ctx.strokeStyle = `${color}33`;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - rv);
+    ctx.lineTo(ax - side * 4, cy - rv);
+    ctx.moveTo(cx, cy + rv);
+    ctx.lineTo(ax - side * 4, cy + rv);
+    ctx.stroke();
+    ctx.restore();
+
+    arrow(ctx, ax, cy + rv, ax, cy - rv, `${color}aa`);
+    ctx.fillStyle = color;
+    ctx.font = "bold 16px monospace";
+    ctx.textAlign = side < 0 ? "right" : "left";
+    ctx.fillText(`Ø${odMm.toFixed(0)} mm`, ax + side * 6, cy + 6);
 }
 
 // ── Floating tooltip ──────────────────────────────────────────────────────────
