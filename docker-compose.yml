@@ -2,7 +2,7 @@ services:
   caddy:
     build: .
     ports:
-      - "3000:80"
+      - "3001:80"
     restart: unless-stopped
     volumes:
       - ./public:/srv:ro

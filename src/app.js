@@ -292,31 +292,51 @@ function drawHub(ctx, hubX, cy, rHH) {
 }
 
 // ── Measurement row (arrow + flanking labels) ─────────────────────────────────
-// tag    → right-aligned left of hub tick
-// detail → left-aligned right of outer tick, clamped to maxX
+// tag    → right-aligned left of the hub tick
+// detail → right-aligned at the right margin (maxX), free to extend left as far
+//          as just right of the hub. The detail font shrinks if even that span
+//          is too narrow, so long translations never overlap the wheel or run
+//          off-canvas. For short labels the detail stays right of the wheel and
+//          the full hub→rim arrow is drawn, as before.
 
 function pokeRow(ctx, hubX, outerX, y, color, tag, detail, maxX) {
+    const rightX = (maxX !== undefined ? maxX : outerX + 8) - 4;
+    const minX = hubX + 8; // detail may use the whole span from here to rightX
+
+    // Size the detail to fit the available width, shrinking from 16px if needed
+    let fontPx = 16;
+    ctx.font = `${fontPx}px monospace`;
+    const avail = rightX - minX;
+    while (ctx.measureText(detail).width > avail && fontPx > 10) {
+        fontPx -= 1;
+        ctx.font = `${fontPx}px monospace`;
+    }
+    const detailLeft = rightX - ctx.measureText(detail).width;
+
+    // Ticks + arrow — arrow stops before the detail text so they never overlap
     ctx.strokeStyle = `${color}88`;
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(hubX, y - 5);
     ctx.lineTo(hubX, y + 5);
-    ctx.moveTo(outerX, y - 5);
-    ctx.lineTo(outerX, y + 5);
+    if (outerX < detailLeft - 2) {
+        ctx.moveTo(outerX, y - 5);
+        ctx.lineTo(outerX, y + 5);
+    }
     ctx.stroke();
-    arrow(ctx, hubX, y, outerX, y, `${color}aa`);
+    const arrowEnd = Math.min(outerX, detailLeft - 6);
+    if (arrowEnd > hubX + 2) arrow(ctx, hubX, y, arrowEnd, y, `${color}aa`);
 
+    // Tag — right-aligned just left of the hub tick
     ctx.fillStyle = `${color}cc`;
     ctx.font = "16px monospace";
-
     ctx.textAlign = "right";
     ctx.fillText(tag, hubX - 8, y + 5);
 
-    const tw = ctx.measureText(detail).width;
-    let lx = outerX + 8;
-    if (maxX !== undefined && lx + tw > maxX) lx = maxX - tw - 4;
+    // Detail — right-aligned at the margin, drawn last so it sits above the arrow
+    ctx.font = `${fontPx}px monospace`;
     ctx.textAlign = "left";
-    ctx.fillText(detail, lx, y + 5);
+    ctx.fillText(detail, detailLeft, y + 5);
 }
 
 // ── Suspension components (illustrative) ─────────────────────────────────────
