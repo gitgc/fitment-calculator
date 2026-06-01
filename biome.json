@@ -26,6 +26,15 @@
             "quoteStyle": "double"
         }
     },
+    "html": {
+        "experimentalFullSupportEnabled": false,
+        "formatter": {
+            "enabled": false
+        },
+        "parser": {
+            "interpolation": true
+        }
+    },
     "assist": {
         "enabled": true,
         "actions": {

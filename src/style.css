@@ -112,7 +112,9 @@ header p {
     font-size: 1rem;
     line-height: 1;
     cursor: pointer;
-    transition: border-color 0.15s, color 0.15s;
+    transition:
+        border-color 0.15s,
+        color 0.15s;
 }
 .lang-trigger:hover {
     border-color: var(--text);
@@ -157,7 +159,9 @@ header p {
     color: var(--muted);
     font-size: 0.85rem;
     white-space: nowrap;
-    transition: background 0.1s, color 0.1s;
+    transition:
+        background 0.1s,
+        color 0.1s;
 }
 .lang-option:hover {
     background: var(--card);

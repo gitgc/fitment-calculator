@@ -75,7 +75,7 @@ function buildSeoTags(cfg, locales) {
 			const href = locale.code === 'en' ? `${base}/` : `${base}/${locale.code}/`;
 			t.push(`<link rel="alternate" hreflang="${esc(locale.code)}" href="${esc(href)}">`);
 		}
-		t.push(`<link rel="alternate" hreflang="x-default" href="${esc(base + '/')}">`);
+		t.push(`<link rel="alternate" hreflang="x-default" href="${esc(`${base}/`)}">`);
 	}
 
 	return t.join('\n  ');

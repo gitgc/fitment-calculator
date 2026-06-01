@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node server.js",
     "caddy": "caddy run --config Caddyfile --watch",
-    "check": "biome check --write .",
+    "check": "biome check --write --unsafe .",
     "publish": "node build.js",
     "test": "node build.js && playwright install chromium && playwright test",
     "a11y": "playwright install chromium && node a11y.js"

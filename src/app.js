@@ -1,13 +1,13 @@
 // ── Input helper ──────────────────────────────────────────────────────────────
 
 function v(id) {
-    const el  = document.getElementById(id);
-    let   val = parseFloat(el.value);
-    if (isNaN(val)) val = 0;
+    const el = document.getElementById(id);
+    let val = parseFloat(el.value);
+    if (Number.isNaN(val)) val = 0;
     const lo = parseFloat(el.min);
     const hi = parseFloat(el.max);
-    if (!isNaN(lo) && val < lo) val = lo;
-    if (!isNaN(hi) && val > hi) val = hi;
+    if (!Number.isNaN(lo) && val < lo) val = lo;
+    if (!Number.isNaN(hi) && val > hi) val = hi;
     return val;
 }
 
@@ -87,15 +87,15 @@ function calculate() {
     const rhGain = (n.od - o.od) / 2;
 
     const tips = {
-        [L.rowDiameter]:      L.tipDiameter,
+        [L.rowDiameter]: L.tipDiameter,
         [L.rowCircumference]: L.tipCircumference,
-        [L.rowPoke]:          L.tipPoke,
-        [L.rowInset]:         L.tipInset,
-        [L.rowSpeedoError]:   L.tipSpeedoError,
-        [L.rowAt1]:           L.tipAt1,
-        [L.rowAt2]:           L.tipAt2,
-        [L.rowRideHeight]:    L.tipRideHeight,
-        [L.rowArchGap]:       L.tipArchGap,
+        [L.rowPoke]: L.tipPoke,
+        [L.rowInset]: L.tipInset,
+        [L.rowSpeedoError]: L.tipSpeedoError,
+        [L.rowAt1]: L.tipAt1,
+        [L.rowAt2]: L.tipAt2,
+        [L.rowRideHeight]: L.tipRideHeight,
+        [L.rowArchGap]: L.tipArchGap,
     };
 
     const rows = [
@@ -141,12 +141,7 @@ function calculate() {
             `${fmt(r2, 1)} ${unit}`,
             signed(r2 - ref2, unit),
         ],
-        [
-            L.rowRideHeight,
-            "0.0 mm",
-            `${fmt(rhGain)} mm`,
-            signed(rhGain, "mm"),
-        ],
+        [L.rowRideHeight, "0.0 mm", `${fmt(rhGain)} mm`, signed(rhGain, "mm")],
         [L.rowArchGap, "0.0 mm", `${fmt(rhGain)} mm`, signed(rhGain, "mm")],
     ];
 
@@ -717,7 +712,7 @@ function _share() {
 
 function initLangSwitcher() {
     const switcher = document.querySelector(".lang-switcher");
-    const trigger  = switcher && switcher.querySelector(".lang-trigger");
+    const trigger = switcher?.querySelector(".lang-trigger");
     if (!trigger) return;
 
     trigger.addEventListener("click", (e) => {
