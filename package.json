@@ -8,7 +8,9 @@
     "check": "node build.js && biome check --write .",
     "publish": "node build.js",
     "test": "node build.js && playwright install chromium && playwright test",
-    "a11y": "node build.js && node server.js & playwright install chromium && node a11y.js"
+    "a11y": "node build.js && node server.js & playwright install chromium && node a11y.js",
+    "deploy": "wrangler deploy",
+    "preview": "wrangler dev"
   },
   "dependencies": {
     "express": "^4.22.2"
@@ -23,6 +25,7 @@
     "clean-css": "^5.3.3",
     "html-minifier-terser": "^7.2.0",
     "playwright": "^1.60.0",
-    "terser": "^5.48.0"
+    "terser": "^5.48.0",
+    "wrangler": "^4.96.0"
   }
 }
