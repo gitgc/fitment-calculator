@@ -34,9 +34,11 @@ self.addEventListener("fetch", (ev) => {
             return fetch(ev.request)
                 .then((res) => {
                     if (!res.ok) return res;
-                    caches
-                        .open(CACHE)
-                        .then((c) => c.put(ev.request, res.clone()));
+                    // Clone synchronously — before `res` is returned and its body
+                    // consumed — otherwise the async cache write throws
+                    // "Response body is already used".
+                    const copy = res.clone();
+                    caches.open(CACHE).then((c) => c.put(ev.request, copy));
                     return res;
                 })
                 .catch(() => caches.match("/"));
