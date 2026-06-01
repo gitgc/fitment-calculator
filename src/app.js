@@ -182,7 +182,7 @@ function calculate() {
 
     document
         .getElementById("cv2")
-        .setAttribute(
+        ?.setAttribute(
             "aria-label",
             `${L.faceTitle}: ${L.canvasCurrent} Ø${fmt(o.od, 0)} mm, ${L.canvasNew} Ø${fmt(n.od, 0)} mm`,
         );

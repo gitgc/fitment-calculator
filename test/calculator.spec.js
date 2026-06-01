@@ -56,6 +56,21 @@ async function setIdenticalTires(page, d = 17, tw = 225, pr = 45, w = 7.5, et = 
 	}
 }
 
+// True if the canvas drew anything — i.e. has at least one pixel that differs from
+// the #0d1117 (13,17,23) background. Scans the pixel buffer with a stride instead
+// of allocating ~2.2M values (and the always-non-zero background would otherwise
+// make a naive `some(v > 0)` pass even on a blank canvas).
+async function drewOnCanvas(page, id) {
+	return page.evaluate((elId) => {
+		const cv = document.getElementById(elId);
+		const { data } = cv.getContext('2d').getImageData(0, 0, cv.width, cv.height);
+		for (let i = 0; i < data.length; i += 40) { // every 10th pixel (4 bytes each)
+			if (data[i] !== 13 || data[i + 1] !== 17 || data[i + 2] !== 23) return true;
+		}
+		return false;
+	}, id);
+}
+
 // ── Default inputs ────────────────────────────────────────────────────────────
 
 test.describe('Default inputs', () => {
@@ -385,13 +400,8 @@ test.describe('Canvas diagram', () => {
 		expect(dims).toEqual({ w: 900, h: 620 });
 	});
 
-	test('contains non-empty pixel data', async () => {
-		const hasPixels = await page.evaluate(() => {
-			const cv  = document.getElementById('cv');
-			const ctx = cv.getContext('2d');
-			return Array.from(ctx.getImageData(0, 0, cv.width, cv.height).data).some(v => v > 0);
-		});
-		expect(hasPixels).toBe(true);
+	test('draws content beyond the background', async () => {
+		expect(await drewOnCanvas(page, 'cv')).toBe(true);
 	});
 
 	test('aria-label is updated with mm measurements', async () => {
@@ -402,12 +412,7 @@ test.describe('Canvas diagram', () => {
 		const dims = await page.$eval('#cv2', el => ({ w: el.width, h: el.height }));
 		expect(dims).toEqual({ w: 900, h: 620 });
 
-		const hasPixels = await page.evaluate(() => {
-			const cv  = document.getElementById('cv2');
-			const ctx = cv.getContext('2d');
-			return Array.from(ctx.getImageData(0, 0, cv.width, cv.height).data).some(v => v > 0);
-		});
-		expect(hasPixels).toBe(true);
+		expect(await drewOnCanvas(page, 'cv2')).toBe(true);
 
 		// aria-label carries both diameters (Ø…mm) for the face view
 		await expect(page.locator('#cv2')).toHaveAttribute('aria-label', /Ø.*mm.*Ø.*mm/);
