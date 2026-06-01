@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "description": "Interactive wheel and tyre fitment calculator — static single-page app",
   "scripts": {
-    "start": "node server.js",
+    "start": "node build.js && node server.js",
     "caddy": "caddy run --config Caddyfile --watch",
-    "check": "biome check --write --unsafe .",
+    "check": "node build.js && biome check --write --unsafe .",
     "publish": "node build.js",
     "test": "node build.js && playwright install chromium && playwright test",
-    "a11y": "playwright install chromium && node a11y.js"
+    "a11y": "node build.js && node server.js & playwright install chromium && node a11y.js"
   },
   "dependencies": {
     "express": "^4.22.2"

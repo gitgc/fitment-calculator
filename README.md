@@ -18,21 +18,23 @@ Interactive wheel and tyre fitment calculator. Enter your current and new wheel/
 
 ## Local dev
 
-### Option A — Node / Express (serves `src/` directly, no build)
+### Option A — Node / Express
 
 ```sh
 npm install
 npm start        # → http://localhost:3000
 ```
 
-Override the port with `PORT=8080 npm start`.
+### Option B — Caddy
 
-### Option B — Caddy (serves `src/` directly, no build)
-
-Requires [Caddy](https://caddyserver.com/docs/install) (`brew install caddy` on macOS).
+Requires [Caddy](https://caddyserver.com/docs/install) (`brew install caddy` on macOS) if not using Docker:
 
 ```sh
 npm run caddy    # → http://localhost:80
+
+# or with Docker:
+
+docker compose up
 ```
 
 ## Build for production
