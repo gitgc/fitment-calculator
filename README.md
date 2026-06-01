@@ -12,8 +12,9 @@ Interactive wheel and tyre fitment calculator. Enter your current and new wheel/
 - **Hover tooltips** — plain-English explanation of every measurement
 - **Offline / PWA** — installable on desktop and mobile; works fully without a network connection after first load
 - **Fully accessible** — skip link, labelled form groups, `role="status"` live region, axe-core clean
-- **Localised** — Multiple languages with auto-detection, per-locale HTML
+- **Localised** — 23 languages with browser auto-detection, per-locale HTML, hreflang, and full RTL support (Arabic, Hebrew, Urdu)
 - **Input validation** — all fields have enforced min/max ranges; JS clamping backs up browser constraints
+- **Hardened headers** — CSP, HSTS, COOP, and frame control shipped via `_headers` (Cloudflare) and the Caddyfile (Docker)
 - **Zero client dependencies** — pure vanilla JS, no framework
 
 ## Local dev
@@ -44,7 +45,7 @@ npm run publish
 ```
 
 > `public/` is a build artifact — it is **gitignored, not committed**. Cloudflare
-> Pages (and CI, Docker, and the test suite) regenerate it from `src/` with
+> (and CI, Docker, and the test suite) regenerates it from `src/` with
 > `npm run publish`. Run the build once locally before `npm start`, `docker build`,
 > or serving `public/` directly.
 
@@ -55,18 +56,18 @@ Reads `src/`, runs these steps in order, and writes everything to `public/`:
 3. **HTML** — one page per locale: SEO tags + hreflang injected, `window.L` locale object inlined, JS filename + `defer` injected, then minified
 4. **Service worker** — cache name and precache list (root + all locale paths) injected, then minified
 5. **Manifest + icon** — copied verbatim
-6. **`_headers`** — Cloudflare cache rules written for every locale path
+6. **`_headers`** — cache rules per locale path plus a `/*` block of security headers (CSP, HSTS, COOP, frame control)
 
 ```text
-  locales           en, de, es, fr, ja, ko
-  style.css   10.2 KiB -> 6.2 KiB  -38%  (inlined)
-  app.js      23.1 KiB -> 10.2 KiB  -56%  -> app.e233f0a7.js
-  en/index.html  5.6 KiB -> 17.8 KiB
-  de/index.html  5.6 KiB -> 18.1 KiB
+  locales           en, ar, bn, da, de, es, fi, fr, he, hi, hr, it, ja, ko, nl, no, pl, pt, ro, sv, uk, ur, zh
+  style.css   11.8 KiB -> 7.3 KiB  -38%  (inlined)
+  app.js      25.1 KiB -> 10.8 KiB  -57%  -> app.<hash>.js
+  en/index.html  11.9 KiB -> 21.7 KiB
+  ar/index.html  11.9 KiB -> 23.6 KiB
   ...
-  sw.js       1.3 KiB -> 0.6 KiB  -49%
+  sw.js       1.4 KiB -> 0.7 KiB  -49%
 
-✓ Done in ~120ms
+✓ Done in ~230ms
 ```
 
 > The HTML grows because minified CSS and the locale object (`window.L`) are inlined — total bytes in one round-trip instead of two.
@@ -78,12 +79,14 @@ Languages are defined in `src/locales/<lang>.json`. The build picks up every `.j
 **To add a new language:**
 
 1. Copy `src/locales/en.json` to `src/locales/sv.json` (or any BCP 47 code)
-2. Translate every string value — keep all keys present
+2. Translate every string value — keep all keys present (the test suite enforces completeness)
 3. Set `"speedUnit"`, `"refSpeed1"`, `"refSpeed2"` appropriately (`"mph"` + `30`/`60` for imperial countries; `"km/h"` + `50`/`100` for metric)
 4. Add the flag emoji to `"flag"` and the native language name to `"langName"`
 5. Run `npm run publish` — the new locale page, hreflang tags, and switcher option appear automatically
 
-**URL structure:**
+Right-to-left rendering is automatic: the build sets `<html dir="rtl">` for Arabic, Hebrew, Urdu, and Farsi, and the CSS uses logical properties so the layout mirrors with no per-locale work.
+
+**URL structure** (23 locales — English at the root, each other under its code):
 
 | Locale | URL |
 | ------ | --- |
@@ -91,8 +94,8 @@ Languages are defined in `src/locales/<lang>.json`. The build picks up every `.j
 | German | `/de/` |
 | French | `/fr/` |
 | Japanese | `/ja/` |
-| Spanish | `/es/` |
-| Korean | `/ko/` |
+| Arabic (RTL) | `/ar/` |
+| … | `/<lang>/` |
 
 **Auto-detection:** On first visit to `/`, the site reads `navigator.language`. If the browser locale matches a supported language it redirects once and stores the preference in `localStorage`. The language switcher (top-right of header) overrides this at any time.
 
@@ -108,9 +111,11 @@ Builds the project, installs Playwright Chromium if needed, then runs all specs.
 
 | File | What it covers |
 | ---- | -------------- |
-| `test/locales.spec.js` | Locale JSON completeness (all required keys, speed units, placeholders, no empty strings); build output HTML (lang attr, `window.L` values, hreflang tags, redirect scripts, shared JS bundle, `_headers`) |
+| `test/locales.spec.js` | Locale JSON completeness (all required keys, speed units, placeholders, no empty strings); build output HTML (`lang`/`dir` attrs, `window.L` values, hreflang tags + exact href targets, redirect scripts, shared JS bundle); `_headers` cache + security headers (CSP, HSTS, COOP, frame control, Cloudflare Analytics allowances) |
 | `test/calculator.spec.js` | Default inputs and values; input constraint attributes; results table (row count, OD, poke, labels, speedo precision); boundary calculations at min/max limits; out-of-range clamping; spacer maths; canvas rendering; tooltips; share button; URL parameter pre-fill |
-| `test/i18n.spec.js` | Per-locale rendering (lang attr, h1, button labels, speed unit/reference value, no JS errors); language switcher (open/close, all locales listed, active state, Escape key, click-outside) |
+| `test/i18n.spec.js` | Per-locale rendering (`lang` attr, h1, button labels, speed unit/reference value, tooltip-attribute escaping, no JS errors); language switcher (open/close, all locales listed, active state, Escape key, click-outside) |
+| `test/autodetect.spec.js` | Auto-detection on `/`: browser locale and stored preference redirect to the right locale; English/unsupported stay on `/` |
+| `test/csp.spec.js` | Loads pages under the exact production CSP from `_headers` and asserts the app triggers zero policy violations (LTR + RTL) |
 
 ### Shared fixture
 
@@ -121,10 +126,9 @@ Builds the project, installs Playwright Chromium if needed, then runs all specs.
 
 ### Accessibility check
 
-Requires the dev server to be running:
+`npm run a11y` builds, starts its own server, and runs the axe-core scan — no separate dev server needed:
 
 ```sh
-npm start &
 npm run a11y                               # scans http://localhost:3000
 npm run a11y -- https://fixthatgap.com    # scans production
 ```
@@ -157,14 +161,16 @@ docker compose up
 
 The container uses Caddy with gzip/zstd compression and security headers.
 
-## Deploying to Cloudflare Pages
+## Deploying to Cloudflare
 
-1. Push this repo to GitHub
-2. In the Cloudflare dashboard → **Pages → Create a project → Connect to Git**
-3. Set:
-   - **Build command**: `npm run publish`
-   - **Build output directory**: `public`
-4. Deploy — Cloudflare runs the build, serves `public/`, handles CDN and HTTPS
+Deployment uses [Wrangler](https://developers.cloudflare.com/workers/wrangler/). The root [`wrangler.jsonc`](wrangler.jsonc) points Cloudflare at the built `public/` directory (`assets.directory`).
+
+```sh
+npm run publish   # build src/ → public/
+npm run deploy    # wrangler deploy  (npm run preview for a local Cloudflare preview)
+```
+
+`_headers` is honoured by Cloudflare for cache and security headers; Cloudflare handles CDN and HTTPS. Connecting the repo to Cloudflare's Git integration also works — set the build command to `npm run publish` and the output directory to `public`.
 
 ## Project structure
 
@@ -190,14 +196,16 @@ fitment-calculator/
 │   └── _headers            # Cloudflare cache + security headers
 ├── test/
 │   ├── fixtures.js         # shared Playwright fixtures (server + makePage)
-│   ├── locales.spec.js     # locale JSON + build output structure
+│   ├── locales.spec.js     # locale JSON + build output + headers
 │   ├── calculator.spec.js  # calculator features + constraints + clamping
-│   └── i18n.spec.js        # per-locale rendering + language switcher
+│   ├── i18n.spec.js        # per-locale rendering + language switcher
+│   └── csp.spec.js         # app runs clean under the production CSP
 ├── build.js                # build pipeline (terser + clean-css + html-minifier-terser)
 ├── playwright.config.js    # Playwright test runner config
 ├── a11y.js                 # axe-core accessibility scanner
-├── server.js               # local dev — Express on :3000, serves src/
+├── server.js               # local dev — Express on :3000, serves public/
 ├── site.config.json        # SEO metadata (canonical URL, OG, Twitter, keywords)
+├── wrangler.jsonc          # Cloudflare deploy config (assets dir: public/)
 ├── Caddyfile               # Caddy config (local + Docker)
 ├── Dockerfile              # production image — Caddy on :80
 ├── docker-compose.yml
@@ -212,14 +220,16 @@ fitment-calculator/
 
 ## npm scripts
 
-| Command           | What it does |
-| ----------------- | ------------ |
-| `npm start`       | Express dev server on `:3000`, serves `src/` |
-| `npm run caddy`   | Caddy dev server on `:80`, serves `src/` |
-| `npm run check`   | Biome lint + format |
+| Command | What it does |
+| --- | --- |
+| `npm start` | Build, then serve `public/` via Express on `:3000` |
+| `npm run caddy` | Caddy server on `:80` (serves the Docker `/srv` root) |
+| `npm run check` | Build, then Biome lint + format |
 | `npm run publish` | Build `src/` → `public/` for all locales |
-| `npm test`        | Build, install Chromium, run all Playwright specs |
-| `npm run a11y`    | Axe-core accessibility scan against `:3000` |
+| `npm test` | Build, install Chromium, run all Playwright specs |
+| `npm run a11y` | Build, start a server, axe-core scan against `:3000` |
+| `npm run deploy` | `wrangler deploy` (publishes `public/` to Cloudflare) |
+| `npm run preview` | `wrangler dev` (local Cloudflare preview) |
 
 ## CI
 
@@ -228,8 +238,8 @@ fitment-calculator/
 1. `npx biome ci .` — lint (no auto-fix, exits non-zero on violations)
 2. `npm run publish` — build all locale pages
 3. `npx playwright install chromium --with-deps` — install browser for tests
-4. `npx playwright test` — 87 specs across locales, calculator, i18n, and constraints
-5. `node a11y.js` — axe-core scan against the started Express server
+4. `npx playwright test` — full suite across locales, calculator, i18n, constraints, and CSP
+5. `node a11y.js` — axe-core scan against the built site
 
 ## Inputs
 

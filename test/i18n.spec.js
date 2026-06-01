@@ -1,5 +1,3 @@
-
-
 const { test, expect, LOCALES, localeUrl } = require('./fixtures');
 
 // ── Per-locale rendering ──────────────────────────────────────────────────────
