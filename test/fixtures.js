@@ -27,7 +27,14 @@ function startServer() {
 	const server = http.createServer((req, res) => {
 		let p = req.url.split('?')[0];
 		if (p.endsWith('/')) p += 'index.html';
+		// path.join normalizes `..`; confine the result to PUBLIC so a crafted
+		// path can't escape the served directory
 		const file = path.join(PUBLIC, p);
+		if (file !== PUBLIC && !file.startsWith(PUBLIC + path.sep)) {
+			res.writeHead(403);
+			res.end();
+			return;
+		}
 		try {
 			const data = fs.readFileSync(file);
 			res.writeHead(200, { 'Content-Type': MIME[path.extname(file)] || 'application/octet-stream' });

@@ -5,13 +5,12 @@
 // localized data — never from user input — so the policy is a pass-through.
 // Browsers without Trusted Types fall back to plain strings.
 
-const ttPolicy =
-    window.trustedTypes && window.trustedTypes.createPolicy
-        ? window.trustedTypes.createPolicy("ftg", {
-              createHTML: (s) => s,
-              createScriptURL: (s) => s,
-          })
-        : null;
+const ttPolicy = window.trustedTypes?.createPolicy
+    ? window.trustedTypes.createPolicy("ftg", {
+          createHTML: (s) => s,
+          createScriptURL: (s) => s,
+      })
+    : null;
 
 function trustedHTML(s) {
     return ttPolicy ? ttPolicy.createHTML(s) : s;

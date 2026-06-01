@@ -39,10 +39,18 @@ test.beforeAll(() => new Promise((resolve, reject) => {
 	server = http.createServer((req, res) => {
 		let p = req.url.split('?')[0];
 		if (p.endsWith('/')) p += 'index.html';
+		// path.join normalizes `..`; confine the result to PUB so a crafted
+		// path can't escape the served directory
+		const file = path.join(PUB, p);
+		if (file !== PUB && !file.startsWith(PUB + path.sep)) {
+			res.writeHead(403);
+			res.end();
+			return;
+		}
 		try {
-			const data = fs.readFileSync(path.join(PUB, p));
-			const headers = { 'Content-Type': MIME[path.extname(p)] || 'application/octet-stream' };
-			if (p.endsWith('.html')) headers['Content-Security-Policy'] = CSP;
+			const data = fs.readFileSync(file);
+			const headers = { 'Content-Type': MIME[path.extname(file)] || 'application/octet-stream' };
+			if (file.endsWith('.html')) headers['Content-Security-Policy'] = CSP;
 			res.writeHead(200, headers);
 			res.end(data);
 		} catch {
