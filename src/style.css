@@ -549,7 +549,6 @@ footer a:focus-visible {
     color: var(--muted);
     font-size: 0.72rem;
     line-height: 1.6;
-    opacity: 0.75;
     text-wrap: balance;
 }
 /* The disclaimer overrides the generic footer p sizing/margin above */
