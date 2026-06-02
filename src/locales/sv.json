@@ -70,5 +70,8 @@
     "warnSpeedoOver": "Hastighetsmätaren visar mer än 10% för högt.",
     "warnDiameter": "Totaldiametern ändras med {pct}% — kan påverka hastighetsmätare, ABS/antispinn och spelrum.",
     "warnStretch": "Däcket ser sträckt ut för denna fälgbredd — ökar risken att vulsten lossnar.",
-    "warnBulge": "Fälgen ser smal ut för detta däck — slitbanan kan bukta ut."
+    "warnBulge": "Fälgen ser smal ut för detta däck — slitbanan kan bukta ut.",
+    "warnLowProfile": "Mycket lågprofilsdäck — hårdare gång och högre risk för fälg- och potthålsskador.",
+    "warnSpacer": "Tjock distans — kontrollera att hjulbultarna får tillräckligt grepp och använd navcentrerade distanser.",
+    "warnCamber": "Aggressiv camber — snabbar på slitage på innerkanten och minskar bromskontaktytan."
 }

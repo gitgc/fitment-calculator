@@ -70,5 +70,8 @@
     "warnSpeedoOver": "O velocímetro marca a mais em mais de 10%.",
     "warnDiameter": "O diâmetro total muda {pct}% — pode afetar o velocímetro, o ABS/controlo de tração e as folgas.",
     "warnStretch": "O pneu parece esticado para esta largura de jante — aumenta o risco de o talão sair.",
-    "warnBulge": "A jante parece estreita para este pneu — o piso pode ficar abaulado."
+    "warnBulge": "A jante parece estreita para este pneu — o piso pode ficar abaulado.",
+    "warnLowProfile": "Pneu de perfil muito baixo — condução mais dura e maior risco de danos na jante e por buracos.",
+    "warnSpacer": "Espaçador grande — verifique se os pernos têm rosca suficiente e use espaçadores hub-centric.",
+    "warnCamber": "Camber agressivo — acelera o desgaste do bordo interior e reduz a superfície de travagem."
 }

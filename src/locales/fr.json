@@ -70,5 +70,8 @@
     "warnSpeedoOver": "Le compteur surestime la vitesse de plus de 10 %.",
     "warnDiameter": "Le diamètre total change de {pct} % — cela peut affecter le compteur, l'ABS/antipatinage et les dégagements.",
     "warnStretch": "Le pneu semble étiré pour cette largeur de jante — augmente le risque de déjantage.",
-    "warnBulge": "La jante semble étroite pour ce pneu — la bande de roulement peut se bomber."
+    "warnBulge": "La jante semble étroite pour ce pneu — la bande de roulement peut se bomber.",
+    "warnLowProfile": "Pneu très taille basse — conduite plus ferme et risque accru de dommages à la jante et aux nids-de-poule.",
+    "warnSpacer": "Entretoise épaisse — vérifiez que les goujons s'engagent suffisamment et utilisez des entretoises hub-centric.",
+    "warnCamber": "Carrossage agressif — accélère l'usure du bord intérieur et réduit la surface de freinage."
 }

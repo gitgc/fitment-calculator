@@ -36,6 +36,7 @@ const REQUIRED_KEYS = [
 	'tipDiameter', 'tipCircumference', 'tipPoke', 'tipInset', 'tipSpeedoError',
 	'tipAt1', 'tipAt2', 'tipRideHeight', 'tipArchGap',
 	'warnSpeedoUnder', 'warnSpeedoOver', 'warnDiameter', 'warnStretch', 'warnBulge',
+	'warnLowProfile', 'warnSpacer', 'warnCamber',
 ];
 
 const IMPERIAL     = new Set(['en']);

@@ -70,5 +70,8 @@
     "warnSpeedoOver": "De snelheidsmeter wijst meer dan 10% te hoog aan.",
     "warnDiameter": "De totale diameter verandert met {pct}% — kan de snelheidsmeter, ABS/tractiecontrole en speling beïnvloeden.",
     "warnStretch": "De band lijkt uitgerekt voor deze velgbreedte — verhoogt het risico dat de hiel losschiet.",
-    "warnBulge": "De velg lijkt smal voor deze band — het loopvlak kan bol gaan staan."
+    "warnBulge": "De velg lijkt smal voor deze band — het loopvlak kan bol gaan staan.",
+    "warnLowProfile": "Zeer laag profiel — hardere rit en hoger risico op velg- en kuilschade.",
+    "warnSpacer": "Grote spacer — controleer of de wielbouten genoeg grip houden en gebruik hub-centric spacers.",
+    "warnCamber": "Agressieve camber — versnelt slijtage aan de binnenkant en verkleint het remcontactvlak."
 }

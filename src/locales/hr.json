@@ -70,5 +70,8 @@
     "warnSpeedoOver": "Brzinomjer pokazuje više od 10% previše.",
     "warnDiameter": "Ukupni promjer mijenja se za {pct}% — može utjecati na brzinomjer, ABS/kontrolu trakcije i zazore.",
     "warnStretch": "Guma izgleda rastegnuto za ovu širinu naplatka — povećava rizik od skidanja stope.",
-    "warnBulge": "Naplatak izgleda usko za ovu gumu — gazni sloj može se ispupčiti."
+    "warnBulge": "Naplatak izgleda usko za ovu gumu — gazni sloj može se ispupčiti.",
+    "warnLowProfile": "Vrlo niskoprofilna guma — tvrđa vožnja i veći rizik od oštećenja naplatka i od rupa.",
+    "warnSpacer": "Veliki distancer — provjerite dovoljan zahvat vijaka i koristite hub-centric distancere.",
+    "warnCamber": "Agresivan bočni nagib — ubrzava trošenje unutarnjeg ruba i smanjuje kontaktnu površinu pri kočenju."
 }

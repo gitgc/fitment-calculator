@@ -70,5 +70,8 @@
     "warnSpeedoOver": "Speedometeret viser mere end 10% for højt.",
     "warnDiameter": "Den samlede diameter ændres med {pct}% — kan påvirke speedometer, ABS/antispin og frigang.",
     "warnStretch": "Dækket ser strakt ud til denne fælgbredde — øger risikoen for, at hælen springer af.",
-    "warnBulge": "Fælgen ser smal ud til dette dæk — slidbanen kan bule ud."
+    "warnBulge": "Fælgen ser smal ud til dette dæk — slidbanen kan bule ud.",
+    "warnLowProfile": "Meget lavprofildæk — hårdere køretur og højere risiko for fælg- og hulskader.",
+    "warnSpacer": "Tyk afstandsskive — tjek at hjulboltene har nok gevindindgreb og brug navcentrerede afstandsskiver.",
+    "warnCamber": "Aggressiv camber — øger slitagen på inderkanten og reducerer bremsekontaktfladen."
 }

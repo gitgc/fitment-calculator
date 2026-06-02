@@ -70,5 +70,8 @@
     "warnSpeedoOver": "Speedometeret viser mer enn 10% for høyt.",
     "warnDiameter": "Totaldiameteren endres med {pct}% — kan påvirke speedometer, ABS/antispinn og klaring.",
     "warnStretch": "Dekket ser strukket ut for denne felgbredden — øker risikoen for at vulsten løsner.",
-    "warnBulge": "Felgen ser smal ut for dette dekket — slitebanen kan bule ut."
+    "warnBulge": "Felgen ser smal ut for dette dekket — slitebanen kan bule ut.",
+    "warnLowProfile": "Svært lavprofildekk — hardere kjøring og høyere risiko for felg- og hullskader.",
+    "warnSpacer": "Tykk avstandsstykke — sjekk at hjulboltene har nok gjengegrep og bruk navsentrerte avstandsstykker.",
+    "warnCamber": "Aggressiv camber — øker slitasjen på innerkanten og reduserer bremsekontaktflaten."
 }

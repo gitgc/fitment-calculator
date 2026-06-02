@@ -652,4 +652,41 @@ test.describe('Fitment warnings', () => {
 		await expect(page.locator('#tbody tr.row-warn, #tbody tr.row-danger')).toHaveCount(0);
 		await expect(page.locator('#fitment-warnings .fitment-danger')).toContainText('bulge');
 	});
+
+	// ── Tier 2 (setup-level, no row) ──────────────────────────────────────────
+	test('a large wheel spacer is a danger (no row warnings)', async () => {
+		await page.fill('#n-sp', '30'); // spacer only affects ET/poke, not the rows
+		await page.click('button.calc-btn');
+		await expect(page.locator('#tbody tr.row-warn, #tbody tr.row-danger')).toHaveCount(0);
+		await expect(page.locator('#fitment-warnings .fitment-danger')).toContainText('spacer');
+	});
+
+	test('a moderate wheel spacer is a caution', async () => {
+		await page.fill('#n-sp', '20');
+		await page.click('button.calc-btn');
+		await expect(page.locator('#fitment-warnings .fitment-warn')).toContainText('spacer');
+	});
+
+	test('aggressive camber is flagged (no row warnings)', async () => {
+		await page.fill('#n-cam', '5');
+		await page.click('button.calc-btn');
+		await expect(page.locator('#tbody tr.row-warn, #tbody tr.row-danger')).toHaveCount(0);
+		await expect(page.locator('#fitment-warnings .fitment-danger')).toContainText('camber');
+	});
+
+	test('a very low-profile tyre is flagged', async () => {
+		await page.fill('#n-pr', '20');
+		await page.click('button.calc-btn');
+		await expect(page.locator('#fitment-warnings')).toContainText('low-profile');
+	});
+
+	test('danger warnings sort ahead of cautions in the strip', async () => {
+		// Caution spacer (20) + danger camber (5) → danger should render first
+		await page.fill('#n-sp', '20');
+		await page.fill('#n-cam', '5');
+		await page.click('button.calc-btn');
+		const warnings = page.locator('#fitment-warnings .fitment-warning');
+		await expect(warnings).toHaveCount(2);
+		await expect(warnings.first()).toHaveClass(/fitment-danger/);
+	});
 });

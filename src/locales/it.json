@@ -70,5 +70,8 @@
     "warnSpeedoOver": "Il tachimetro segna in eccesso di oltre il 10%.",
     "warnDiameter": "Il diametro totale cambia del {pct}% — può influire su tachimetro, ABS/controllo di trazione e spazi.",
     "warnStretch": "Lo pneumatico sembra stirato per questa larghezza del cerchio — aumenta il rischio di stallonamento.",
-    "warnBulge": "Il cerchio sembra stretto per questo pneumatico — il battistrada può gonfiarsi."
+    "warnBulge": "Il cerchio sembra stretto per questo pneumatico — il battistrada può gonfiarsi.",
+    "warnLowProfile": "Pneumatico a profilo molto ribassato — guida più rigida e maggior rischio di danni a cerchio e da buche.",
+    "warnSpacer": "Distanziale spesso — verifica l'avvitamento sufficiente dei prigionieri e usa distanziali hub-centric.",
+    "warnCamber": "Campanatura aggressiva — accelera l'usura del bordo interno e riduce la superficie frenante."
 }

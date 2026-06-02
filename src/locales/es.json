@@ -70,5 +70,8 @@
     "warnSpeedoOver": "El velocímetro marca de más en más del 10 %.",
     "warnDiameter": "El diámetro total cambia un {pct} % — puede afectar al velocímetro, al ABS/control de tracción y a la holgura.",
     "warnStretch": "El neumático parece estirado para este ancho de llanta — aumenta el riesgo de que el talón se salga.",
-    "warnBulge": "La llanta parece estrecha para este neumático — la banda de rodadura puede abombarse."
+    "warnBulge": "La llanta parece estrecha para este neumático — la banda de rodadura puede abombarse.",
+    "warnLowProfile": "Neumático de perfil muy bajo — conducción más dura y mayor riesgo de daños en llanta y por baches.",
+    "warnSpacer": "Separador grande — comprueba que los espárragos enrosquen lo suficiente y usa separadores hub-centric.",
+    "warnCamber": "Caída agresiva — acelera el desgaste del borde interior y reduce la superficie de frenado."
 }

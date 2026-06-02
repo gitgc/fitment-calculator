@@ -102,11 +102,13 @@ function escapeHTML(s) {
         .replace(/"/g, "&quot;");
 }
 
-// ── Fitment assessment (Tier-1 warnings) ───────────────────────────────────────
+// ── Fitment assessment (Tier 1 + 2 warnings) ───────────────────────────────────
 // Returns { rows: { [rowLabel]: {severity, message} }, setup: [{severity, message}] }
 // where severity is "warn" (caution) or "danger". Thresholds are deliberately
-// lenient so that common, sensible setups don't trip false alarms.
-function assessFitment(o, n) {
+// lenient so that common, sensible setups don't trip false alarms. Row-bound
+// checks tint the matching table row; setup-level checks (which have no
+// comparison row) collect into `setup` and render in the strip below the table.
+function assessFitment(o, n, nCam) {
     const L = window.L;
     const rows = {};
     const setup = [];
@@ -146,6 +148,35 @@ function assessFitment(o, n) {
             message: delta > 0 ? L.warnStretch : L.warnBulge,
         });
     }
+
+    // ── Tier 2 — new-setup properties ──────────────────────────────────────────
+    // Low-profile tyre — harsher ride, higher pothole/wheel damage risk.
+    if (n.pr < 30) {
+        setup.push({
+            severity: n.pr < 25 ? "danger" : "warn",
+            message: L.warnLowProfile,
+        });
+    }
+    // Large wheel spacer — stud engagement / hub-centric concerns.
+    if (n.sp > 15) {
+        setup.push({
+            severity: n.sp > 25 ? "danger" : "warn",
+            message: L.warnSpacer,
+        });
+    }
+    // Aggressive camber — inner-edge wear, reduced braking contact patch.
+    const absCam = Math.abs(nCam);
+    if (absCam > 2.5) {
+        setup.push({
+            severity: absCam > 4 ? "danger" : "warn",
+            message: L.warnCamber,
+        });
+    }
+
+    // Danger before caution, so the most serious advice leads the strip.
+    setup.sort((a, b) =>
+        a.severity === b.severity ? 0 : a.severity === "danger" ? -1 : 1,
+    );
 
     return { rows, setup };
 }
@@ -241,7 +272,7 @@ function calculate() {
         [L.rowArchGap, "0.0 mm", `${fmt(rhGain)} mm`, signed(rhGain, "mm")],
     ];
 
-    const assess = assessFitment(o, n);
+    const assess = assessFitment(o, n, nCam);
 
     document.getElementById("tbody").innerHTML = rows
         .map(([label, ov, nv, dv]) => {

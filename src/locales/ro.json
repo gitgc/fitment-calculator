@@ -70,5 +70,8 @@
     "warnSpeedoOver": "Vitezometrul indică în plus cu peste 10%.",
     "warnDiameter": "Diametrul total se modifică cu {pct}% — poate afecta vitezometrul, ABS/controlul tracțiunii și spațiile.",
     "warnStretch": "Anvelopa pare întinsă pentru această lățime de jantă — crește riscul de dezmărginire.",
-    "warnBulge": "Janta pare îngustă pentru această anvelopă — banda de rulare se poate bomba."
+    "warnBulge": "Janta pare îngustă pentru această anvelopă — banda de rulare se poate bomba.",
+    "warnLowProfile": "Anvelopă cu profil foarte jos — condus mai dur și risc mai mare de deteriorare a jantei și de la gropi.",
+    "warnSpacer": "Distanțier gros — verifică angajarea suficientă a prezoanelor și folosește distanțiere hub-centric.",
+    "warnCamber": "Camber agresiv — accelerează uzura marginii interioare și reduce suprafața de frânare."
 }

@@ -70,5 +70,8 @@
     "warnSpeedoOver": "Speedometer over-reads by more than 10% — it shows well above your true speed.",
     "warnDiameter": "Overall diameter changes by {pct}% — can affect the speedometer, ABS/traction control and clearance.",
     "warnStretch": "Tyre looks stretched for this rim width — raises the risk of the bead unseating.",
-    "warnBulge": "Rim looks narrow for this tyre — the tread may bulge."
+    "warnBulge": "Rim looks narrow for this tyre — the tread may bulge.",
+    "warnLowProfile": "Very low-profile tyre — expect a harsher ride and a higher risk of wheel and pothole damage.",
+    "warnSpacer": "Large wheel spacer — check that enough wheel-stud thread still engages and use hub-centric spacers.",
+    "warnCamber": "Aggressive camber — accelerates inner-edge tyre wear and reduces the braking contact patch."
 }
