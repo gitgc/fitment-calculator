@@ -31,6 +31,7 @@
     "colDifference": "Różnica",
     "crossSectionTitle": "Porównanie przekroju",
     "faceTitle": "Widok z przodu",
+    "suspensionNote": "Pokazane zawieszenie ma charakter wyłącznie poglądowy.",
     "legendCurrent": "Obecna konfiguracja",
     "legendNew": "Nowa konfiguracja",
     "canvasAriaLabelStatic": "Diagram przekroju porównujący obecną i nową konfigurację koła oraz opony",
