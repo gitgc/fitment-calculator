@@ -76,5 +76,15 @@
     "warnCamber": "Agresivan bočni nagib — ubrzava trošenje unutarnjeg ruba i smanjuje kontaktnu površinu pri kočenju.",
     "warnPoke": "Strši znatno više od trenutne konfiguracije — može strugati o blatobran ili viriti. Provjerite zazor.",
     "warnInset": "Ulazi znatno dublje od trenutne konfiguracije — može strugati o amortizer, kočnicu ili unutarnji blatobran. Provjerite zazor.",
-    "warnArchGapOpen": "Ova konfiguracija povećava razmak blatobrana umjesto da ga smanji."
+    "warnArchGapOpen": "Ova konfiguracija povećava razmak blatobrana umjesto da ga smanji.",
+    "centreBore": "Središnji provrt (mm)",
+    "warnBoreSmaller": "Središnji provrt nove felge manji je od trenutnog — neće prijeći preko glavčine i neće stati.",
+    "warnBoreLarger": "Središnji provrt nove felge veći je od trenutnog — stat će, ali upotrijebite centrirne prstenove.",
+    "rowBore": "Središnji provrt",
+    "tipBore": "Promjer središnjeg provrta felge. Provrt nove felge mora biti barem velik kao glavčina: manji ne stane, veći traži centrirne prstenove.",
+    "boltPattern": "Raspored vijaka",
+    "rowBolt": "Raspored vijaka",
+    "tipBolt": "Broj vijaka × promjer kružnice vijaka (PCD). Nova felga mora odgovarati rasporedu vijaka glavčine; male razlike premošćuju se adapterima, velike obično ne. Pretpostavlja 5×114,3 ako je prazno.",
+    "warnBoltAmber": "Raspored vijaka razlikuje se od trenutnog, ali tek neznatno — adapteri su uobičajeno dostupni.",
+    "warnBoltRed": "Raspored vijaka previše se razlikuje od trenutnog i obično se ne može sigurno prilagoditi — felga neće sjesti."
 }

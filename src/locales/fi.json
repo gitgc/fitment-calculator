@@ -76,5 +76,15 @@
     "warnCamber": "Voimakas camber — nopeuttaa sisäreunan kulumista ja pienentää jarrutuksen kosketuspintaa.",
     "warnPoke": "Työntyy selvästi ulommas kuin nykyinen kokoonpano — voi osua lokasuojaan tai työntyä ulos. Tarkista välys.",
     "warnInset": "Istuu selvästi sisemmäs kuin nykyinen kokoonpano — voi osua jousijalkaan, jarruun tai sisälokasuojaan. Tarkista välys.",
-    "warnArchGapOpen": "Tämä kokoonpano kasvattaa lokasuojan väliä sen sulkemisen sijaan."
+    "warnArchGapOpen": "Tämä kokoonpano kasvattaa lokasuojan väliä sen sulkemisen sijaan.",
+    "centreBore": "Keskireikä (mm)",
+    "warnBoreSmaller": "Uuden vanteen keskireikä on pienempi kuin nykyinen — se ei mene navan yli eikä sovi.",
+    "warnBoreLarger": "Uuden vanteen keskireikä on suurempi kuin nykyinen — se sopii, mutta käytä keskitysrenkaita keskittämiseen.",
+    "rowBore": "Keskireikä",
+    "tipBore": "Vanteen keskireiän halkaisija. Uuden vanteen keskireiän on oltava vähintään navan kokoinen: pienempi ei sovi, suurempi vaatii keskitysrenkaat.",
+    "boltPattern": "Pulttijako",
+    "rowBolt": "Pulttijako",
+    "tipBolt": "Pulttien määrä × jakohalkaisija (PCD). Uuden vanteen on sovittava navan pulttijakoon; pienet erot voi kuroa adaptereilla, suuria yleensä ei. Oletus 5×114,3, jos tyhjä.",
+    "warnBoltAmber": "Pulttijako poikkeaa nykyisestä, mutta vain vähän — adaptereita on yleisesti saatavilla.",
+    "warnBoltRed": "Pulttijako poikkeaa liikaa nykyisestä eikä sitä yleensä voi sovittaa turvallisesti — vanne ei kiinnity."
 }

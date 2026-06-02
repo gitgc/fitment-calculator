@@ -76,5 +76,15 @@
     "warnCamber": "Aggressiv camber — øker slitasjen på innerkanten og reduserer bremsekontaktflaten.",
     "warnPoke": "Stikker merkbart lenger ut enn ditt nåværende oppsett — kan skrape mot hjulbuen eller stikke ut. Sjekk klaringen.",
     "warnInset": "Sitter merkbart lenger inn enn ditt nåværende oppsett — kan skrape mot fjærbein, brems eller innerskjerm. Sjekk klaringen.",
-    "warnArchGapOpen": "Dette oppsettet øker hjulbuegapet i stedet for å lukke det."
+    "warnArchGapOpen": "Dette oppsettet øker hjulbuegapet i stedet for å lukke det.",
+    "centreBore": "Senterhull (mm)",
+    "warnBoreSmaller": "Det nye hjulets senterhull er mindre enn ditt nåværende — det går ikke over navet og passer ikke.",
+    "warnBoreLarger": "Det nye hjulets senterhull er større enn ditt nåværende — det passer, men bruk sentreringsringer for å sentrere det på navet.",
+    "rowBore": "Senterhull",
+    "tipBore": "Hjulets senterhulldiameter. Det nye hjulets senterhull må være minst like stort som navet: mindre passer ikke, større trenger sentreringsringer.",
+    "boltPattern": "Boltsirkel",
+    "rowBolt": "Boltsirkel",
+    "tipBolt": "Antall bolter × boltsirkeldiameter (PCD). Det nye hjulet må passe navets boltsirkel; små forskjeller kan dekkes med adaptere, store vanligvis ikke. Antar 5×114,3 hvis tomt.",
+    "warnBoltAmber": "Boltsirkelen avviker fra din nåværende, men bare litt — adaptere er vanlig tilgjengelig.",
+    "warnBoltRed": "Boltsirkelen avviker for mye fra din nåværende og kan vanligvis ikke tilpasses trygt — hjulet passer ikke."
 }

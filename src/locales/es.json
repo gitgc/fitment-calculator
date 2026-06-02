@@ -76,5 +76,15 @@
     "warnCamber": "Caída agresiva — acelera el desgaste del borde interior y reduce la superficie de frenado.",
     "warnPoke": "Sobresale bastante más que tu configuración actual — puede rozar el paso de rueda o sobresalir. Comprueba la holgura.",
     "warnInset": "Queda bastante más hacia dentro que tu configuración actual — puede rozar el amortiguador, el freno o el arco interior. Comprueba la holgura.",
-    "warnArchGapOpen": "Esta configuración aumenta el hueco del paso de rueda en lugar de cerrarlo."
+    "warnArchGapOpen": "Esta configuración aumenta el hueco del paso de rueda en lugar de cerrarlo.",
+    "centreBore": "Diámetro de buje (mm)",
+    "warnBoreSmaller": "El diámetro de buje de la nueva llanta es menor que el actual — no encajará en el cubo y no se podrá montar.",
+    "warnBoreLarger": "El diámetro de buje de la nueva llanta es mayor que el actual — encajará, pero usa anillos de centrado para asentarla en el cubo.",
+    "rowBore": "Diámetro de buje",
+    "tipBore": "Diámetro del buje de la llanta. El buje de la nueva llanta debe ser al menos tan grande como el cubo: menor no encaja, mayor necesita anillos de centrado.",
+    "boltPattern": "Patrón de pernos",
+    "rowBolt": "Patrón de pernos",
+    "tipBolt": "Número de pernos × diámetro del círculo de pernos (PCD). La nueva llanta debe coincidir con el patrón del cubo; las pequeñas diferencias se salvan con adaptadores, las grandes normalmente no. Por defecto 5×114,3 si se deja vacío.",
+    "warnBoltAmber": "El patrón de pernos difiere del actual, pero solo ligeramente — los adaptadores están disponibles habitualmente.",
+    "warnBoltRed": "El patrón de pernos difiere demasiado del actual y normalmente no se puede adaptar con seguridad — no se podrá montar."
 }

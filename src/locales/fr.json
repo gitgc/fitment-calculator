@@ -76,5 +76,15 @@
     "warnCamber": "Carrossage agressif — accélère l'usure du bord intérieur et réduit la surface de freinage.",
     "warnPoke": "Ressort nettement plus que votre configuration actuelle — peut frotter l'aile ou dépasser. Vérifiez le dégagement.",
     "warnInset": "Rentre nettement plus que votre configuration actuelle — peut frotter la jambe de force, le frein ou l'aile intérieure. Vérifiez le dégagement.",
-    "warnArchGapOpen": "Cette configuration agrandit le jour de l'aile au lieu de le réduire."
+    "warnArchGapOpen": "Cette configuration agrandit le jour de l'aile au lieu de le réduire.",
+    "centreBore": "Alésage central (mm)",
+    "warnBoreSmaller": "L'alésage central de la nouvelle jante est plus petit que l'actuel — il ne passera pas sur le moyeu et ne pourra pas se monter.",
+    "warnBoreLarger": "L'alésage central de la nouvelle jante est plus grand que l'actuel — il se montera, mais utilisez des bagues de centrage pour le centrer sur le moyeu.",
+    "rowBore": "Alésage central",
+    "tipBore": "Alésage central de la jante. L'alésage de la nouvelle jante doit être au moins aussi grand que le moyeu : plus petit ne passe pas, plus grand nécessite des bagues de centrage.",
+    "boltPattern": "Entraxe",
+    "rowBolt": "Entraxe",
+    "tipBolt": "Nombre de trous × diamètre de perçage (PCD). La nouvelle jante doit correspondre à l'entraxe du moyeu ; de petites différences se rattrapent avec des adaptateurs, les grandes rarement. 5×114,3 par défaut si vide.",
+    "warnBoltAmber": "L'entraxe diffère de l'actuel, mais légèrement — des adaptateurs sont couramment disponibles.",
+    "warnBoltRed": "L'entraxe diffère trop de l'actuel et ne peut généralement pas être adapté en toute sécurité — la jante ne se montera pas."
 }

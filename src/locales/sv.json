@@ -76,5 +76,15 @@
     "warnCamber": "Aggressiv camber — snabbar på slitage på innerkanten och minskar bromskontaktytan.",
     "warnPoke": "Sticker ut märkbart mer än din nuvarande uppsättning — kan skava mot hjulhuset eller sticka ut. Kontrollera spelrummet.",
     "warnInset": "Sitter märkbart längre in än din nuvarande uppsättning — kan skava mot fjäderbenet, bromsen eller innerskärmen. Kontrollera spelrummet.",
-    "warnArchGapOpen": "Den här uppsättningen ökar hjulhusspalten i stället för att minska den."
+    "warnArchGapOpen": "Den här uppsättningen ökar hjulhusspalten i stället för att minska den.",
+    "centreBore": "Centrumhål (mm)",
+    "warnBoreSmaller": "Det nya hjulets centrumhål är mindre än ditt nuvarande — det går inte över navet och passar inte.",
+    "warnBoreLarger": "Det nya hjulets centrumhål är större än ditt nuvarande — det passar, men använd centreringsringar för att centrera det på navet.",
+    "rowBore": "Centrumhål",
+    "tipBore": "Hjulets centrumhålsdiameter. Det nya hjulets centrumhål måste vara minst lika stort som navet: mindre passar inte, större behöver centreringsringar.",
+    "boltPattern": "Bultcirkel",
+    "rowBolt": "Bultcirkel",
+    "tipBolt": "Antal bultar × bultcirkeldiameter (PCD). Det nya hjulet måste passa navets bultcirkel; små skillnader kan överbryggas med adaptrar, stora oftast inte. Antar 5×114,3 om tomt.",
+    "warnBoltAmber": "Bultcirkeln skiljer sig från din nuvarande, men bara lite — adaptrar finns allmänt tillgängliga.",
+    "warnBoltRed": "Bultcirkeln skiljer sig för mycket från din nuvarande och kan oftast inte anpassas säkert — hjulet passar inte."
 }

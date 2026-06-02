@@ -8,13 +8,13 @@ Interactive wheel and tyre fitment calculator. Enter your current and new wheel/
 - **Speedometer correction** — shows actual speed at reference speeds (mph for UK/US, km/h for all other locales)
 - **Spacer support** — adjusts effective ET automatically; reflected in diagram and poke calculation
 - **Camber rendering** — enter positive or negative degrees and the wheel tilts in the diagram
-- **Two 2D diagrams** — a cross-section (overlaid tyre profiles on a shared hub, with diameter callouts and poke rows) plus a face-on view (concentric tyre/rim circles, camber foreshortened into an ellipse)
+- **Two 2D diagrams** — a cross-section (overlaid tyre profiles on a shared hub, with diameter callouts and poke rows) plus a face-on view (concentric tyre/rim circles, camber foreshortened into an ellipse, centre bores and hexagonal bolt heads drawn to scale)
 - **Hover tooltips** — plain-English explanation of every measurement
 - **Offline / PWA** — installable on desktop and mobile; works fully without a network connection after first load
 - **Fully accessible** — skip link, labelled form groups, `role="status"` live region, axe-core clean
 - **Localised** — 23 languages with browser auto-detection, per-locale HTML, hreflang, and full RTL support (Arabic, Hebrew, Urdu)
 - **Input validation** — all fields have enforced min/max ranges; JS clamping backs up browser constraints
-- **Fitment warnings** — amber/red flags with a plain-English reason: speedo under-reading, large rolling-diameter change, poke/inset clearance (row tints) plus tyre stretch/bulge, low profile, large spacers and aggressive camber (warning strip)
+- **Fitment warnings** — amber/red flags with a plain-English reason: speedo under-reading, large rolling-diameter change, poke/inset clearance, centre-bore mismatch and bolt-pattern mismatch (row tints) plus tyre stretch/bulge, low profile, large spacers and aggressive camber (warning strip)
 - **Hardened headers** — CSP, HSTS, COOP, and frame control shipped via `_headers` (Cloudflare) and the Caddyfile (Docker)
 - **Zero client dependencies** — pure vanilla JS, no framework
 
@@ -113,7 +113,7 @@ Builds the project, installs Playwright Chromium if needed, then runs all specs.
 | File | What it covers |
 | ---- | -------------- |
 | `test/locales.spec.js` | Locale JSON completeness (all required keys, speed units, placeholders, no empty strings); build output HTML (`lang`/`dir` attrs, `window.L` values, hreflang tags + exact href targets, redirect scripts, shared JS bundle); `_headers` cache + security headers (CSP, HSTS, COOP, frame control, Cloudflare Analytics allowances) |
-| `test/calculator.spec.js` | Default inputs and values; input constraint attributes; results table (row count, OD, poke, labels, speedo precision); boundary calculations at min/max limits; out-of-range clamping; spacer maths; fitment warnings (row tints + stretch/bulge strip); both canvas diagrams (cross-section + face-on view); tooltips; share button URL round-trip; URL parameter pre-fill |
+| `test/calculator.spec.js` | Default inputs and values; input constraint attributes; results table (row count, OD, poke, labels, speedo precision); optional centre-bore and bolt-pattern rows (current/new/difference + adaptability warnings); boundary calculations at min/max limits; out-of-range clamping; spacer maths; fitment warnings (row tints + stretch/bulge strip); both canvas diagrams (cross-section + face-on view); tooltips; share button URL round-trip; URL parameter pre-fill |
 | `test/i18n.spec.js` | Per-locale rendering (`lang` attr, h1, button labels, speed unit/reference value, tooltip-attribute escaping, no JS errors); language switcher (open/close, all locales listed, active state, Escape key, click-outside) |
 | `test/autodetect.spec.js` | Auto-detection on `/`: browser locale and stored preference redirect to the right locale; English/unsupported stay on `/` |
 | `test/csp.spec.js` | Loads pages under the exact production CSP from `_headers` and asserts the app triggers zero policy violations (LTR + RTL) |
@@ -253,8 +253,10 @@ fitment-calculator/
 | Profile      | %      | 10 – 100   | Aspect ratio (sidewall height as % of section width) |
 | Spacer       | mm     | 0 – 100    | Optional — reduces effective ET by this amount |
 | Camber       | °      | −20 – +20  | Optional — positive or negative; tilts wheel in diagram |
+| Centre bore  | mm     | 40 – 120   | Optional — wheel hub-bore diameter; drawn to scale in the face view and compared current-vs-new for fitment |
+| Bolt pattern | —      | dropdown   | Optional — stud count × PCD (e.g. `5×114.3`); drawn as hexagonal lugs on the PCD circle and compared for adaptability. Assumes `5×114.3` when unset |
 
-All limits are enforced both by HTML `min`/`max` attributes (browser UI) and by JavaScript clamping in the `v()` input helper (calculation layer).
+All limits are enforced both by HTML `min`/`max` attributes (browser UI) and by JavaScript clamping in the `v()` input helper (calculation layer). Centre bore and bolt pattern are read raw (blank = unspecified) rather than clamped, since they are optional comparison-only fields.
 
 ## Key formulas
 

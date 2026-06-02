@@ -76,5 +76,15 @@
     "warnCamber": "Aggressiv camber — øger slitagen på inderkanten og reducerer bremsekontaktfladen.",
     "warnPoke": "Stikker mærkbart længere ud end din nuværende opsætning — kan skrabe mod hjulkassen eller stikke ud. Tjek frigangen.",
     "warnInset": "Sidder mærkbart længere ind end din nuværende opsætning — kan skrabe mod fjederben, bremse eller inderskærm. Tjek frigangen.",
-    "warnArchGapOpen": "Denne opsætning øger hjulkassemellemrummet i stedet for at lukke det."
+    "warnArchGapOpen": "Denne opsætning øger hjulkassemellemrummet i stedet for at lukke det.",
+    "centreBore": "Centerhul (mm)",
+    "warnBoreSmaller": "Den nye fælgs centerhul er mindre end dit nuværende — det går ikke over navet og passer ikke.",
+    "warnBoreLarger": "Den nye fælgs centerhul er større end dit nuværende — det passer, men brug centreringsringe til at centrere det på navet.",
+    "rowBore": "Centerhul",
+    "tipBore": "Fælgens centerhulsdiameter. Den nye fælgs centerhul skal være mindst lige så stort som navet: mindre passer ikke, større kræver centreringsringe.",
+    "boltPattern": "Boltcirkel",
+    "rowBolt": "Boltcirkel",
+    "tipBolt": "Antal bolte × boltcirkeldiameter (PCD). Den nye fælg skal passe til navets boltcirkel; små forskelle kan klares med adaptere, store som regel ikke. Antager 5×114,3 hvis tom.",
+    "warnBoltAmber": "Boltcirklen afviger fra din nuværende, men kun lidt — adaptere er almindeligt tilgængelige.",
+    "warnBoltRed": "Boltcirklen afviger for meget fra din nuværende og kan som regel ikke tilpasses sikkert — fælgen passer ikke."
 }

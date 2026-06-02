@@ -48,6 +48,7 @@ const TD = {
 	insetRowIdx:  3,
 	speedoRow:    4,
 	archGapRow:   8,
+	boreRow:      9, // only present when a centre bore is entered (appended last)
 };
 
 // Fills all OD-affecting fields to the same values on both setups so the
@@ -720,5 +721,102 @@ test.describe('Fitment warnings', () => {
 		const archGap = page.locator('#tbody tr').nth(TD.archGapRow);
 		await expect(archGap).toHaveClass(/row-warn/);
 		await expect(archGap.locator('.row-reason')).toContainText('gap');
+	});
+
+	// ── Centre bore (optional, its own table row) ────────────────────────────
+	test('no centre-bore row appears by default', async () => {
+		await page.click('button.calc-btn');
+		await expect(page.locator('#tbody tr')).toHaveCount(9);
+	});
+
+	test('entering both bores adds a row with current, new and difference', async () => {
+		await page.fill('#o-cb', '57.1');
+		await page.fill('#n-cb', '72.6');
+		await page.click('button.calc-btn');
+		const rows = page.locator('#tbody tr');
+		await expect(rows).toHaveCount(10);
+		const cells = rows.nth(TD.boreRow).locator('td'); // current, new, difference
+		await expect(cells.nth(0)).toContainText('57.1');
+		await expect(cells.nth(1)).toContainText('72.6');
+		await expect(cells.nth(2)).toContainText('+15.5');
+	});
+
+	test('a smaller new centre bore flags the Centre Bore row (danger)', async () => {
+		await page.fill('#o-cb', '70.1');
+		await page.fill('#n-cb', '64.1');
+		await page.click('button.calc-btn');
+		const bore = page.locator('#tbody tr').nth(TD.boreRow);
+		await expect(bore).toHaveClass(/row-danger/);
+		await expect(bore.locator('.row-reason')).toContainText('fit');
+		// Warning lives in the row now, not the strip
+		await expect(page.locator('#fitment-warnings')).toBeEmpty();
+	});
+
+	test('a larger new centre bore is a caution on the row (hub-centric rings)', async () => {
+		await page.fill('#o-cb', '64.1');
+		await page.fill('#n-cb', '72.6');
+		await page.click('button.calc-btn');
+		const bore = page.locator('#tbody tr').nth(TD.boreRow);
+		await expect(bore).toHaveClass(/row-warn/);
+		await expect(bore.locator('.row-reason')).toContainText('rings');
+	});
+
+	test('matching or partial centre bore shows the row without a warning', async () => {
+		// Equal bores → row present, no warning class
+		await page.fill('#o-cb', '64.1');
+		await page.fill('#n-cb', '64.1');
+		await page.click('button.calc-btn');
+		const bore = page.locator('#tbody tr').nth(TD.boreRow);
+		await expect(bore).toHaveCount(1);
+		await expect(bore).not.toHaveClass(/row-warn|row-danger/);
+		// Only one side filled → row still shows (difference dashed), still silent
+		await page.fill('#n-cb', '');
+		await page.click('button.calc-btn');
+		await expect(page.locator('#tbody tr')).toHaveCount(10);
+		await expect(page.locator('#tbody tr').nth(TD.boreRow)).not.toHaveClass(/row-warn|row-danger/);
+	});
+
+	// ── Bolt pattern (optional, its own table row) ───────────────────────────
+	// With no centre bore set, the bolt row is the only extra row → index 9.
+	const BOLT_ROW = 9;
+
+	test('no bolt-pattern row appears by default', async () => {
+		await page.click('button.calc-btn');
+		await expect(page.locator('#tbody tr')).toHaveCount(9);
+	});
+
+	test('a small bolt-pattern change is a caution with an "old → new" difference', async () => {
+		// Current unset (assumes 5x114.3), new 5x100 → same studs, small PCD change
+		await page.selectOption('#n-bp', '5x100');
+		await page.click('button.calc-btn');
+		const rows = page.locator('#tbody tr');
+		await expect(rows).toHaveCount(10);
+		const bolt = rows.nth(BOLT_ROW);
+		await expect(bolt).toHaveClass(/row-warn/);
+		await expect(bolt.locator('.row-reason')).toContainText('adapters');
+		const cells = bolt.locator('td'); // current, new, difference
+		await expect(cells.nth(0)).toContainText('5×114.3');
+		await expect(cells.nth(1)).toContainText('5×100');
+		await expect(cells.nth(2)).toContainText('5×114.3 → 5×100');
+		await expect(page.locator('#fitment-warnings')).toBeEmpty();
+	});
+
+	test('a large bolt-pattern change is a danger (not adaptable)', async () => {
+		await page.selectOption('#o-bp', '4x100');
+		await page.selectOption('#n-bp', '6x139.7');
+		await page.click('button.calc-btn');
+		const bolt = page.locator('#tbody tr').nth(BOLT_ROW);
+		await expect(bolt).toHaveClass(/row-danger/);
+		await expect(bolt.locator('.row-reason')).toContainText('bolt on');
+	});
+
+	test('matching bolt pattern shows the row without a warning', async () => {
+		await page.selectOption('#o-bp', '5x112');
+		await page.selectOption('#n-bp', '5x112');
+		await page.click('button.calc-btn');
+		const bolt = page.locator('#tbody tr').nth(BOLT_ROW);
+		await expect(bolt).toHaveCount(1);
+		await expect(bolt).not.toHaveClass(/row-warn|row-danger/);
+		await expect(bolt.locator('td').nth(2)).toContainText('—');
 	});
 });

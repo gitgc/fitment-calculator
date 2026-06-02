@@ -76,5 +76,15 @@
     "warnCamber": "Aggressive camber — accelerates inner-edge tyre wear and reduces the braking contact patch.",
     "warnPoke": "Pokes noticeably further out than your current setup — may foul the wheel arch or sit proud. Check clearance.",
     "warnInset": "Sits noticeably further inboard than your current setup — may foul the strut, brake or inner arch. Check clearance.",
-    "warnArchGapOpen": "This setup widens the wheel-arch gap instead of closing it."
+    "warnArchGapOpen": "This setup widens the wheel-arch gap instead of closing it.",
+    "centreBore": "Centre bore (mm)",
+    "warnBoreSmaller": "The new wheel's centre bore is smaller than your current one — it won't clear the hub and won't physically fit.",
+    "warnBoreLarger": "The new wheel's centre bore is larger than your current one — it will fit, but use hub-centric rings to centre it on the hub.",
+    "rowBore": "Centre Bore",
+    "tipBore": "Hub-bore diameter of the wheel. The new wheel's bore must be at least as large as the hub: smaller won't fit, larger needs hub-centric rings to centre it.",
+    "boltPattern": "Bolt pattern",
+    "rowBolt": "Bolt Pattern",
+    "tipBolt": "Stud count × pitch-circle diameter (PCD). The new wheel must match the hub's bolt pattern; small differences can be bridged with adapters, large ones usually can't. Assumes 5×114.3 if left unset.",
+    "warnBoltAmber": "The bolt pattern differs from your current one, but only slightly — adapters are commonly available.",
+    "warnBoltRed": "The bolt pattern differs too much from your current one and usually can't be safely adapted — it won't bolt on."
 }

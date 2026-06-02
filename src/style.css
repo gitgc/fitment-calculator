@@ -210,7 +210,22 @@ main {
     gap: 1.25rem;
     margin-bottom: 1.5rem;
 }
-@media (max-width: 640px) {
+/* Keep Current and New side by side on phones — it's the natural comparison and
+   halves the scrolling. The labels are short and values tiny, so two columns fit;
+   just tighten the spacing on narrow screens. */
+@media (max-width: 560px) {
+    .inputs {
+        gap: 0.6rem;
+    }
+    .card {
+        padding: 0.85rem;
+    }
+    .field {
+        margin-bottom: 0.55rem;
+    }
+}
+/* Safety net for very small devices (≈320px): fall back to a single column. */
+@media (max-width: 340px) {
     .inputs {
         grid-template-columns: 1fr;
     }
@@ -270,7 +285,8 @@ main {
     color: var(--muted);
     margin-bottom: 0.3rem;
 }
-.field input {
+.field input,
+.field select {
     width: 100%;
     background: var(--card);
     border: 1px solid var(--border);
@@ -280,7 +296,19 @@ main {
     font-size: 0.95rem;
     transition: border-color 0.15s;
 }
-.field input:focus-visible {
+.field select {
+    /* Match the inputs but keep the native dropdown affordance legible. */
+    appearance: none;
+    cursor: pointer;
+    padding-inline-end: 1.75rem;
+    background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+        linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+    background-position: calc(100% - 1rem) center, calc(100% - 0.7rem) center;
+    background-size: 0.3rem 0.3rem, 0.3rem 0.3rem;
+    background-repeat: no-repeat;
+}
+.field input:focus-visible,
+.field select:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 1px;
     border-color: var(--accent);

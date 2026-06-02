@@ -102,13 +102,35 @@ function escapeHTML(s) {
         .replace(/"/g, "&quot;");
 }
 
+// A typical modern PCD, assumed when no bolt pattern is selected.
+const DEFAULT_BOLT = "5x114.3";
+
+// "5x114.3" → { count: 5, pcd: 114.3 }; null if it can't be parsed.
+function parseBolt(s) {
+    const m = /^(\d+)x([\d.]+)$/.exec(s);
+    return m ? { count: +m[1], pcd: parseFloat(m[2]) } : null;
+}
+
+// Display form, e.g. "5x114.3" → "5×114.3".
+function fmtBolt(s) {
+    return s.replace("x", "×");
+}
+
 // ── Fitment assessment (Tier 1 + 2 warnings) ───────────────────────────────────
 // Returns { rows: { [rowLabel]: {severity, message} }, setup: [{severity, message}] }
 // where severity is "warn" (caution) or "danger". Thresholds are deliberately
 // lenient so that common, sensible setups don't trip false alarms. Row-bound
 // checks tint the matching table row; setup-level checks (which have no
 // comparison row) collect into `setup` and render in the strip below the table.
-function assessFitment(o, n, nCam) {
+function assessFitment(
+    o,
+    n,
+    nCam,
+    oBore = 0,
+    nBore = 0,
+    oBolt = "",
+    nBolt = "",
+) {
     const L = window.L;
     const rows = {};
     const setup = [];
@@ -197,6 +219,31 @@ function assessFitment(o, n, nCam) {
             message: L.warnCamber,
         });
     }
+    // Centre bore (optional — only when both are given). The current wheel fits
+    // the hub, so its bore is the reference. A smaller new bore won't clear the
+    // hub at all (danger); a larger one fits but needs hub-centric rings (caution).
+    // Bound to its own table row, which calculate() only shows when bore is set.
+    if (oBore > 0 && nBore > 0 && nBore !== oBore) {
+        rows[L.rowBore] =
+            nBore < oBore
+                ? { severity: "danger", message: L.warnBoreSmaller }
+                : { severity: "warn", message: L.warnBoreLarger };
+    }
+
+    // Bolt pattern (optional). Unspecified sides assume the typical default, so a
+    // genuine mismatch only shows when at least one side was chosen. A small
+    // change in stud count and PCD is commonly bridged by off-the-shelf adapters
+    // (caution); a large change usually isn't safely adaptable (danger).
+    const oPat = parseBolt(oBolt || DEFAULT_BOLT);
+    const nPat = parseBolt(nBolt || DEFAULT_BOLT);
+    if (oPat && nPat && (oPat.count !== nPat.count || oPat.pcd !== nPat.pcd)) {
+        const adaptable =
+            Math.abs(oPat.count - nPat.count) <= 1 &&
+            Math.abs(oPat.pcd - nPat.pcd) <= 30;
+        rows[L.rowBolt] = adaptable
+            ? { severity: "warn", message: L.warnBoltAmber }
+            : { severity: "danger", message: L.warnBoltRed };
+    }
 
     // Danger before caution, so the most serious advice leads the strip.
     setup.sort((a, b) =>
@@ -227,6 +274,13 @@ function calculate() {
     );
     const oCam = v("o-cam");
     const nCam = v("n-cam");
+    // Centre bore is optional and not used in any geometry — read it raw so an
+    // empty field stays 0 ("not specified") rather than being clamped to the min.
+    const oBore = parseFloat(document.getElementById("o-cb").value) || 0;
+    const nBore = parseFloat(document.getElementById("n-cb").value) || 0;
+    // Bolt pattern is optional; an unset side falls back to the typical default.
+    const oBolt = document.getElementById("o-bp").value;
+    const nBolt = document.getElementById("n-bp").value;
 
     const L = window.L;
     const ref1 = L.refSpeed1;
@@ -297,7 +351,36 @@ function calculate() {
         [L.rowArchGap, "0.0 mm", `${fmt(rhGain)} mm`, signed(rhGain, "mm")],
     ];
 
-    const assess = assessFitment(o, n, nCam);
+    // Optional centre-bore row — only shown when the user supplied a bore. Each
+    // side falls back to "—" when blank, and the difference only when both exist.
+    if (oBore > 0 || nBore > 0) {
+        const dash = '<span class="neu">—</span>';
+        tips[L.rowBore] = L.tipBore;
+        rows.push([
+            L.rowBore,
+            oBore > 0 ? `${fmt(oBore)} mm` : dash,
+            nBore > 0 ? `${fmt(nBore)} mm` : dash,
+            oBore > 0 && nBore > 0 ? signed(nBore - oBore, "mm") : dash,
+        ]);
+    }
+
+    // Optional bolt-pattern row — shown when either side was chosen. Unset sides
+    // display the assumed default; the difference reads "old → new" when they vary.
+    if (oBolt || nBolt) {
+        const oEff = oBolt || DEFAULT_BOLT;
+        const nEff = nBolt || DEFAULT_BOLT;
+        tips[L.rowBolt] = L.tipBolt;
+        rows.push([
+            L.rowBolt,
+            fmtBolt(oEff),
+            fmtBolt(nEff),
+            oEff === nEff
+                ? '<span class="neu">—</span>'
+                : `${fmtBolt(oEff)} → ${fmtBolt(nEff)}`,
+        ]);
+    }
+
+    const assess = assessFitment(o, n, nCam, oBore, nBore, oBolt, nBolt);
 
     document.getElementById("tbody").innerHTML = rows
         .map(([label, ov, nv, dv]) => {
@@ -326,7 +409,16 @@ function calculate() {
 
     document.getElementById("results").classList.add("show");
     drawDiagram(o, n, oCam, nCam);
-    drawFaceDiagram(o, n, oCam, nCam);
+    drawFaceDiagram(
+        o,
+        n,
+        oCam,
+        nCam,
+        oBore,
+        nBore,
+        oBolt || DEFAULT_BOLT,
+        nBolt || DEFAULT_BOLT,
+    );
 
     document
         .getElementById("cv")
@@ -884,7 +976,53 @@ function drawSidewallText(
     ctx.restore();
 }
 
-function drawFaceDiagram(o, n, oCam, nCam) {
+// Draws a single hexagonal bolt head (point-up) at (x, y). `r` is the
+// circumradius (centre to corner).
+function drawHexBolt(ctx, x, y, r, color) {
+    ctx.beginPath();
+    for (let k = 0; k < 6; k++) {
+        const a = -Math.PI / 2 + (k * Math.PI) / 3;
+        const px = x + r * Math.cos(a);
+        const py = y + r * Math.sin(a);
+        if (k === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fillStyle = `${color}40`;
+    ctx.fill();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+}
+
+// Lays out a wheel's bolt heads on its PCD circle, to scale. `bolt` is a parsed
+// { count, pcd }. Each lug is a 19 mm hex (across the flats).
+function drawBoltPattern(ctx, cx, cy, bolt, scale, color) {
+    if (!bolt) return;
+    const pcdR = (bolt.pcd / 2) * scale;
+    const boltR = Math.max(2.5, (19 / Math.sqrt(3)) * scale); // 19 mm across flats
+    for (let i = 0; i < bolt.count; i++) {
+        const a = -Math.PI / 2 + (i * 2 * Math.PI) / bolt.count;
+        drawHexBolt(
+            ctx,
+            cx + pcdR * Math.cos(a),
+            cy + pcdR * Math.sin(a),
+            boltR,
+            color,
+        );
+    }
+}
+
+function drawFaceDiagram(
+    o,
+    n,
+    oCam,
+    nCam,
+    oBore = 0,
+    nBore = 0,
+    oBolt = "",
+    nBolt = "",
+) {
     const canvas = document.getElementById("cv2");
     if (!canvas) return;
     const W = canvas.width,
@@ -973,15 +1111,50 @@ function drawFaceDiagram(o, n, oCam, nCam) {
         ); // left
     }
 
-    // Shared hub centre
-    const hubR = Math.max(8, (Math.min(o.rimDmm, n.rimDmm) / 2) * scale * 0.16);
-    ctx.fillStyle = "#253044";
-    ctx.strokeStyle = "#4a6080";
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.arc(cx, cy, hubR, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
+    // Hub centre. When centre-bore sizes are given we draw the actual bores to
+    // scale (one ring per setup, in its colour) so their relative size — and any
+    // mismatch — is visible; the smaller bore is punched through as the hole.
+    // Otherwise fall back to a small stylised stub.
+    if (oBore > 0 || nBore > 0) {
+        const bores = [oBore, nBore].filter((b) => b > 0);
+        const holeR = (Math.min(...bores) / 2) * scale;
+        ctx.fillStyle = "#0d1117"; // empty hole = canvas background
+        ctx.strokeStyle = "#4a6080";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(cx, cy, holeR, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.lineWidth = 2;
+        if (oBore > 0) {
+            ctx.strokeStyle = "#58a6ffcc";
+            ctx.beginPath();
+            ctx.arc(cx, cy, (oBore / 2) * scale, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+        if (nBore > 0) {
+            ctx.strokeStyle = "#f78166cc";
+            ctx.beginPath();
+            ctx.arc(cx, cy, (nBore / 2) * scale, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+    } else {
+        const hubR = Math.max(
+            8,
+            (Math.min(o.rimDmm, n.rimDmm) / 2) * scale * 0.16,
+        );
+        ctx.fillStyle = "#253044";
+        ctx.strokeStyle = "#4a6080";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(cx, cy, hubR, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+    }
+
+    // Bolt heads on each setup's PCD circle, to scale (current blue, new orange).
+    drawBoltPattern(ctx, cx, cy, parseBolt(oBolt), scale, "#58a6ff");
+    drawBoltPattern(ctx, cx, cy, parseBolt(nBolt), scale, "#f78166");
 
     // Diameter callouts — current left, new right
     const oR = (o.od / 2) * scale;
@@ -1109,6 +1282,8 @@ const PARAMS = {
     "o-pr": "opr",
     "o-sp": "osp",
     "o-cam": "ocam",
+    "o-cb": "ocb",
+    "o-bp": "obp",
     "n-d": "nd",
     "n-w": "nw",
     "n-et": "net",
@@ -1116,12 +1291,16 @@ const PARAMS = {
     "n-pr": "npr",
     "n-sp": "nsp",
     "n-cam": "ncam",
+    "n-cb": "ncb",
+    "n-bp": "nbp",
 };
 
 function buildShareUrl() {
     const p = new URLSearchParams();
     for (const [id, key] of Object.entries(PARAMS)) {
-        p.set(key, document.getElementById(id).value);
+        const { value } = document.getElementById(id);
+        // Skip blank optional fields (centre bore) so they don't clutter the URL.
+        if (value !== "") p.set(key, value);
     }
     return `${location.origin}${location.pathname}?${p}`;
 }

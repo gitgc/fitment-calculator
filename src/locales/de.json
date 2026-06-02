@@ -76,5 +76,15 @@
     "warnCamber": "Starker Sturz — beschleunigt den Verschleiß an der Reifeninnenkante und verringert die Bremsauflagefläche.",
     "warnPoke": "Steht deutlich weiter außen als die aktuelle Konfiguration — kann am Radkasten schleifen oder hervorstehen. Freigängigkeit prüfen.",
     "warnInset": "Sitzt deutlich weiter innen als die aktuelle Konfiguration — kann an Federbein, Bremse oder innerem Radkasten schleifen. Freigängigkeit prüfen.",
-    "warnArchGapOpen": "Diese Konfiguration vergrößert den Radlaufspalt, statt ihn zu schließen."
+    "warnArchGapOpen": "Diese Konfiguration vergrößert den Radlaufspalt, statt ihn zu schließen.",
+    "centreBore": "Mittenbohrung (mm)",
+    "warnBoreSmaller": "Die Mittenbohrung des neuen Rades ist kleiner als die aktuelle — sie passt nicht über die Nabe und lässt sich nicht montieren.",
+    "warnBoreLarger": "Die Mittenbohrung des neuen Rades ist größer als die aktuelle — es passt, aber zur Zentrierung sind Zentrierringe nötig.",
+    "rowBore": "Mittenbohrung",
+    "tipBore": "Mittenbohrung des Rades. Die Bohrung des neuen Rades muss mindestens so groß wie die Nabe sein: kleiner passt nicht, größer braucht Zentrierringe.",
+    "boltPattern": "Lochkreis",
+    "rowBolt": "Lochkreis",
+    "tipBolt": "Lochzahl × Lochkreisdurchmesser (LK). Das neue Rad muss zum Lochkreis der Nabe passen; kleine Unterschiede lassen sich mit Adaptern überbrücken, große meist nicht. Standard 5×114,3, falls leer.",
+    "warnBoltAmber": "Der Lochkreis weicht vom aktuellen ab, aber nur geringfügig — Adapter sind gängig verfügbar.",
+    "warnBoltRed": "Der Lochkreis weicht zu stark vom aktuellen ab und lässt sich meist nicht sicher adaptieren — das Rad passt nicht."
 }

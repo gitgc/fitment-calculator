@@ -76,5 +76,15 @@
     "warnCamber": "Agressieve camber — versnelt slijtage aan de binnenkant en verkleint het remcontactvlak.",
     "warnPoke": "Steekt duidelijk verder uit dan je huidige opstelling — kan de wielkast raken of uitsteken. Controleer de speling.",
     "warnInset": "Zit duidelijk verder naar binnen dan je huidige opstelling — kan het veerpoot, de rem of de binnenkant raken. Controleer de speling.",
-    "warnArchGapOpen": "Deze opstelling vergroot de wielkastspleet in plaats van die te verkleinen."
+    "warnArchGapOpen": "Deze opstelling vergroot de wielkastspleet in plaats van die te verkleinen.",
+    "centreBore": "Naafgat (mm)",
+    "warnBoreSmaller": "Het naafgat van het nieuwe wiel is kleiner dan het huidige — het past niet over de naaf en kan niet gemonteerd worden.",
+    "warnBoreLarger": "Het naafgat van het nieuwe wiel is groter dan het huidige — het past, maar gebruik centreerringen om het te centreren.",
+    "rowBore": "Naafgat",
+    "tipBore": "Naafgatdiameter van het wiel. Het naafgat van het nieuwe wiel moet minstens zo groot zijn als de naaf: kleiner past niet, groter heeft centreerringen nodig.",
+    "boltPattern": "Steekcirkel",
+    "rowBolt": "Steekcirkel",
+    "tipBolt": "Aantal bouten × steekcirkeldiameter (PCD). Het nieuwe wiel moet bij de steekcirkel van de naaf passen; kleine verschillen zijn met adapters te overbruggen, grote meestal niet. Standaard 5×114,3 indien leeg.",
+    "warnBoltAmber": "De steekcirkel wijkt af van de huidige, maar slechts licht — adapters zijn algemeen verkrijgbaar.",
+    "warnBoltRed": "De steekcirkel wijkt te veel af van de huidige en is meestal niet veilig aan te passen — het wiel past niet."
 }

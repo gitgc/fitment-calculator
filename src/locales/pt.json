@@ -76,5 +76,15 @@
     "warnCamber": "Camber agressivo — acelera o desgaste do bordo interior e reduz a superfície de travagem.",
     "warnPoke": "Sobressai bastante mais do que a sua configuração atual — pode roçar na cava ou ficar saliente. Verifique a folga.",
     "warnInset": "Fica bastante mais para dentro do que a sua configuração atual — pode roçar no amortecedor, no travão ou na cava interior. Verifique a folga.",
-    "warnArchGapOpen": "Esta configuração aumenta a folga da cava em vez de a reduzir."
+    "warnArchGapOpen": "Esta configuração aumenta a folga da cava em vez de a reduzir.",
+    "centreBore": "Furo central (mm)",
+    "warnBoreSmaller": "O furo central da nova jante é menor do que o atual — não passa no cubo e não vai encaixar.",
+    "warnBoreLarger": "O furo central da nova jante é maior do que o atual — vai encaixar, mas use anéis de centragem para o centrar no cubo.",
+    "rowBore": "Furo central",
+    "tipBore": "Diâmetro do furo central da jante. O furo da nova jante deve ser pelo menos tão grande como o cubo: menor não encaixa, maior precisa de anéis de centragem.",
+    "boltPattern": "Furação",
+    "rowBolt": "Furação",
+    "tipBolt": "Número de furos × diâmetro do círculo de furação (PCD). A nova jante deve coincidir com a furação do cubo; pequenas diferenças resolvem-se com adaptadores, as grandes normalmente não. Assume 5×114,3 se vazio.",
+    "warnBoltAmber": "A furação difere da atual, mas apenas ligeiramente — há adaptadores facilmente disponíveis.",
+    "warnBoltRed": "A furação difere demasiado da atual e normalmente não se adapta com segurança — não vai encaixar."
 }
