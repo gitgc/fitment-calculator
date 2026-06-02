@@ -958,8 +958,26 @@ function syncSizeFromFields(prefix) {
     const rim = parseFloat(document.getElementById(`${prefix}-d`).value);
     const tw = parseFloat(document.getElementById(`${prefix}-tw`).value);
     const pr = parseFloat(document.getElementById(`${prefix}-pr`).value);
-    el.value = tw > 0 && pr > 0 && rim > 0 ? formatTyreSize(tw, pr, rim) : "";
-    el.removeAttribute("aria-invalid");
+
+    if (!(tw > 0 && pr > 0 && rim > 0)) {
+        el.value = "";
+        el.removeAttribute("aria-invalid");
+        return;
+    }
+
+    el.value = formatTyreSize(tw, pr, rim);
+    // Flag the box when a field is out of range — the displayed value would
+    // otherwise disagree with what calculate() clamps it to. Symmetric with the
+    // parse path, which rejects out-of-range sizes.
+    const inRange =
+        withinInputRange(`${prefix}-tw`, tw) &&
+        withinInputRange(`${prefix}-pr`, pr) &&
+        withinInputRange(`${prefix}-d`, rim);
+    if (inRange) {
+        el.removeAttribute("aria-invalid");
+    } else {
+        el.setAttribute("aria-invalid", "true");
+    }
 }
 
 function initSizeInputs() {

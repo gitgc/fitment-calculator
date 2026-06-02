@@ -579,4 +579,16 @@ test.describe('Tyre size parser', () => {
 		await page.fill('#n-pr', '35');
 		await expect(page.locator('#n-size')).toHaveValue('255/35R19');
 	});
+
+	test('an out-of-range field flags the size box (matches what calculate clamps)', async () => {
+		// Rim max is 25; typing 26 shows the value but marks it invalid
+		await page.fill('#o-d', '26');
+		await expect(page.locator('#o-size')).toHaveValue('225/45R26');
+		await expect(page.locator('#o-size')).toHaveAttribute('aria-invalid', 'true');
+
+		// Back in range clears the flag
+		await page.fill('#o-d', '20');
+		await expect(page.locator('#o-size')).toHaveValue('225/45R20');
+		await expect(page.locator('#o-size')).not.toHaveAttribute('aria-invalid', 'true');
+	});
 });
