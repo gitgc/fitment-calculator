@@ -512,6 +512,23 @@ function drawSuspension(ctx, hubX, cy, avgRHH, topPad) {
     ctx.lineTo(strutTX + px * mw, strutTopY + py * mw);
     ctx.stroke();
 
+    // ── Watermark — brand etched along the damper body, following its slope ────
+    // Sits on the lower shaft so a shared screenshot is always attributed.
+    const wmText = "fixthatgap.com";
+    const damperLen = dist * splitT;
+    ctx.save();
+    ctx.translate((strutBX + midX) / 2, (strutBY + midY) / 2);
+    ctx.rotate(Math.atan2(-dy, -dx)); // align with the shaft, sloping down-right
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = "10px sans-serif";
+    const w10 = ctx.measureText(wmText).width || 1;
+    const wmFont = Math.max(8, Math.min(13, (damperLen * 0.9 * 10) / w10));
+    ctx.font = `${wmFont}px sans-serif`;
+    ctx.fillStyle = "rgba(13, 17, 23, 0.7)"; // dark, like etching on the metal
+    ctx.fillText(wmText, 0, 0);
+    ctx.restore();
+
     ctx.restore();
 }
 
