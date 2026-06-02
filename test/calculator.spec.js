@@ -414,8 +414,11 @@ test.describe('Canvas diagram', () => {
 
 		expect(await drewOnCanvas(page, 'cv2')).toBe(true);
 
-		// aria-label carries both diameters (Ø…mm) for the face view
-		await expect(page.locator('#cv2')).toHaveAttribute('aria-label', /Ø.*mm.*Ø.*mm/);
+		// aria-label carries the tyre size + diameter for both setups
+		await expect(page.locator('#cv2')).toHaveAttribute(
+			'aria-label',
+			/225\/45R17.*Ø.*mm.*235\/40R18.*Ø.*mm/,
+		);
 	});
 });
 

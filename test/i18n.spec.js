@@ -59,6 +59,12 @@ for (const L of LOCALES) {
 			}
 		});
 
+		test('cross-section canvas is described by the localized suspension note', async () => {
+			const noteId = await page.getAttribute('#cv', 'aria-describedby');
+			expect(noteId).toBe('cv-note');
+			await expect(page.locator(`#${noteId}`)).toHaveText(L.suspensionNote);
+		});
+
 		test('no JS errors on load', async () => {
 			const errors = [];
 			page.on('pageerror', e => errors.push(e.message));

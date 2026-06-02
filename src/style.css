@@ -563,3 +563,15 @@ footer p.disclaimer {
     font-size: 0.72rem;
     margin-bottom: 0;
 }
+
+/* Small right-aligned caption under the cross-section canvas. Constrained to the
+   canvas's own max width and centred the same way, so its right edge lines up
+   with the canvas rather than the (wider) wrapper. */
+.canvas-note {
+    max-width: 900px;
+    margin: 0.6rem auto 0;
+    color: var(--muted);
+    font-size: 0.72rem;
+    line-height: 1.5;
+    text-align: end;
+}

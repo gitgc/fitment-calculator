@@ -1,3 +1,7 @@
+// ── Site config (injected by build.js from site.config.json) ───────────────────
+// Brand shown on the diagrams. Empty string when not configured → nothing drawn.
+const BRAND = window.SITE?.brand ?? "";
+
 // ── Input helper ──────────────────────────────────────────────────────────────
 
 function v(id) {
@@ -217,7 +221,7 @@ function calculate() {
         .getElementById("cv2")
         ?.setAttribute(
             "aria-label",
-            `${L.faceTitle}: ${L.canvasCurrent} Ø${fmt(o.od, 0)} mm, ${L.canvasNew} Ø${fmt(n.od, 0)} mm`,
+            `${L.faceTitle}: ${L.canvasCurrent} ${formatTyreSize(o.tw, o.pr, o.rimIn)} Ø${fmt(o.od, 0)} mm, ${L.canvasNew} ${formatTyreSize(n.tw, n.pr, n.rimIn)} Ø${fmt(n.od, 0)} mm`,
         );
 
     document.getElementById("calc-status").textContent = L.calcStatus;
@@ -512,6 +516,24 @@ function drawSuspension(ctx, hubX, cy, avgRHH, topPad) {
     ctx.lineTo(strutTX + px * mw, strutTopY + py * mw);
     ctx.stroke();
 
+    // ── Watermark — brand etched along the damper body, following its slope ────
+    // Sits on the lower shaft so a shared screenshot is always attributed.
+    if (BRAND) {
+        const damperLen = dist * splitT;
+        ctx.save();
+        ctx.translate((strutBX + midX) / 2, (strutBY + midY) / 2);
+        ctx.rotate(Math.atan2(-dy, -dx)); // align with the shaft, sloping down-right
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = "10px sans-serif";
+        const w10 = ctx.measureText(BRAND).width || 1;
+        const wmFont = Math.max(8, Math.min(13, (damperLen * 0.9 * 10) / w10));
+        ctx.font = `${wmFont}px sans-serif`;
+        ctx.fillStyle = "rgba(13, 17, 23, 0.7)"; // dark, like etching on the metal
+        ctx.fillText(BRAND, 0, 0);
+        ctx.restore();
+    }
+
     ctx.restore();
 }
 
@@ -580,7 +602,9 @@ function drawDiagram(o, n, oCam, nCam) {
     ctx.fillStyle = "#58a6ff";
     ctx.font = "bold 16px monospace";
     ctx.textAlign = "right";
-    ctx.fillText(`Ø${o.od.toFixed(0)} mm`, aL - 6, cy + 6);
+    ctx.fillText(`Ø${o.od.toFixed(0)} mm`, aL - 6, cy - 3);
+    ctx.font = "13px monospace";
+    ctx.fillText(formatTyreSize(o.tw, o.pr, o.rimIn), aL - 6, cy + 15);
 
     const nDRight = nRimCX + (n.tw / 2) * scale;
     const aR = nDRight + 26;
@@ -601,7 +625,9 @@ function drawDiagram(o, n, oCam, nCam) {
     ctx.fillStyle = "#f78166";
     ctx.font = "bold 16px monospace";
     ctx.textAlign = "left";
-    ctx.fillText(`Ø${n.od.toFixed(0)} mm`, aR + 6, cy + 6);
+    ctx.fillText(`Ø${n.od.toFixed(0)} mm`, aR + 6, cy - 3);
+    ctx.font = "13px monospace";
+    ctx.fillText(formatTyreSize(n.tw, n.pr, n.rimIn), aR + 6, cy + 15);
 
     // Info rows below — width + ET (+ spacer if any) + poke
     const py1 = cy + maxTH / 2 + 28;
@@ -694,6 +720,48 @@ function drawFace(ctx, w, cx, cy, scale, color, camberDeg) {
     ctx.restore(); // undo camber foreshorten
 }
 
+// Writes text along a circular arc, like markings embossed on a tyre sidewall.
+// `centerAngle` is where the text is centred (0 = top, PI/2 = right, PI = bottom,
+// -PI/2 = left). Letters sit tangent with their tops facing outward; pass
+// `flip = true` (used at the bottom) to turn them so the text still reads
+// upright left-to-right.
+function drawSidewallText(
+    ctx,
+    cx,
+    cy,
+    radius,
+    text,
+    color,
+    font,
+    centerAngle,
+    flip = false,
+) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.fillStyle = color;
+    ctx.font = font;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    const chars = [...text];
+    const widths = chars.map((c) => ctx.measureText(c).width);
+    const totalAngle = widths.reduce((a, b) => a + b, 0) / radius;
+    const dir = flip ? -1 : 1; // flipped text sweeps the other way so it reads L→R
+
+    let ang = centerAngle - (dir * totalAngle) / 2;
+    for (let i = 0; i < chars.length; i++) {
+        const charAngle = widths[i] / radius;
+        ang += (dir * charAngle) / 2;
+        ctx.save();
+        ctx.translate(radius * Math.sin(ang), -radius * Math.cos(ang));
+        ctx.rotate(flip ? ang + Math.PI : ang);
+        ctx.fillText(chars[i], 0, 0);
+        ctx.restore();
+        ang += (dir * charAngle) / 2;
+    }
+    ctx.restore();
+}
+
 function drawFaceDiagram(o, n, oCam, nCam) {
     const canvas = document.getElementById("cv2");
     if (!canvas) return;
@@ -719,6 +787,69 @@ function drawFaceDiagram(o, n, oCam, nCam) {
     // Concentric wheel faces — current then new
     drawFace(ctx, o, cx, cy, scale, "#58a6ff", oCam);
     drawFace(ctx, n, cx, cy, scale, "#f78166", nCam);
+
+    // Tyre markings along each sidewall. The size code is in the wheel's colour
+    // (new across the top, current across the bottom); the brand sits on the new
+    // tyre's left & right sidewalls in grey so it reads as moulded lettering
+    // rather than a measurement. Opposite arcs keep everything from overlapping.
+    const midRadius = (w) => ((w.od / 2 + w.rimDmm / 2) / 2) * scale;
+    const sidewallPx = (w) => ((w.od - w.rimDmm) / 2) * scale;
+
+    const oMid = midRadius(o);
+    const nMid = midRadius(n);
+    const oFont = Math.max(13, Math.min(26, sidewallPx(o) * 0.55));
+    const nFont = Math.max(13, Math.min(26, sidewallPx(n) * 0.55));
+
+    const oSize = formatTyreSize(o.tw, o.pr, o.rimIn);
+    const nSize = formatTyreSize(n.tw, n.pr, n.rimIn);
+
+    drawSidewallText(
+        ctx,
+        cx,
+        cy,
+        nMid,
+        nSize,
+        "#f78166dd",
+        `bold ${nFont}px monospace`,
+        0,
+    ); // new — top
+    drawSidewallText(
+        ctx,
+        cx,
+        cy,
+        oMid,
+        oSize,
+        "#58a6ffdd",
+        `bold ${oFont}px monospace`,
+        Math.PI,
+        true,
+    ); // current — bottom
+
+    // Brand down the new tyre's left & right sidewalls (italic, grey, racy)
+    if (BRAND) {
+        const brandPx = Math.max(11, Math.min(22, sidewallPx(n) * 0.45));
+        const brandFont = `italic bold ${brandPx}px sans-serif`;
+        drawSidewallText(
+            ctx,
+            cx,
+            cy,
+            nMid,
+            BRAND,
+            "#8b949ecc",
+            brandFont,
+            Math.PI / 2,
+        ); // right
+        drawSidewallText(
+            ctx,
+            cx,
+            cy,
+            nMid,
+            BRAND,
+            "#8b949ecc",
+            brandFont,
+            -Math.PI / 2,
+        ); // left
+    }
 
     // Shared hub centre
     const hubR = Math.max(8, (Math.min(o.rimDmm, n.rimDmm) / 2) * scale * 0.16);

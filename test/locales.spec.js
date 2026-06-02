@@ -25,7 +25,7 @@ const REQUIRED_KEYS = [
 	'diameterInches', 'widthInches', 'offsetET', 'tireWidth', 'profile', 'spacer', 'camber',
 	'calcBtn', 'shareBtn', 'shareBtnAriaLabel',
 	'tableAriaLabel', 'colMeasurement', 'colCurrent', 'colNew', 'colDifference',
-	'crossSectionTitle', 'faceTitle', 'legendCurrent', 'legendNew',
+	'crossSectionTitle', 'faceTitle', 'suspensionNote', 'legendCurrent', 'legendNew',
 	'canvasAriaLabelStatic', 'githubAriaLabel', 'switchLang', 'langName',
 	'shareCopied',
 	'rowDiameter', 'rowCircumference', 'rowPoke', 'rowInset', 'rowSpeedoError',
@@ -146,6 +146,16 @@ test.describe('Build output — HTML files', () => {
 			expect(content, `${code} refSpeed1`).toContain(`refSpeed1:${ref1}`);
 			expect(content, `${code} refSpeed2`).toContain(`refSpeed2:${ref2}`);
 			expect(content, `${code} speedUnit`).toContain(`speedUnit:"${unit}"`);
+		}
+	});
+
+	test('window.SITE.brand is injected from the canonical host', () => {
+		const brand = new URL(siteConfig.canonicalUrl).host; // e.g. fixthatgap.com
+		for (const { code } of locales) {
+			const content = html(code);
+			if (!content) return;
+			expect(content, `${code} window.SITE`).toContain('window.SITE=');
+			expect(content, `${code} brand`).toContain(`brand:"${brand}"`);
 		}
 	});
 
