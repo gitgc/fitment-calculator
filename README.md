@@ -8,7 +8,7 @@ Interactive wheel and tyre fitment calculator. Enter your current and new wheel/
 - **Speedometer correction** — shows actual speed at reference speeds (mph for UK/US, km/h for all other locales)
 - **Spacer support** — adjusts effective ET automatically; reflected in diagram and poke calculation
 - **Camber rendering** — enter positive or negative degrees and the wheel tilts in the diagram
-- **Two 2D diagrams** — a cross-section (overlaid tyre profiles on a shared hub, with diameter callouts and poke rows) plus a face-on view (concentric tyre/rim circles, camber foreshortened into an ellipse, centre bores and hexagonal bolt heads drawn to scale)
+- **Two 2D diagrams** — a cross-section (overlaid tyre profiles on a shared hub, with diameter callouts and poke rows) plus a face-on view (both wheels as 6-spoke alloys, camber foreshortened into an ellipse, centre bores and hexagonal bolt heads drawn to scale)
 - **Hover tooltips** — plain-English explanation of every measurement
 - **Offline / PWA** — installable on desktop and mobile; works fully without a network connection after first load
 - **Fully accessible** — skip link, labelled form groups, `role="status"` live region, axe-core clean

@@ -886,11 +886,115 @@ function drawDiagram(o, n, oCam, nCam) {
 // wheel face, so each setup is a set of concentric circles (tyre outer = OD,
 // inner = rim). Camber foreshortens the circle vertically into an ellipse.
 
-function drawFace(ctx, w, cx, cy, scale, color, camberDeg) {
+// A clean 6-spoke alloy face (Rays TE37 style): six equal-width spokes running
+// from a central hub out to the rim lip, with curved ends that follow the rim
+// and large open windows between them. `hubR` is the hub radius — sized by the
+// caller to enclose the lug nuts so the spokes never overlap them.
+function drawAlloySpokes(ctx, cx, cy, rRim, color, count, hubR, rot = 0) {
+    const rLip = rRim * 0.92; // inner edge of the rim barrel
+    const rHub = hubR;
+    const w = rRim * 0.13; // constant spoke width (parallel sides)
+    const dIn = Math.asin(Math.min(1, w / 2 / rHub)); // half-angle at the hub
+    const dOut = Math.asin(Math.min(1, w / 2 / rLip)); // half-angle at the rim
+
+    // Metallic shading — a radial gradient with an off-centre highlight so the
+    // alloy reads as a lit, dished surface, clearly distinct from the dark tyre.
+    const metal = ctx.createRadialGradient(
+        cx - rRim * 0.35,
+        cy - rRim * 0.35,
+        rRim * 0.05,
+        cx,
+        cy,
+        rRim,
+    );
+    metal.addColorStop(0, `${color}c4`);
+    metal.addColorStop(0.55, `${color}6a`);
+    metal.addColorStop(1, `${color}3a`);
+
+    // The hub, spokes and outer rim lip are one continuous casting, all filled
+    // with the same gradient so they merge seamlessly (no pasted-on rectangles).
+
+    // Outer rim lip band — between the spoke tips and the tyre bead.
+    ctx.fillStyle = metal;
+    ctx.beginPath();
+    ctx.arc(cx, cy, rRim, 0, Math.PI * 2);
+    ctx.arc(cx, cy, rLip, 0, Math.PI * 2, true);
+    ctx.fill();
+
+    // Equal-width spokes — two parallel edges joined by arcs that sit on the hub
+    // and rim circles, so each end blends flush into the hub and the rim lip.
+    for (let i = 0; i < count; i++) {
+        const a = -Math.PI / 2 + rot + (i * 2 * Math.PI) / count;
+        ctx.beginPath();
+        ctx.moveTo(
+            cx + rHub * Math.cos(a + dIn),
+            cy + rHub * Math.sin(a + dIn),
+        );
+        ctx.lineTo(
+            cx + rLip * Math.cos(a + dOut),
+            cy + rLip * Math.sin(a + dOut),
+        );
+        ctx.arc(cx, cy, rLip, a + dOut, a - dOut, true); // outer cap on the rim
+        ctx.lineTo(
+            cx + rHub * Math.cos(a - dIn),
+            cy + rHub * Math.sin(a - dIn),
+        );
+        ctx.arc(cx, cy, rHub, a - dIn, a + dIn, false); // inner cap on the hub
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    // Hub face — same metal; lug nuts and the centre bore render on top later.
+    ctx.beginPath();
+    ctx.arc(cx, cy, rHub, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Definition strokes: only the spoke *sides* (the window edges), in the full
+    // wheel colour so blue vs orange reads crisply. The hub and rim ends are left
+    // unstroked so the spokes flow into them as one shape.
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    for (let i = 0; i < count; i++) {
+        const a = -Math.PI / 2 + rot + (i * 2 * Math.PI) / count;
+        ctx.beginPath();
+        ctx.moveTo(
+            cx + rHub * Math.cos(a + dIn),
+            cy + rHub * Math.sin(a + dIn),
+        );
+        ctx.lineTo(
+            cx + rLip * Math.cos(a + dOut),
+            cy + rLip * Math.sin(a + dOut),
+        );
+        ctx.moveTo(
+            cx + rHub * Math.cos(a - dIn),
+            cy + rHub * Math.sin(a - dIn),
+        );
+        ctx.lineTo(
+            cx + rLip * Math.cos(a - dOut),
+            cy + rLip * Math.sin(a - dOut),
+        );
+        ctx.stroke();
+    }
+}
+
+function drawFace(
+    ctx,
+    w,
+    cx,
+    cy,
+    scale,
+    color,
+    camberDeg,
+    spokeCount = 0,
+    hubR = 0,
+    rot = 0,
+    alpha = 1,
+) {
     const rOD = (w.od / 2) * scale;
     const rRim = (w.rimDmm / 2) * scale;
 
     ctx.save();
+    ctx.globalAlpha = alpha; // recede the current (rear) wheel, emphasise the new
     if (camberDeg) {
         ctx.translate(cx, cy);
         ctx.scale(1, Math.cos((camberDeg * Math.PI) / 180));
@@ -922,14 +1026,19 @@ function drawFace(ctx, w, cx, cy, scale, color, camberDeg) {
     ctx.arc(cx, cy, rOD, 0, Math.PI * 2);
     ctx.stroke();
 
-    // Rim face
-    ctx.fillStyle = `${color}14`;
+    // Rim face — a 6-spoke alloy. `rot` lets the rear wheel's spokes be offset by
+    // half a pitch so they sit in the front wheel's window gaps (both stay visible).
     ctx.strokeStyle = `${color}55`;
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.arc(cx, cy, rRim, 0, Math.PI * 2);
-    ctx.fill();
     ctx.stroke();
+    if (spokeCount > 0) {
+        drawAlloySpokes(ctx, cx, cy, rRim, color, spokeCount, hubR, rot);
+    } else {
+        ctx.fillStyle = `${color}14`;
+        ctx.fill();
+    }
 
     ctx.restore(); // undo camber foreshorten
 }
@@ -1044,9 +1153,37 @@ function drawFaceDiagram(
     const cx = W / 2;
     const cy = topPad + availH / 2;
 
-    // Concentric wheel faces — current then new
-    drawFace(ctx, o, cx, cy, scale, "#58a6ff", oCam);
-    drawFace(ctx, n, cx, cy, scale, "#f78166", nCam);
+    // Both wheels render as the 6-spoke alloy. Each hub is sized to enclose its
+    // own lug nuts (bolt PCD + lug radius) so the spokes start outboard of them,
+    // with a sensible floor and ceiling relative to that wheel's rim.
+    const lugR = (19 / Math.sqrt(3)) * scale;
+    const hubFor = (w, bolt) => {
+        const rRimPx = (w.rimDmm / 2) * scale;
+        const pat = parseBolt(bolt);
+        const pcdRpx = pat ? (pat.pcd / 2) * scale : 0;
+        return Math.min(
+            rRimPx * 0.58,
+            Math.max(rRimPx * 0.3, pcdRpx + lugR * 1.5 + 4),
+        );
+    };
+
+    // Concentric wheel faces. The current wheel sits behind, so its spokes are
+    // rotated by half a spoke pitch (30° for 6 spokes) to sit in the new wheel's
+    // window gaps — both spoke sets stay visible instead of one hiding the other.
+    drawFace(
+        ctx,
+        o,
+        cx,
+        cy,
+        scale,
+        "#58a6ff",
+        oCam,
+        6,
+        hubFor(o, oBolt),
+        Math.PI / 6,
+        0.5, // current sits behind — clearly ghosted as the "before"
+    );
+    drawFace(ctx, n, cx, cy, scale, "#f78166", nCam, 6, hubFor(n, nBolt));
 
     // Tyre markings along each sidewall. The size code is in the wheel's colour
     // (new across the top, current across the bottom); the brand sits on the new
