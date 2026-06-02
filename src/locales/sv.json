@@ -86,5 +86,8 @@
     "rowBolt": "Bultcirkel",
     "tipBolt": "Antal bultar × bultcirkeldiameter (PCD). Det nya hjulet måste passa navets bultcirkel; små skillnader kan överbryggas med adaptrar, stora oftast inte. Antar 5×114,3 om tomt.",
     "warnBoltAmber": "Bultcirkeln skiljer sig från din nuvarande, men bara lite — adaptrar finns allmänt tillgängliga.",
-    "warnBoltRed": "Bultcirkeln skiljer sig för mycket från din nuvarande och kan oftast inte anpassas säkert — hjulet passar inte."
+    "warnBoltRed": "Bultcirkeln skiljer sig för mycket från din nuvarande och kan oftast inte anpassas säkert — hjulet passar inte.",
+    "wheelDesign": "Fälgdesign",
+    "spokeCount": "Ekrar",
+    "spokeWidth": "Ekerbredd"
 }

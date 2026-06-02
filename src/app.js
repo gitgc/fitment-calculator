@@ -281,6 +281,11 @@ function calculate() {
     // Bolt pattern is optional; an unset side falls back to the typical default.
     const oBolt = document.getElementById("o-bp").value;
     const nBolt = document.getElementById("n-bp").value;
+    // Per-wheel spoke design (count + width %). Clamped by the input helper.
+    const oSpokes = Math.round(v("o-spokes"));
+    const nSpokes = Math.round(v("n-spokes"));
+    const oSpokeW = v("o-spokew") / 100;
+    const nSpokeW = v("n-spokew") / 100;
 
     const L = window.L;
     const ref1 = L.refSpeed1;
@@ -418,6 +423,10 @@ function calculate() {
         nBore,
         oBolt || DEFAULT_BOLT,
         nBolt || DEFAULT_BOLT,
+        oSpokes,
+        nSpokes,
+        oSpokeW,
+        nSpokeW,
     );
 
     document
@@ -886,14 +895,57 @@ function drawDiagram(o, n, oCam, nCam) {
 // wheel face, so each setup is a set of concentric circles (tyre outer = OD,
 // inner = rim). Camber foreshortens the circle vertically into an ellipse.
 
-// A clean 6-spoke alloy face (Rays TE37 style): six equal-width spokes running
-// from a central hub out to the rim lip, with curved ends that follow the rim
-// and large open windows between them. `hubR` is the hub radius — sized by the
-// caller to enclose the lug nuts so the spokes never overlap them.
-function drawAlloySpokes(ctx, cx, cy, rRim, color, count, hubR, rot = 0) {
+// Best rotation (radians) for the rear spoke set so the two overlaid wheels show
+// their spokes as evenly spread as possible — i.e. maximise the smallest gap
+// between any two spokes in the combined set. For equal counts this is exactly
+// half a pitch (e.g. 30° for two 6-spoke wheels); for mismatched counts (5 vs 6)
+// it settles on the best compromise.
+function bestSpokeOffset(rearCount, frontCount) {
+    const front = [];
+    for (let j = 0; j < frontCount; j++) {
+        front.push((j * 2 * Math.PI) / frontCount);
+    }
+    const period = (2 * Math.PI) / rearCount; // rear set repeats every pitch
+    const steps = 360;
+    let best = 0;
+    let bestGap = -1;
+    for (let s = 0; s < steps; s++) {
+        const rot = (s / steps) * period;
+        const all = front.slice();
+        for (let i = 0; i < rearCount; i++) {
+            all.push((rot + (i * 2 * Math.PI) / rearCount) % (2 * Math.PI));
+        }
+        all.sort((a, b) => a - b);
+        let minGap = 2 * Math.PI - (all[all.length - 1] - all[0]); // wrap gap
+        for (let k = 1; k < all.length; k++) {
+            minGap = Math.min(minGap, all[k] - all[k - 1]);
+        }
+        if (minGap > bestGap) {
+            bestGap = minGap;
+            best = rot;
+        }
+    }
+    return best;
+}
+
+// A clean alloy face (Rays TE37 style): `count` equal-width spokes running from a
+// central hub out to the rim lip, with curved ends that follow the rim and large
+// open windows between them. `hubR` is the hub radius — sized by the caller to
+// enclose the lug nuts so the spokes never overlap them.
+function drawAlloySpokes(
+    ctx,
+    cx,
+    cy,
+    rRim,
+    color,
+    count,
+    hubR,
+    rot = 0,
+    widthFrac = 0.13,
+) {
     const rLip = rRim * 0.92; // inner edge of the rim barrel
     const rHub = hubR;
-    const w = rRim * 0.13; // constant spoke width (parallel sides)
+    const w = rRim * widthFrac; // constant spoke width (parallel sides)
     const dIn = Math.asin(Math.min(1, w / 2 / rHub)); // half-angle at the hub
     const dOut = Math.asin(Math.min(1, w / 2 / rLip)); // half-angle at the rim
 
@@ -989,6 +1041,7 @@ function drawFace(
     hubR = 0,
     rot = 0,
     alpha = 1,
+    widthFrac = 0.13,
 ) {
     const rOD = (w.od / 2) * scale;
     const rRim = (w.rimDmm / 2) * scale;
@@ -1034,7 +1087,17 @@ function drawFace(
     ctx.arc(cx, cy, rRim, 0, Math.PI * 2);
     ctx.stroke();
     if (spokeCount > 0) {
-        drawAlloySpokes(ctx, cx, cy, rRim, color, spokeCount, hubR, rot);
+        drawAlloySpokes(
+            ctx,
+            cx,
+            cy,
+            rRim,
+            color,
+            spokeCount,
+            hubR,
+            rot,
+            widthFrac,
+        );
     } else {
         ctx.fillStyle = `${color}14`;
         ctx.fill();
@@ -1131,6 +1194,10 @@ function drawFaceDiagram(
     nBore = 0,
     oBolt = "",
     nBolt = "",
+    oSpokes = 6,
+    nSpokes = 6,
+    oSpokeW = 0.13,
+    nSpokeW = 0.13,
 ) {
     const canvas = document.getElementById("cv2");
     if (!canvas) return;
@@ -1167,9 +1234,10 @@ function drawFaceDiagram(
         );
     };
 
-    // Concentric wheel faces. The current wheel sits behind, so its spokes are
-    // rotated by half a spoke pitch (30° for 6 spokes) to sit in the new wheel's
-    // window gaps — both spoke sets stay visible instead of one hiding the other.
+    // Concentric wheel faces. The current wheel sits behind; its spokes are
+    // rotated by the offset that best interleaves them with the new wheel's
+    // spokes (half a pitch for matching counts) so both stay visible.
+    const rearRot = bestSpokeOffset(oSpokes, nSpokes);
     drawFace(
         ctx,
         o,
@@ -1178,12 +1246,26 @@ function drawFaceDiagram(
         scale,
         "#58a6ff",
         oCam,
-        6,
+        oSpokes,
         hubFor(o, oBolt),
-        Math.PI / 6,
+        rearRot,
         0.5, // current sits behind — clearly ghosted as the "before"
+        oSpokeW,
     );
-    drawFace(ctx, n, cx, cy, scale, "#f78166", nCam, 6, hubFor(n, nBolt));
+    drawFace(
+        ctx,
+        n,
+        cx,
+        cy,
+        scale,
+        "#f78166",
+        nCam,
+        nSpokes,
+        hubFor(n, nBolt),
+        0,
+        1,
+        nSpokeW,
+    );
 
     // Tyre markings along each sidewall. The size code is in the wheel's colour
     // (new across the top, current across the bottom); the brand sits on the new
@@ -1421,6 +1503,8 @@ const PARAMS = {
     "o-cam": "ocam",
     "o-cb": "ocb",
     "o-bp": "obp",
+    "o-spokes": "osc",
+    "o-spokew": "osw",
     "n-d": "nd",
     "n-w": "nw",
     "n-et": "net",
@@ -1430,6 +1514,8 @@ const PARAMS = {
     "n-cam": "ncam",
     "n-cb": "ncb",
     "n-bp": "nbp",
+    "n-spokes": "nsc",
+    "n-spokew": "nsw",
 };
 
 // The genuinely optional inputs (centre bore, bolt pattern). Only these are
@@ -1438,11 +1524,21 @@ const PARAMS = {
 // reverting to its HTML default on reopen.
 const OPTIONAL_PARAMS = new Set(["o-cb", "n-cb", "o-bp", "n-bp"]);
 
+// Cosmetic-only fields dropped from the share URL while at their default, to keep
+// the link short. Absent → loadFromParams leaves the HTML default, so unchanged.
+const DEFAULT_SKIP = {
+    "o-spokes": "6",
+    "o-spokew": "13",
+    "n-spokes": "6",
+    "n-spokew": "13",
+};
+
 function buildShareUrl() {
     const p = new URLSearchParams();
     for (const [id, key] of Object.entries(PARAMS)) {
         const { value } = document.getElementById(id);
         if (value === "" && OPTIONAL_PARAMS.has(id)) continue;
+        if (DEFAULT_SKIP[id] === value) continue;
         p.set(key, value);
     }
     return `${location.origin}${location.pathname}?${p}`;
@@ -1600,6 +1696,10 @@ window.onload = () => {
     calculate();
     initLangSwitcher();
     initSizeInputs();
+    // Live-update the face diagram as the spoke design is tweaked.
+    for (const id of ["o-spokes", "o-spokew", "n-spokes", "n-spokew"]) {
+        document.getElementById(id).addEventListener("input", calculate);
+    }
 };
 
 // ── Service worker registration ───────────────────────────────────────────────

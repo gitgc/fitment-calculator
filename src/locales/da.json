@@ -86,5 +86,8 @@
     "rowBolt": "Boltcirkel",
     "tipBolt": "Antal bolte × boltcirkeldiameter (PCD). Den nye fælg skal passe til navets boltcirkel; små forskelle kan klares med adaptere, store som regel ikke. Antager 5×114,3 hvis tom.",
     "warnBoltAmber": "Boltcirklen afviger fra din nuværende, men kun lidt — adaptere er almindeligt tilgængelige.",
-    "warnBoltRed": "Boltcirklen afviger for meget fra din nuværende og kan som regel ikke tilpasses sikkert — fælgen passer ikke."
+    "warnBoltRed": "Boltcirklen afviger for meget fra din nuværende og kan som regel ikke tilpasses sikkert — fælgen passer ikke.",
+    "wheelDesign": "Fælgdesign",
+    "spokeCount": "Eger",
+    "spokeWidth": "Egerbredde"
 }

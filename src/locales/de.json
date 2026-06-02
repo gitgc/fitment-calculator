@@ -86,5 +86,8 @@
     "rowBolt": "Lochkreis",
     "tipBolt": "Lochzahl × Lochkreisdurchmesser (LK). Das neue Rad muss zum Lochkreis der Nabe passen; kleine Unterschiede lassen sich mit Adaptern überbrücken, große meist nicht. Standard 5×114,3, falls leer.",
     "warnBoltAmber": "Der Lochkreis weicht vom aktuellen ab, aber nur geringfügig — Adapter sind gängig verfügbar.",
-    "warnBoltRed": "Der Lochkreis weicht zu stark vom aktuellen ab und lässt sich meist nicht sicher adaptieren — das Rad passt nicht."
+    "warnBoltRed": "Der Lochkreis weicht zu stark vom aktuellen ab und lässt sich meist nicht sicher adaptieren — das Rad passt nicht.",
+    "wheelDesign": "Felgendesign",
+    "spokeCount": "Speichen",
+    "spokeWidth": "Speichenbreite"
 }

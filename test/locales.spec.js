@@ -26,6 +26,7 @@ const REQUIRED_KEYS = [
 	'calcBtn', 'shareBtn', 'shareBtnAriaLabel',
 	'tableAriaLabel', 'colMeasurement', 'colCurrent', 'colNew', 'colDifference',
 	'crossSectionTitle', 'faceTitle', 'suspensionNote', 'legendCurrent', 'legendNew',
+	'wheelDesign', 'spokeCount', 'spokeWidth',
 	'canvasAriaLabelStatic', 'githubAriaLabel', 'switchLang', 'langName',
 	'shareCopied',
 	'rowDiameter', 'rowCircumference', 'rowPoke', 'rowInset', 'rowSpeedoError',

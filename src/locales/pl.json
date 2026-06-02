@@ -86,5 +86,8 @@
     "rowBolt": "Rozstaw śrub",
     "tipBolt": "Liczba śrub × średnica okręgu śrub (PCD). Nowa felga musi pasować do rozstawu śrub piasty; małe różnice można nadrobić adapterami, dużych zwykle nie. Domyślnie 5×114,3, jeśli puste.",
     "warnBoltAmber": "Rozstaw śrub różni się od obecnego, ale tylko nieznacznie — adaptery są powszechnie dostępne.",
-    "warnBoltRed": "Rozstaw śrub różni się zbyt mocno od obecnego i zwykle nie da się go bezpiecznie zaadaptować — felga się nie przykręci."
+    "warnBoltRed": "Rozstaw śrub różni się zbyt mocno od obecnego i zwykle nie da się go bezpiecznie zaadaptować — felga się nie przykręci.",
+    "wheelDesign": "Wygląd felgi",
+    "spokeCount": "Ramiona",
+    "spokeWidth": "Szerokość ramienia"
 }

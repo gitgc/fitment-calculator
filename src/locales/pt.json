@@ -86,5 +86,8 @@
     "rowBolt": "Furação",
     "tipBolt": "Número de furos × diâmetro do círculo de furação (PCD). A nova jante deve coincidir com a furação do cubo; pequenas diferenças resolvem-se com adaptadores, as grandes normalmente não. Assume 5×114,3 se vazio.",
     "warnBoltAmber": "A furação difere da atual, mas apenas ligeiramente — há adaptadores facilmente disponíveis.",
-    "warnBoltRed": "A furação difere demasiado da atual e normalmente não se adapta com segurança — não vai encaixar."
+    "warnBoltRed": "A furação difere demasiado da atual e normalmente não se adapta com segurança — não vai encaixar.",
+    "wheelDesign": "Design da jante",
+    "spokeCount": "Raios",
+    "spokeWidth": "Largura do raio"
 }

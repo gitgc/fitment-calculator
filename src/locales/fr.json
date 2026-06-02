@@ -86,5 +86,8 @@
     "rowBolt": "Entraxe",
     "tipBolt": "Nombre de trous × diamètre de perçage (PCD). La nouvelle jante doit correspondre à l'entraxe du moyeu ; de petites différences se rattrapent avec des adaptateurs, les grandes rarement. 5×114,3 par défaut si vide.",
     "warnBoltAmber": "L'entraxe diffère de l'actuel, mais légèrement — des adaptateurs sont couramment disponibles.",
-    "warnBoltRed": "L'entraxe diffère trop de l'actuel et ne peut généralement pas être adapté en toute sécurité — la jante ne se montera pas."
+    "warnBoltRed": "L'entraxe diffère trop de l'actuel et ne peut généralement pas être adapté en toute sécurité — la jante ne se montera pas.",
+    "wheelDesign": "Design de jante",
+    "spokeCount": "Branches",
+    "spokeWidth": "Largeur de branche"
 }

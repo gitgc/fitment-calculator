@@ -86,5 +86,8 @@
     "rowBolt": "Schema fori",
     "tipBolt": "Numero fori × diametro di calettamento (PCD). Il nuovo cerchio deve corrispondere allo schema fori del mozzo; piccole differenze si colmano con adattatori, quelle grandi di solito no. Predefinito 5×114,3 se vuoto.",
     "warnBoltAmber": "Lo schema fori è diverso dall'attuale, ma di poco — gli adattatori sono comunemente disponibili.",
-    "warnBoltRed": "Lo schema fori è troppo diverso dall'attuale e di solito non è adattabile in sicurezza — non si monta."
+    "warnBoltRed": "Lo schema fori è troppo diverso dall'attuale e di solito non è adattabile in sicurezza — non si monta.",
+    "wheelDesign": "Design del cerchio",
+    "spokeCount": "Razze",
+    "spokeWidth": "Larghezza razza"
 }

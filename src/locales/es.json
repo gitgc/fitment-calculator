@@ -86,5 +86,8 @@
     "rowBolt": "Patrón de pernos",
     "tipBolt": "Número de pernos × diámetro del círculo de pernos (PCD). La nueva llanta debe coincidir con el patrón del cubo; las pequeñas diferencias se salvan con adaptadores, las grandes normalmente no. Por defecto 5×114,3 si se deja vacío.",
     "warnBoltAmber": "El patrón de pernos difiere del actual, pero solo ligeramente — los adaptadores están disponibles habitualmente.",
-    "warnBoltRed": "El patrón de pernos difiere demasiado del actual y normalmente no se puede adaptar con seguridad — no se podrá montar."
+    "warnBoltRed": "El patrón de pernos difiere demasiado del actual y normalmente no se puede adaptar con seguridad — no se podrá montar.",
+    "wheelDesign": "Diseño de llanta",
+    "spokeCount": "Radios",
+    "spokeWidth": "Ancho de radio"
 }

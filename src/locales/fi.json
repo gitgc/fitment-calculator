@@ -86,5 +86,8 @@
     "rowBolt": "Pulttijako",
     "tipBolt": "Pulttien määrä × jakohalkaisija (PCD). Uuden vanteen on sovittava navan pulttijakoon; pienet erot voi kuroa adaptereilla, suuria yleensä ei. Oletus 5×114,3, jos tyhjä.",
     "warnBoltAmber": "Pulttijako poikkeaa nykyisestä, mutta vain vähän — adaptereita on yleisesti saatavilla.",
-    "warnBoltRed": "Pulttijako poikkeaa liikaa nykyisestä eikä sitä yleensä voi sovittaa turvallisesti — vanne ei kiinnity."
+    "warnBoltRed": "Pulttijako poikkeaa liikaa nykyisestä eikä sitä yleensä voi sovittaa turvallisesti — vanne ei kiinnity.",
+    "wheelDesign": "Vanteen muotoilu",
+    "spokeCount": "Puolat",
+    "spokeWidth": "Puolan leveys"
 }

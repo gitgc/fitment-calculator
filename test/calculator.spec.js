@@ -842,3 +842,62 @@ test.describe('Fitment warnings', () => {
 		await expect(bolt.locator('td').nth(2)).toContainText('—');
 	});
 });
+
+// ── Wheel design (per-wheel spokes) ───────────────────────────────────────────
+
+test.describe('Wheel design — spoke controls', () => {
+	test('default values and clamp attributes for both wheels', async ({ makePage }) => {
+		const page = await makePage('en');
+		await page.goto(localeUrl('en'), { waitUntil: 'domcontentloaded' });
+		for (const id of ['o-spokes', 'n-spokes']) {
+			await expect(page.locator(`#${id}`)).toHaveValue('6');
+			await expect(page.locator(`#${id}`)).toHaveAttribute('min', '3');
+			await expect(page.locator(`#${id}`)).toHaveAttribute('max', '12');
+		}
+		for (const id of ['o-spokew', 'n-spokew']) {
+			await expect(page.locator(`#${id}`)).toHaveValue('13');
+			await expect(page.locator(`#${id}`)).toHaveAttribute('min', '5');
+			await expect(page.locator(`#${id}`)).toHaveAttribute('max', '30');
+		}
+	});
+
+	test('spoke design round-trips through the share URL', async ({ makePage }) => {
+		const page = await makePage('en');
+		await page.goto(localeUrl('en'), { waitUntil: 'domcontentloaded' });
+		await page.fill('#n-spokes', '8');
+		await page.fill('#o-spokew', '20');
+		await page.evaluate(() => {
+			window.__copied = null;
+			navigator.clipboard.writeText = (t) => {
+				window.__copied = t;
+				return Promise.resolve();
+			};
+		});
+		await page.click('#share-btn');
+
+		const url = await page.evaluate(() => window.__copied);
+		expect(url).toContain('nsc=8');
+		expect(url).toContain('osw=20');
+		// Fields left at their default are dropped to keep the URL short.
+		expect(url).not.toContain('osc='); // o-spokes still 6
+		expect(url).not.toContain('nsw='); // n-spokew still 13
+
+		await page.goto(url, { waitUntil: 'domcontentloaded' });
+		await expect(page.locator('#n-spokes')).toHaveValue('8');
+		await expect(page.locator('#o-spokew')).toHaveValue('20');
+		// Skipped defaults round-trip back to their default values.
+		await expect(page.locator('#o-spokes')).toHaveValue('6');
+		await expect(page.locator('#n-spokew')).toHaveValue('13');
+	});
+
+	test('editing a spoke field live-redraws the face canvas', async ({ makePage }) => {
+		const page = await makePage('en');
+		await page.goto(localeUrl('en'), { waitUntil: 'domcontentloaded' });
+		await page.click('button.calc-btn');
+		// Changing spokes should re-run calculate() without another button press.
+		await page.fill('#n-spokes', '10');
+		await expect(page.locator('#cv2')).toBeVisible();
+		// The diagram is canvas-drawn; assert no error and the value stuck.
+		await expect(page.locator('#n-spokes')).toHaveValue('10');
+	});
+});

@@ -86,5 +86,8 @@
     "rowBolt": "Steekcirkel",
     "tipBolt": "Aantal bouten × steekcirkeldiameter (PCD). Het nieuwe wiel moet bij de steekcirkel van de naaf passen; kleine verschillen zijn met adapters te overbruggen, grote meestal niet. Standaard 5×114,3 indien leeg.",
     "warnBoltAmber": "De steekcirkel wijkt af van de huidige, maar slechts licht — adapters zijn algemeen verkrijgbaar.",
-    "warnBoltRed": "De steekcirkel wijkt te veel af van de huidige en is meestal niet veilig aan te passen — het wiel past niet."
+    "warnBoltRed": "De steekcirkel wijkt te veel af van de huidige en is meestal niet veilig aan te passen — het wiel past niet.",
+    "wheelDesign": "Wielontwerp",
+    "spokeCount": "Spaken",
+    "spokeWidth": "Spaakbreedte"
 }

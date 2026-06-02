@@ -86,5 +86,8 @@
     "rowBolt": "Bolt Pattern",
     "tipBolt": "Stud count × pitch-circle diameter (PCD). The new wheel must match the hub's bolt pattern; small differences can be bridged with adapters, large ones usually can't. Assumes 5×114.3 if left unset.",
     "warnBoltAmber": "The bolt pattern differs from your current one, but only slightly — adapters are commonly available.",
-    "warnBoltRed": "The bolt pattern differs too much from your current one and usually can't be safely adapted — it won't bolt on."
+    "warnBoltRed": "The bolt pattern differs too much from your current one and usually can't be safely adapted — it won't bolt on.",
+    "wheelDesign": "Wheel design",
+    "spokeCount": "Spokes",
+    "spokeWidth": "Spoke width"
 }

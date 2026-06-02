@@ -86,5 +86,8 @@
     "rowBolt": "Boltsirkel",
     "tipBolt": "Antall bolter × boltsirkeldiameter (PCD). Det nye hjulet må passe navets boltsirkel; små forskjeller kan dekkes med adaptere, store vanligvis ikke. Antar 5×114,3 hvis tomt.",
     "warnBoltAmber": "Boltsirkelen avviker fra din nåværende, men bare litt — adaptere er vanlig tilgjengelig.",
-    "warnBoltRed": "Boltsirkelen avviker for mye fra din nåværende og kan vanligvis ikke tilpasses trygt — hjulet passer ikke."
+    "warnBoltRed": "Boltsirkelen avviker for mye fra din nåværende og kan vanligvis ikke tilpasses trygt — hjulet passer ikke.",
+    "wheelDesign": "Felgdesign",
+    "spokeCount": "Eiker",
+    "spokeWidth": "Eikerbredde"
 }

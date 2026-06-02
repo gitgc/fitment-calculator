@@ -392,6 +392,69 @@
                         role="img"
                         aria-label="{{ faceTitle }}"
                     ></canvas>
+                    <div class="wheel-design">
+                        <h4 class="wheel-design-title">{{ wheelDesign }}</h4>
+                        <div class="inputs">
+                            <div class="card old">
+                                <h2>{{ legendCurrent }}</h2>
+                                <div class="field">
+                                    <label for="o-spokes"
+                                        >{{ spokeCount }}</label
+                                    >
+                                    <input
+                                        type="number"
+                                        id="o-spokes"
+                                        value="6"
+                                        min="3"
+                                        max="12"
+                                        step="1"
+                                    >
+                                </div>
+                                <div class="field">
+                                    <label for="o-spokew"
+                                        >{{ spokeWidth }}</label
+                                    >
+                                    <input
+                                        type="number"
+                                        id="o-spokew"
+                                        value="13"
+                                        min="5"
+                                        max="30"
+                                        step="1"
+                                    >
+                                </div>
+                            </div>
+                            <div class="card new">
+                                <h2>{{ legendNew }}</h2>
+                                <div class="field">
+                                    <label for="n-spokes"
+                                        >{{ spokeCount }}</label
+                                    >
+                                    <input
+                                        type="number"
+                                        id="n-spokes"
+                                        value="6"
+                                        min="3"
+                                        max="12"
+                                        step="1"
+                                    >
+                                </div>
+                                <div class="field">
+                                    <label for="n-spokew"
+                                        >{{ spokeWidth }}</label
+                                    >
+                                    <input
+                                        type="number"
+                                        id="n-spokew"
+                                        value="13"
+                                        min="5"
+                                        max="30"
+                                        step="1"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>

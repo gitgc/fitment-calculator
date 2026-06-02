@@ -553,6 +553,24 @@ tr.row-danger .row-reason {
     color: var(--muted);
     margin-bottom: 0.75rem;
 }
+/* Optional per-wheel spoke design controls, beneath the face diagram. Reuses the
+   two-column .inputs/.card layout from the top so it matches the main form. */
+.wheel-design {
+    margin-top: 1.25rem;
+}
+.wheel-design-title {
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+}
+.wheel-design .inputs {
+    margin-bottom: 0;
+}
+
 .legend {
     display: flex;
     justify-content: center;

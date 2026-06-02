@@ -86,5 +86,8 @@
     "rowBolt": "Raspored vijaka",
     "tipBolt": "Broj vijaka × promjer kružnice vijaka (PCD). Nova felga mora odgovarati rasporedu vijaka glavčine; male razlike premošćuju se adapterima, velike obično ne. Pretpostavlja 5×114,3 ako je prazno.",
     "warnBoltAmber": "Raspored vijaka razlikuje se od trenutnog, ali tek neznatno — adapteri su uobičajeno dostupni.",
-    "warnBoltRed": "Raspored vijaka previše se razlikuje od trenutnog i obično se ne može sigurno prilagoditi — felga neće sjesti."
+    "warnBoltRed": "Raspored vijaka previše se razlikuje od trenutnog i obično se ne može sigurno prilagoditi — felga neće sjesti.",
+    "wheelDesign": "Dizajn felge",
+    "spokeCount": "Krakovi",
+    "spokeWidth": "Širina kraka"
 }

@@ -86,5 +86,8 @@
     "rowBolt": "Prindere (PCD)",
     "tipBolt": "Număr de prezoane × diametrul cercului de prindere (PCD). Noua jantă trebuie să se potrivească cu prinderea butucului; diferențele mici se acoperă cu adaptoare, cele mari de obicei nu. Implicit 5×114,3 dacă e gol.",
     "warnBoltAmber": "Prinderea diferă de cea actuală, dar doar puțin — adaptoarele sunt disponibile în mod obișnuit.",
-    "warnBoltRed": "Prinderea diferă prea mult de cea actuală și de obicei nu poate fi adaptată în siguranță — janta nu se va monta."
+    "warnBoltRed": "Prinderea diferă prea mult de cea actuală și de obicei nu poate fi adaptată în siguranță — janta nu se va monta.",
+    "wheelDesign": "Design jantă",
+    "spokeCount": "Spițe",
+    "spokeWidth": "Lățime spiță"
 }
