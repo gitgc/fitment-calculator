@@ -73,5 +73,7 @@
     "warnBulge": "Fælgen ser smal ud til dette dæk — slidbanen kan bule ud.",
     "warnLowProfile": "Meget lavprofildæk — hårdere køretur og højere risiko for fælg- og hulskader.",
     "warnSpacer": "Tyk afstandsskive — tjek at hjulboltene har nok gevindindgreb og brug navcentrerede afstandsskiver.",
-    "warnCamber": "Aggressiv camber — øger slitagen på inderkanten og reducerer bremsekontaktfladen."
+    "warnCamber": "Aggressiv camber — øger slitagen på inderkanten og reducerer bremsekontaktfladen.",
+    "warnPoke": "Stikker mærkbart længere ud end din nuværende opsætning — kan skrabe mod hjulkassen eller stikke ud. Tjek frigangen.",
+    "warnInset": "Sidder mærkbart længere ind end din nuværende opsætning — kan skrabe mod fjederben, bremse eller inderskærm. Tjek frigangen."
 }

@@ -73,5 +73,7 @@
     "warnBulge": "Fälgen ser smal ut för detta däck — slitbanan kan bukta ut.",
     "warnLowProfile": "Mycket lågprofilsdäck — hårdare gång och högre risk för fälg- och potthålsskador.",
     "warnSpacer": "Tjock distans — kontrollera att hjulbultarna får tillräckligt grepp och använd navcentrerade distanser.",
-    "warnCamber": "Aggressiv camber — snabbar på slitage på innerkanten och minskar bromskontaktytan."
+    "warnCamber": "Aggressiv camber — snabbar på slitage på innerkanten och minskar bromskontaktytan.",
+    "warnPoke": "Sticker ut märkbart mer än din nuvarande uppsättning — kan skava mot hjulhuset eller sticka ut. Kontrollera spelrummet.",
+    "warnInset": "Sitter märkbart längre in än din nuvarande uppsättning — kan skava mot fjäderbenet, bromsen eller innerskärmen. Kontrollera spelrummet."
 }

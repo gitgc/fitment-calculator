@@ -44,6 +44,8 @@ const TD = {
 	rideNew:      22,  // RideHeight   new
 	// Row indices (into `#tbody tr`) for warning checks
 	diameterRow:  0,
+	pokeRowIdx:   2,
+	insetRowIdx:  3,
 	speedoRow:    4,
 };
 
@@ -654,10 +656,10 @@ test.describe('Fitment warnings', () => {
 	});
 
 	// ── Tier 2 (setup-level, no row) ──────────────────────────────────────────
-	test('a large wheel spacer is a danger (no row warnings)', async () => {
-		await page.fill('#n-sp', '30'); // spacer only affects ET/poke, not the rows
+	test('a large wheel spacer is a danger', async () => {
+		// (A 30 mm spacer also pushes poke out, so the Poke row warns too — correct.)
+		await page.fill('#n-sp', '30');
 		await page.click('button.calc-btn');
-		await expect(page.locator('#tbody tr.row-warn, #tbody tr.row-danger')).toHaveCount(0);
 		await expect(page.locator('#fitment-warnings .fitment-danger')).toContainText('spacer');
 	});
 
@@ -688,5 +690,25 @@ test.describe('Fitment warnings', () => {
 		const warnings = page.locator('#fitment-warnings .fitment-warning');
 		await expect(warnings).toHaveCount(2);
 		await expect(warnings.first()).toHaveClass(/fitment-danger/);
+	});
+
+	// ── Tier 3 (poke / inset rows) ────────────────────────────────────────────
+	test('a big poke increase flags the Poke row (danger)', async () => {
+		// Low ET pushes the wheel out without changing OD/stretch/etc.
+		await page.fill('#n-et', '20');
+		await page.click('button.calc-btn');
+		const rows = page.locator('#tbody tr');
+		await expect(rows.nth(TD.pokeRowIdx)).toHaveClass(/row-danger/);
+		await expect(rows.nth(TD.pokeRowIdx).locator('.row-reason')).toContainText('proud');
+		await expect(page.locator('#fitment-warnings')).toBeEmpty();
+	});
+
+	test('a big inset increase flags the Inset row (danger)', async () => {
+		// High ET pulls the wheel inboard
+		await page.fill('#n-et', '80');
+		await page.click('button.calc-btn');
+		const rows = page.locator('#tbody tr');
+		await expect(rows.nth(TD.insetRowIdx)).toHaveClass(/row-danger/);
+		await expect(rows.nth(TD.insetRowIdx).locator('.row-reason')).toContainText('strut');
 	});
 });

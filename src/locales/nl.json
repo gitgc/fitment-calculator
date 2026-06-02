@@ -73,5 +73,7 @@
     "warnBulge": "De velg lijkt smal voor deze band — het loopvlak kan bol gaan staan.",
     "warnLowProfile": "Zeer laag profiel — hardere rit en hoger risico op velg- en kuilschade.",
     "warnSpacer": "Grote spacer — controleer of de wielbouten genoeg grip houden en gebruik hub-centric spacers.",
-    "warnCamber": "Agressieve camber — versnelt slijtage aan de binnenkant en verkleint het remcontactvlak."
+    "warnCamber": "Agressieve camber — versnelt slijtage aan de binnenkant en verkleint het remcontactvlak.",
+    "warnPoke": "Steekt duidelijk verder uit dan je huidige opstelling — kan de wielkast raken of uitsteken. Controleer de speling.",
+    "warnInset": "Zit duidelijk verder naar binnen dan je huidige opstelling — kan het veerpoot, de rem of de binnenkant raken. Controleer de speling."
 }

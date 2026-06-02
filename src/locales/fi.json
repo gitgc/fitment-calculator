@@ -73,5 +73,7 @@
     "warnBulge": "Vanne näyttää kapealta tälle renkaalle — kulutuspinta voi pullistua.",
     "warnLowProfile": "Erittäin matalaprofiilinen rengas — kovempi kyyti ja suurempi vanteen ja kuoppavaurioiden riski.",
     "warnSpacer": "Paksu välilevy — varmista pyöränpulttien riittävä kiinnitys ja käytä napakeskisiä välilevyjä.",
-    "warnCamber": "Voimakas camber — nopeuttaa sisäreunan kulumista ja pienentää jarrutuksen kosketuspintaa."
+    "warnCamber": "Voimakas camber — nopeuttaa sisäreunan kulumista ja pienentää jarrutuksen kosketuspintaa.",
+    "warnPoke": "Työntyy selvästi ulommas kuin nykyinen kokoonpano — voi osua lokasuojaan tai työntyä ulos. Tarkista välys.",
+    "warnInset": "Istuu selvästi sisemmäs kuin nykyinen kokoonpano — voi osua jousijalkaan, jarruun tai sisälokasuojaan. Tarkista välys."
 }

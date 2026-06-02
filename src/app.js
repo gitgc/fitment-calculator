@@ -138,6 +138,24 @@ function assessFitment(o, n, nCam) {
         };
     }
 
+    // Poke / inset clearance — car-specific (depends on the actual arch and
+    // suspension), so judged on how much further out/in the new setup sits than
+    // the current one, and worded as advisory ("check clearance").
+    const pokeUp = n.poke - o.poke;
+    if (pokeUp > 20) {
+        rows[L.rowPoke] = {
+            severity: pokeUp > 30 ? "danger" : "warn",
+            message: L.warnPoke,
+        };
+    }
+    const insetUp = n.inset - o.inset;
+    if (insetUp > 15) {
+        rows[L.rowInset] = {
+            severity: insetUp > 25 ? "danger" : "warn",
+            message: L.warnInset,
+        };
+    }
+
     // Tyre stretch / bulge for the new setup — rim width vs tyre section width.
     // idealRim (inches) ≈ section_mm / 30 is a reasonable linear approximation.
     const delta = n.rimWin - n.tw / 30;

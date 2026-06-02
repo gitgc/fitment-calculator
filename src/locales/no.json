@@ -73,5 +73,7 @@
     "warnBulge": "Felgen ser smal ut for dette dekket — slitebanen kan bule ut.",
     "warnLowProfile": "Svært lavprofildekk — hardere kjøring og høyere risiko for felg- og hullskader.",
     "warnSpacer": "Tykk avstandsstykke — sjekk at hjulboltene har nok gjengegrep og bruk navsentrerte avstandsstykker.",
-    "warnCamber": "Aggressiv camber — øker slitasjen på innerkanten og reduserer bremsekontaktflaten."
+    "warnCamber": "Aggressiv camber — øker slitasjen på innerkanten og reduserer bremsekontaktflaten.",
+    "warnPoke": "Stikker merkbart lenger ut enn ditt nåværende oppsett — kan skrape mot hjulbuen eller stikke ut. Sjekk klaringen.",
+    "warnInset": "Sitter merkbart lenger inn enn ditt nåværende oppsett — kan skrape mot fjærbein, brems eller innerskjerm. Sjekk klaringen."
 }

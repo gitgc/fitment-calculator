@@ -14,7 +14,7 @@ Interactive wheel and tyre fitment calculator. Enter your current and new wheel/
 - **Fully accessible** — skip link, labelled form groups, `role="status"` live region, axe-core clean
 - **Localised** — 23 languages with browser auto-detection, per-locale HTML, hreflang, and full RTL support (Arabic, Hebrew, Urdu)
 - **Input validation** — all fields have enforced min/max ranges; JS clamping backs up browser constraints
-- **Fitment warnings** — rows turn amber/red with a plain-English reason for speedo under-reading, large rolling-diameter changes, and tyre stretch/bulge
+- **Fitment warnings** — amber/red flags with a plain-English reason: speedo under-reading, large rolling-diameter change, poke/inset clearance (row tints) plus tyre stretch/bulge, low profile, large spacers and aggressive camber (warning strip)
 - **Hardened headers** — CSP, HSTS, COOP, and frame control shipped via `_headers` (Cloudflare) and the Caddyfile (Docker)
 - **Zero client dependencies** — pure vanilla JS, no framework
 

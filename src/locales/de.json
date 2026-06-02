@@ -73,5 +73,7 @@
     "warnBulge": "Die Felge wirkt für diesen Reifen zu schmal — die Lauffläche kann sich wölben.",
     "warnLowProfile": "Sehr flacher Reifen — härteres Fahrverhalten und höheres Risiko für Felgen- und Schlaglochschäden.",
     "warnSpacer": "Große Distanzscheibe — ausreichende Einschraubtiefe der Radbolzen prüfen und nabenzentrische Distanzscheiben verwenden.",
-    "warnCamber": "Starker Sturz — beschleunigt den Verschleiß an der Reifeninnenkante und verringert die Bremsauflagefläche."
+    "warnCamber": "Starker Sturz — beschleunigt den Verschleiß an der Reifeninnenkante und verringert die Bremsauflagefläche.",
+    "warnPoke": "Steht deutlich weiter außen als die aktuelle Konfiguration — kann am Radkasten schleifen oder hervorstehen. Freigängigkeit prüfen.",
+    "warnInset": "Sitzt deutlich weiter innen als die aktuelle Konfiguration — kann an Federbein, Bremse oder innerem Radkasten schleifen. Freigängigkeit prüfen."
 }

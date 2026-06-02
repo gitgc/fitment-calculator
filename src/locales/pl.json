@@ -73,5 +73,7 @@
     "warnBulge": "Felga wygląda na wąską do tej opony — bieżnik może się wybrzuszyć.",
     "warnLowProfile": "Bardzo niskoprofilowa opona — twardsza jazda i większe ryzyko uszkodzenia felgi oraz przez dziury.",
     "warnSpacer": "Gruba przekładka — sprawdź wystarczające skręcenie szpilek i użyj przekładek hub-centric.",
-    "warnCamber": "Agresywny kąt pochylenia — przyspiesza zużycie wewnętrznej krawędzi i zmniejsza powierzchnię hamowania."
+    "warnCamber": "Agresywny kąt pochylenia — przyspiesza zużycie wewnętrznej krawędzi i zmniejsza powierzchnię hamowania.",
+    "warnPoke": "Wystaje wyraźnie bardziej niż obecna konfiguracja — może ocierać o nadkole lub wystawać. Sprawdź prześwit.",
+    "warnInset": "Wchodzi wyraźnie głębiej niż obecna konfiguracja — może ocierać o amortyzator, hamulec lub wewnętrzne nadkole. Sprawdź prześwit."
 }
