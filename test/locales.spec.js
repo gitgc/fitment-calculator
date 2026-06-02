@@ -149,6 +149,16 @@ test.describe('Build output — HTML files', () => {
 		}
 	});
 
+	test('window.SITE.brand is injected from the canonical host', () => {
+		const brand = new URL(siteConfig.canonicalUrl).host; // e.g. fixthatgap.com
+		for (const { code } of locales) {
+			const content = html(code);
+			if (!content) return;
+			expect(content, `${code} window.SITE`).toContain('window.SITE=');
+			expect(content, `${code} brand`).toContain(`brand:"${brand}"`);
+		}
+	});
+
 	test('every page has hreflang tags for all locales plus x-default', () => {
 		const expected = locales.length + 1;
 		for (const { code } of locales) {

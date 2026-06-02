@@ -239,6 +239,17 @@ async function build() {
 	// canonical/hreflang tags are simply omitted.
 	const base = siteConfig.canonicalUrl ? siteConfig.canonicalUrl.replace(/\/$/, '') : '';
 
+	// Brand shown on the diagrams (tyre sidewall + watermark). Explicit `brand` in
+	// site.config.json wins; otherwise fall back to the canonical URL's host.
+	let brand = siteConfig.brand || '';
+	if (!brand && siteConfig.canonicalUrl) {
+		try {
+			brand = new URL(siteConfig.canonicalUrl).host;
+		} catch {
+			brand = '';
+		}
+	}
+
 	const htmlMinOptions = {
 		collapseWhitespace:            true,
 		removeComments:                true,
@@ -272,7 +283,7 @@ async function build() {
 			? buildAutoDetectScript(nonDefaultCodes)
 			: buildLocaleStoreScript(locale.code);
 		const langSwitcher  = buildLangSwitcher(locales, locale.code);
-		const localeScript  = `<script>window.L=${JSON.stringify(L)};</script>`;
+		const localeScript  = `<script>window.L=${JSON.stringify(L)};window.SITE=${JSON.stringify({ brand })};</script>`;
 
 		let html = htmlBase;
 
