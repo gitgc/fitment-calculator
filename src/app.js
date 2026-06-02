@@ -13,21 +13,31 @@ function v(id) {
 
 // ── Tyre size notation ──────────────────────────────────────────────────────────
 // Parses standard metric tyre codes into { tw, pr, rim }, e.g. "225/45R17",
-// "P225/45ZR17", "225/45-17", "225 / 45 r 17". Returns null if it doesn't look
-// like a tyre size or the values fall outside the input ranges.
+// "P225/45ZR17", "225/45-17", "225 / 45 r 17". Returns null if the string doesn't
+// match the notation. Value ranges are NOT checked here — the call site validates
+// each number against the matching <input>'s own min/max so the bounds can never
+// drift from the UI constraints.
 
 function parseTyreSize(str) {
     const m = String(str).match(
         /(\d{2,3})\s*\/\s*(\d{2,3})\s*(?:z?\s*r|-)\s*(\d{2}(?:\.\d)?)/i,
     );
     if (!m) return null;
-    const tw = parseInt(m[1], 10);
-    const pr = parseInt(m[2], 10);
-    const rim = parseFloat(m[3]);
-    if (tw < 100 || tw > 500) return null;
-    if (pr < 10 || pr > 100) return null;
-    if (rim < 12 || rim > 25) return null;
-    return { tw, pr, rim };
+    return {
+        tw: parseInt(m[1], 10),
+        pr: parseInt(m[2], 10),
+        rim: parseFloat(m[3]),
+    };
+}
+
+// True if `val` is within the [min, max] declared on the input with this id.
+function withinInputRange(id, val) {
+    const el = document.getElementById(id);
+    const lo = parseFloat(el.min);
+    const hi = parseFloat(el.max);
+    return (
+        (Number.isNaN(lo) || val >= lo) && (Number.isNaN(hi) || val <= hi)
+    );
 }
 
 function formatTyreSize(tw, pr, rim) {
@@ -966,7 +976,13 @@ function initSizeInputs() {
                 return;
             }
             const parsed = parseTyreSize(raw);
-            if (!parsed) {
+            // Reject anything that doesn't parse OR falls outside the fields' ranges
+            const valid =
+                parsed &&
+                withinInputRange(`${prefix}-tw`, parsed.tw) &&
+                withinInputRange(`${prefix}-pr`, parsed.pr) &&
+                withinInputRange(`${prefix}-d`, parsed.rim);
+            if (!valid) {
                 sizeEl.setAttribute("aria-invalid", "true");
                 return;
             }

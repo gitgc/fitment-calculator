@@ -13,7 +13,7 @@
     "rimSection": "Fælg",
     "tireSection": "Dæk",
     "optionalSection": "Valgfrit",
-    "tyreSizeLabel": "Dækstørrelse",
+    "tireSizeLabel": "Dækstørrelse",
     "diameterInches": "Diameter (tommer)",
     "widthInches": "Bredde (tommer)",
     "offsetET": "Offset / ET (mm)",

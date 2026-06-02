@@ -13,7 +13,7 @@
     "rimSection": "Rim",
     "tireSection": "Tyre",
     "optionalSection": "Optional",
-    "tyreSizeLabel": "Tyre size",
+    "tireSizeLabel": "Tyre size",
     "diameterInches": "Diameter (inches)",
     "widthInches": "Width (inches)",
     "offsetET": "Offset / ET (mm)",

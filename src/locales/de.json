@@ -13,7 +13,7 @@
     "rimSection": "Felge",
     "tireSection": "Reifen",
     "optionalSection": "Optional",
-    "tyreSizeLabel": "Reifengröße",
+    "tireSizeLabel": "Reifengröße",
     "diameterInches": "Durchmesser (Zoll)",
     "widthInches": "Breite (Zoll)",
     "offsetET": "Einpresstiefe / ET (mm)",

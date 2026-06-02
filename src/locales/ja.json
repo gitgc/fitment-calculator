@@ -13,7 +13,7 @@
     "rimSection": "ホイール",
     "tireSection": "タイヤ",
     "optionalSection": "オプション",
-    "tyreSizeLabel": "タイヤサイズ",
+    "tireSizeLabel": "タイヤサイズ",
     "diameterInches": "直径（インチ）",
     "widthInches": "幅（インチ）",
     "offsetET": "オフセット / ET（mm）",

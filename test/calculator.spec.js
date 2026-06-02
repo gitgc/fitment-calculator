@@ -553,6 +553,14 @@ test.describe('Tyre size parser', () => {
 		await expect(page.locator('#o-d')).toHaveValue('18');
 	});
 
+	test('a well-formed size outside the field ranges is rejected', async () => {
+		await page.fill('#o-tw', '205');
+		// 600 mm width parses fine but exceeds the tyre-width max (500)
+		await page.fill('#o-size', '600/45R17');
+		await expect(page.locator('#o-size')).toHaveAttribute('aria-invalid', 'true');
+		await expect(page.locator('#o-tw')).toHaveValue('205');
+	});
+
 	test('editing the individual fields reflects back into the size box', async () => {
 		await page.fill('#n-d',  '19');
 		await page.fill('#n-tw', '255');

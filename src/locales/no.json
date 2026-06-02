@@ -13,7 +13,7 @@
     "rimSection": "Felg",
     "tireSection": "Dekk",
     "optionalSection": "Valgfritt",
-    "tyreSizeLabel": "Dekkdimensjon",
+    "tireSizeLabel": "Dekkdimensjon",
     "diameterInches": "Diameter (tommer)",
     "widthInches": "Bredde (tommer)",
     "offsetET": "Offset / ET (mm)",

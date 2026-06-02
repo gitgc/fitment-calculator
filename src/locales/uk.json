@@ -13,7 +13,7 @@
     "rimSection": "Диск",
     "tireSection": "Шина",
     "optionalSection": "Додатково",
-    "tyreSizeLabel": "Розмір шини",
+    "tireSizeLabel": "Розмір шини",
     "diameterInches": "Діаметр (дюйми)",
     "widthInches": "Ширина (дюйми)",
     "offsetET": "Виліт / ET (мм)",
