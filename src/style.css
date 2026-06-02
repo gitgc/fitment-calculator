@@ -596,6 +596,15 @@ canvas {
     max-width: 100%;
     border-radius: 8px;
 }
+/* The face wheel is grabbable and flickable — hint it, and stop touch-drags from
+   scrolling the page while spinning the wheel. */
+#cv2 {
+    cursor: grab;
+    touch-action: none;
+}
+#cv2.grabbing {
+    cursor: grabbing;
+}
 
 /* ── Tooltip ────────────────────────────────────────────── */
 

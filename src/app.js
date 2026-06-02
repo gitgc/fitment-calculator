@@ -414,7 +414,9 @@ function calculate() {
 
     document.getElementById("results").classList.add("show");
     drawDiagram(o, n, oCam, nCam);
-    drawFaceDiagram(
+    // Stash the render args so the spin animation can redraw the wheel at any
+    // angle without recalculating, then draw at the current rotation.
+    faceArgs = [
         o,
         n,
         oCam,
@@ -427,7 +429,8 @@ function calculate() {
         nSpokes,
         oSpokeW,
         nSpokeW,
-    );
+    ];
+    renderFace();
 
     document
         .getElementById("cv")
@@ -1198,6 +1201,7 @@ function drawFaceDiagram(
     nSpokes = 6,
     oSpokeW = 0.13,
     nSpokeW = 0.13,
+    spin = 0,
 ) {
     const canvas = document.getElementById("cv2");
     if (!canvas) return;
@@ -1238,6 +1242,15 @@ function drawFaceDiagram(
     // rotated by the offset that best interleaves them with the new wheel's
     // spokes (half a pitch for matching counts) so both stay visible.
     const rearRot = bestSpokeOffset(oSpokes, nSpokes);
+
+    // Everything from here until the matching restore() spins as one group when
+    // the user flicks the wheel — the wheels, sidewall text, bores and bolts. The
+    // diameter callouts and legend are drawn afterwards so they stay put.
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(spin);
+    ctx.translate(-cx, -cy);
+
     drawFace(
         ctx,
         o,
@@ -1375,6 +1388,8 @@ function drawFaceDiagram(
     drawBoltPattern(ctx, cx, cy, parseBolt(oBolt), scale, "#58a6ff");
     drawBoltPattern(ctx, cx, cy, parseBolt(nBolt), scale, "#f78166");
 
+    ctx.restore(); // end spin group — callouts/legend below stay fixed
+
     // Diameter callouts — current left, new right
     const oR = (o.od / 2) * scale;
     const nR = (n.od / 2) * scale;
@@ -1418,6 +1433,111 @@ function drawDiameterTick(ctx, cx, cy, rv, maxR, color, side, odMm) {
     ctx.font = "bold 16px monospace";
     ctx.textAlign = side < 0 ? "right" : "left";
     ctx.fillText(`Ø${odMm.toFixed(0)} mm`, ax + side * 6, cy + 6);
+}
+
+// ── Spinnable face wheel ───────────────────────────────────────────────────────
+// The face diagram can be grabbed and flung like an iPod click wheel. We keep the
+// last render args so the animation loop can redraw the wheel at any angle without
+// re-running the whole calculation; only the wheel group spins (see drawFaceDiagram).
+
+let faceArgs = null; // last args for drawFaceDiagram (sans spin angle)
+let spinAngle = 0; // current wheel rotation (radians)
+let spinVel = 0; // angular velocity carried after a flick (radians/frame)
+let spinRAF = 0; // active requestAnimationFrame id, 0 when idle
+
+function renderFace() {
+    if (faceArgs) drawFaceDiagram(...faceArgs, spinAngle);
+}
+
+const SPIN_FRICTION = 0.97; // free-spin momentum decay per frame
+const SPIN_ENGAGE = 0.13; // below this speed the "weight" starts pulling upright
+const SPIN_SPRING = 0.05; // restoring pull toward the nearest upright orientation
+const SPIN_SETTLE_DAMP = 0.8; // heavier damping while settling, so it eases in
+
+// Momentum decay with a weighted finish: it free-spins under friction, then as it
+// slows a restoring spring rolls it to a stop the right way up — the nearest
+// orientation where the labels read normally (a whole number of turns).
+function spinDecay() {
+    const target = Math.round(spinAngle / (2 * Math.PI)) * (2 * Math.PI);
+    const settling = Math.abs(spinVel) < SPIN_ENGAGE;
+    if (settling) spinVel += (target - spinAngle) * SPIN_SPRING;
+    spinVel *= settling ? SPIN_SETTLE_DAMP : SPIN_FRICTION;
+    spinAngle += spinVel;
+    renderFace();
+
+    if (Math.abs(spinVel) > 0.001 || Math.abs(spinAngle - target) > 0.003) {
+        spinRAF = requestAnimationFrame(spinDecay);
+    } else {
+        spinAngle = target; // snap exactly upright and stop
+        spinVel = 0;
+        renderFace();
+        spinRAF = 0;
+    }
+}
+
+function initFaceSpin() {
+    const canvas = document.getElementById("cv2");
+    if (!canvas) return;
+
+    let dragging = false;
+    let lastAngle = 0;
+    let lastTime = 0;
+
+    // Pointer angle around the wheel centre (which is also the canvas centre).
+    const pointerAngle = (e) => {
+        const r = canvas.getBoundingClientRect();
+        return Math.atan2(
+            e.clientY - (r.top + r.height / 2),
+            e.clientX - (r.left + r.width / 2),
+        );
+    };
+
+    canvas.addEventListener("pointerdown", (e) => {
+        dragging = true;
+        spinVel = 0;
+        if (spinRAF) {
+            cancelAnimationFrame(spinRAF);
+            spinRAF = 0;
+        }
+        lastAngle = pointerAngle(e);
+        lastTime = e.timeStamp;
+        canvas.setPointerCapture(e.pointerId);
+        canvas.classList.add("grabbing");
+    });
+
+    canvas.addEventListener("pointermove", (e) => {
+        if (!dragging) return;
+        const a = pointerAngle(e);
+        let delta = a - lastAngle;
+        if (delta > Math.PI)
+            delta -= 2 * Math.PI; // take the shortest way round
+        else if (delta < -Math.PI) delta += 2 * Math.PI;
+        spinAngle += delta;
+        const dt = e.timeStamp - lastTime;
+        if (dt > 0) spinVel = (delta * 16) / dt; // ≈ radians per 16 ms frame
+        lastAngle = a;
+        lastTime = e.timeStamp;
+        renderFace();
+    });
+
+    const release = (e) => {
+        if (!dragging) return;
+        dragging = false;
+        canvas.classList.remove("grabbing");
+        // A paused finger before lift shouldn't throw the wheel.
+        if (e.timeStamp - lastTime > 80) spinVel = 0;
+        spinVel = Math.max(-0.6, Math.min(0.6, spinVel)); // clamp wild flicks
+        // Always run the decay if there's momentum, or if the wheel was let go
+        // off-upright — so it still rolls to rest the right way up.
+        const target = Math.round(spinAngle / (2 * Math.PI)) * (2 * Math.PI);
+        const needsSettle =
+            Math.abs(spinVel) > 0.0006 || Math.abs(spinAngle - target) > 0.003;
+        if (needsSettle && !spinRAF) {
+            spinRAF = requestAnimationFrame(spinDecay);
+        }
+    };
+    canvas.addEventListener("pointerup", release);
+    canvas.addEventListener("pointercancel", release);
 }
 
 // ── Floating tooltip ──────────────────────────────────────────────────────────
@@ -1696,6 +1816,7 @@ window.onload = () => {
     calculate();
     initLangSwitcher();
     initSizeInputs();
+    initFaceSpin();
     // Live-update the face diagram as the spoke design is tweaked.
     for (const id of ["o-spokes", "o-spokew", "n-spokes", "n-spokew"]) {
         document.getElementById(id).addEventListener("input", calculate);
