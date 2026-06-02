@@ -13,6 +13,7 @@
     "rimSection": "Cerchio",
     "tireSection": "Pneumatico",
     "optionalSection": "Opzionale",
+    "tireSizeLabel": "Misura pneumatico",
     "diameterInches": "Diametro (pollici)",
     "widthInches": "Larghezza (pollici)",
     "offsetET": "Offset / ET (mm)",

@@ -13,6 +13,7 @@
     "rimSection": "轮毂",
     "tireSection": "轮胎",
     "optionalSection": "可选",
+    "tireSizeLabel": "轮胎尺寸",
     "diameterInches": "直径（英寸）",
     "widthInches": "宽度（英寸）",
     "offsetET": "偏距 / ET（mm）",

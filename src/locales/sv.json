@@ -13,6 +13,7 @@
     "rimSection": "Fälg",
     "tireSection": "Däck",
     "optionalSection": "Valfritt",
+    "tireSizeLabel": "Däckdimension",
     "diameterInches": "Diameter (tum)",
     "widthInches": "Bredd (tum)",
     "offsetET": "Offset / ET (mm)",

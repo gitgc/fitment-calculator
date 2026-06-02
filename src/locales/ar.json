@@ -13,6 +13,7 @@
     "rimSection": "الجنط",
     "tireSection": "الإطار",
     "optionalSection": "اختياري",
+    "tireSizeLabel": "مقاس الإطار",
     "diameterInches": "القطر (بوصة)",
     "widthInches": "العرض (بوصة)",
     "offsetET": "الإزاحة / ET (مم)",

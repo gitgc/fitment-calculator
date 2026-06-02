@@ -11,6 +11,39 @@ function v(id) {
     return val;
 }
 
+// ── Tyre size notation ──────────────────────────────────────────────────────────
+// Parses standard metric tyre codes into { tw, pr, rim }, e.g. "225/45R17",
+// "P225/45ZR17", "225/45-17", "225 / 45 r 17", "225/45R17 91W". Returns null if
+// the string doesn't match. The pattern is anchored to the start (after an
+// optional P/LT/ST/T service prefix) so a longer leading number like "1225/45R17"
+// can't sneak through as a substring; trailing load/speed text is ignored. Value
+// ranges are NOT checked here — the call site validates each number against the
+// matching <input>'s own min/max so the bounds can never drift from the UI.
+
+function parseTyreSize(str) {
+    const m = String(str).match(
+        /^\s*(?:lt|st|p|t)?\s*(\d{2,3})\s*\/\s*(\d{2,3})\s*(?:z?\s*r|-)\s*(\d{2}(?:\.\d)?)(?!\d)/i,
+    );
+    if (!m) return null;
+    return {
+        tw: parseInt(m[1], 10),
+        pr: parseInt(m[2], 10),
+        rim: parseFloat(m[3]),
+    };
+}
+
+// True if `val` is within the [min, max] declared on the input with this id.
+function withinInputRange(id, val) {
+    const el = document.getElementById(id);
+    const lo = parseFloat(el.min);
+    const hi = parseFloat(el.max);
+    return (Number.isNaN(lo) || val >= lo) && (Number.isNaN(hi) || val <= hi);
+}
+
+function formatTyreSize(tw, pr, rim) {
+    return `${tw}/${pr}R${rim}`;
+}
+
 // ── Core calculation ──────────────────────────────────────────────────────────
 
 function calc(rimIn, rimWin, et, tw, pr, spacer) {
@@ -914,10 +947,84 @@ function initLangSwitcher() {
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 
+// ── Tyre size quick-entry ───────────────────────────────────────────────────
+// Each setup has a free-text size box (e.g. 225/45R17). Typing a valid size fills
+// the diameter / width / profile fields and recalculates; editing those fields
+// reflects back into the box so the two stay in sync.
+
+function syncSizeFromFields(prefix) {
+    const el = document.getElementById(`${prefix}-size`);
+    if (!el) return;
+    const rim = parseFloat(document.getElementById(`${prefix}-d`).value);
+    const tw = parseFloat(document.getElementById(`${prefix}-tw`).value);
+    const pr = parseFloat(document.getElementById(`${prefix}-pr`).value);
+
+    if (!(tw > 0 && pr > 0 && rim > 0)) {
+        el.value = "";
+        el.removeAttribute("aria-invalid");
+        return;
+    }
+
+    el.value = formatTyreSize(tw, pr, rim);
+    // Flag the box when a field is out of range — the displayed value would
+    // otherwise disagree with what calculate() clamps it to. Symmetric with the
+    // parse path, which rejects out-of-range sizes.
+    const inRange =
+        withinInputRange(`${prefix}-tw`, tw) &&
+        withinInputRange(`${prefix}-pr`, pr) &&
+        withinInputRange(`${prefix}-d`, rim);
+    if (inRange) {
+        el.removeAttribute("aria-invalid");
+    } else {
+        el.setAttribute("aria-invalid", "true");
+    }
+}
+
+function initSizeInputs() {
+    for (const prefix of ["o", "n"]) {
+        const sizeEl = document.getElementById(`${prefix}-size`);
+        if (!sizeEl) continue;
+
+        syncSizeFromFields(prefix);
+
+        sizeEl.addEventListener("input", () => {
+            const raw = sizeEl.value.trim();
+            if (!raw) {
+                sizeEl.removeAttribute("aria-invalid");
+                return;
+            }
+            const parsed = parseTyreSize(raw);
+            // Reject anything that doesn't parse OR falls outside the fields' ranges
+            const valid =
+                parsed &&
+                withinInputRange(`${prefix}-tw`, parsed.tw) &&
+                withinInputRange(`${prefix}-pr`, parsed.pr) &&
+                withinInputRange(`${prefix}-d`, parsed.rim);
+            if (!valid) {
+                sizeEl.setAttribute("aria-invalid", "true");
+                return;
+            }
+            sizeEl.removeAttribute("aria-invalid");
+            document.getElementById(`${prefix}-d`).value = parsed.rim;
+            document.getElementById(`${prefix}-tw`).value = parsed.tw;
+            document.getElementById(`${prefix}-pr`).value = parsed.pr;
+            calculate();
+        });
+
+        // Reflect manual edits of the individual fields back into the size box
+        for (const f of ["d", "tw", "pr"]) {
+            document
+                .getElementById(`${prefix}-${f}`)
+                .addEventListener("input", () => syncSizeFromFields(prefix));
+        }
+    }
+}
+
 window.onload = () => {
     loadFromParams();
     calculate();
     initLangSwitcher();
+    initSizeInputs();
 };
 
 // ── Service worker registration ───────────────────────────────────────────────

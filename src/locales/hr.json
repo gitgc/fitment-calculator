@@ -13,6 +13,7 @@
     "rimSection": "Naplatak",
     "tireSection": "Guma",
     "optionalSection": "Neobavezno",
+    "tireSizeLabel": "Dimenzija gume",
     "diameterInches": "Promjer (inči)",
     "widthInches": "Širina (inči)",
     "offsetET": "Offset / ET (mm)",

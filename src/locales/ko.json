@@ -13,6 +13,7 @@
     "rimSection": "휠",
     "tireSection": "타이어",
     "optionalSection": "선택 사항",
+    "tireSizeLabel": "타이어 사이즈",
     "diameterInches": "직경 (인치)",
     "widthInches": "너비 (인치)",
     "offsetET": "오프셋 / ET (mm)",

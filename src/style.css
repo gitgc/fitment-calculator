@@ -284,6 +284,9 @@ main {
     outline-offset: 1px;
     border-color: var(--accent);
 }
+.field input[aria-invalid="true"] {
+    border-color: var(--neg);
+}
 
 /* ── Button ─────────────────────────────────────────────── */
 

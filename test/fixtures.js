@@ -13,7 +13,6 @@ const MIME = {
 
 const ROOT    = path.join(__dirname, '..');
 const PUBLIC  = path.join(ROOT, 'public');
-const PORT    = 3334;
 
 // Locale data is loaded once at module level — tests must run after `npm run publish`
 const localesDir = path.join(ROOT, 'src', 'locales');
@@ -55,8 +54,10 @@ function startServer() {
 			res.end();
 		}
 	});
+	// Port 0 → the OS assigns a free ephemeral port, so each parallel worker gets
+	// its own server and they never collide.
 	return new Promise((resolve, reject) =>
-		server.listen(PORT, () => resolve(server)).on('error', reject),
+		server.listen(0, () => resolve(server)).on('error', reject),
 	);
 }
 
@@ -74,19 +75,26 @@ const test = base.extend({
 		await new Promise(r => srv.close(r));
 	}, { scope: 'worker' }],
 
+	// Base URL of this worker's server (unique per worker thanks to the ephemeral
+	// port). Tests should navigate relative to it, never to a hard-coded port.
+	serverURL: [async ({ server }, use) => {
+		await use(`http://localhost:${server.address().port}`);
+	}, { scope: 'worker' }],
+
 	/**
 	 * Factory fixture: call `await makePage(lang)` to get a Playwright Page that has:
+	 * - the worker's serverURL as its context baseURL (so `page.goto('/')` works)
 	 * - localStorage pinned to `lang` so the auto-detect script never redirects
 	 * - navigator.clipboard stubbed to resolve immediately (no HTTPS/permission needed)
 	 * - navigator.share removed so the clipboard branch is always exercised
 	 *
 	 * All contexts created through this fixture are closed after the test.
 	 */
-	makePage: async ({ browser, server: _srv }, use) => {
+	makePage: async ({ browser, serverURL }, use) => {
 		const ctxs = [];
 
 		const makePage = async (lang = 'en') => {
-			const ctx  = await browser.newContext();
+			const ctx  = await browser.newContext({ baseURL: serverURL });
 			const page = await ctx.newPage();
 			await page.addInitScript(`localStorage.setItem('ftg-lang','${lang}')`);
 			await page.addInitScript(() => {

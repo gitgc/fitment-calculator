@@ -13,6 +13,7 @@
     "rimSection": "Felga",
     "tireSection": "Opona",
     "optionalSection": "Opcjonalne",
+    "tireSizeLabel": "Rozmiar opony",
     "diameterInches": "Średnica (cale)",
     "widthInches": "Szerokość (cale)",
     "offsetET": "Odsadzenie / ET (mm)",
