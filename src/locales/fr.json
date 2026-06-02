@@ -65,5 +65,10 @@
     "tipAt1": "Ce qu'affiche votre compteur lorsque vous roulez réellement à 50 km/h. Un pneu plus grand signifie moins de tours de roue et une lecture du compteur plus faible.",
     "tipAt2": "Ce qu'affiche votre compteur lorsque vous roulez réellement à 100 km/h.",
     "tipRideHeight": "De combien la carrosserie monte en raison du changement de rayon du pneu (mm). Affecte la géométrie de direction et le réglage des phares.",
-    "tipArchGap": "Réduction du jeu entre la bande de roulement et le passage de roue (mm). Positif = moins de jeu — attention aux frottements sur les bosses."
+    "tipArchGap": "Réduction du jeu entre la bande de roulement et le passage de roue (mm). Positif = moins de jeu — attention aux frottements sur les bosses.",
+    "warnSpeedoUnder": "Le compteur sous-estime la vitesse — votre vitesse réelle est supérieure à l'affichage, ce qui n'est pas légal dans de nombreux pays.",
+    "warnSpeedoOver": "Le compteur surestime la vitesse de plus de 10 %.",
+    "warnDiameter": "Le diamètre total change de {pct} % — cela peut affecter le compteur, l'ABS/antipatinage et les dégagements.",
+    "warnStretch": "Le pneu semble étiré pour cette largeur de jante — augmente le risque de déjantage.",
+    "warnBulge": "La jante semble étroite pour ce pneu — la bande de roulement peut se bomber."
 }

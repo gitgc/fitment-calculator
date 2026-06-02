@@ -65,5 +65,10 @@
     "tipAt1": "Wat je snelheidsmeter toont wanneer je werkelijk 50 km/h rijdt met de nieuwe banden. Een grotere band betekent minder omwentelingen en een lagere aflezing.",
     "tipAt2": "Wat je snelheidsmeter toont wanneer je werkelijk 100 km/h rijdt met de nieuwe banden.",
     "tipRideHeight": "Hoeveel de carrosserie omhoog komt door de verandering in bandstraal (mm). Beïnvloedt de stuurgeometrie en de koplampafstelling.",
-    "tipArchGap": "Vermindering van de ruimte tussen het loopvlak en de wielkastbekleding (mm). Positief = minder ruimte — let op schuren bij hobbels."
+    "tipArchGap": "Vermindering van de ruimte tussen het loopvlak en de wielkastbekleding (mm). Positief = minder ruimte — let op schuren bij hobbels.",
+    "warnSpeedoUnder": "De snelheidsmeter wijst te laag aan — je werkelijke snelheid is hoger dan getoond, wat in veel landen niet is toegestaan.",
+    "warnSpeedoOver": "De snelheidsmeter wijst meer dan 10% te hoog aan.",
+    "warnDiameter": "De totale diameter verandert met {pct}% — kan de snelheidsmeter, ABS/tractiecontrole en speling beïnvloeden.",
+    "warnStretch": "De band lijkt uitgerekt voor deze velgbreedte — verhoogt het risico dat de hiel losschiet.",
+    "warnBulge": "De velg lijkt smal voor deze band — het loopvlak kan bol gaan staan."
 }

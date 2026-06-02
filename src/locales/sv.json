@@ -65,5 +65,10 @@
     "tipAt1": "Vad din hastighetsmätare visar när du faktiskt kör 50 km/h med de nya däcken. Ett större däck innebär färre varv och en lägre avläsning.",
     "tipAt2": "Vad din hastighetsmätare visar när du faktiskt kör 100 km/h med de nya däcken.",
     "tipRideHeight": "Hur mycket karossen höjs på grund av förändringen i däckradie (mm). Påverkar körgeometrin och strålkastarinställningen.",
-    "tipArchGap": "Minskning av spalten mellan däckets slitbana och hjulhusfodret (mm). Positivt = mindre spalt — se upp för skav vid gupp."
+    "tipArchGap": "Minskning av spalten mellan däckets slitbana och hjulhusfodret (mm). Positivt = mindre spalt — se upp för skav vid gupp.",
+    "warnSpeedoUnder": "Hastighetsmätaren visar för lågt — din verkliga hastighet är högre än vad som visas, vilket inte är lagligt i många länder.",
+    "warnSpeedoOver": "Hastighetsmätaren visar mer än 10% för högt.",
+    "warnDiameter": "Totaldiametern ändras med {pct}% — kan påverka hastighetsmätare, ABS/antispinn och spelrum.",
+    "warnStretch": "Däcket ser sträckt ut för denna fälgbredd — ökar risken att vulsten lossnar.",
+    "warnBulge": "Fälgen ser smal ut för detta däck — slitbanan kan bukta ut."
 }

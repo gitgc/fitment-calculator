@@ -102,6 +102,54 @@ function escapeHTML(s) {
         .replace(/"/g, "&quot;");
 }
 
+// ── Fitment assessment (Tier-1 warnings) ───────────────────────────────────────
+// Returns { rows: { [rowLabel]: {severity, message} }, setup: [{severity, message}] }
+// where severity is "warn" (caution) or "danger". Thresholds are deliberately
+// lenient so that common, sensible setups don't trip false alarms.
+function assessFitment(o, n) {
+    const L = window.L;
+    const rows = {};
+    const setup = [];
+
+    // Rolling-diameter change — affects speedo, ABS/traction control, gearing,
+    // clearance. (Circumference change is identical, so we key it to Diameter.)
+    const absPct = Math.abs(((n.od - o.od) / o.od) * 100);
+    if (absPct >= 2) {
+        rows[L.rowDiameter] = {
+            severity: absPct > 3 ? "danger" : "warn",
+            message: L.warnDiameter.replace("{pct}", fmt(absPct, 1)),
+        };
+    }
+
+    // Speedometer accuracy. speedoErr < 0 means the dial under-reads (true speed
+    // higher than shown) — the legally relevant, riskier direction.
+    const speedoErr = (o.circ / n.circ - 1) * 100;
+    if (speedoErr <= -2) {
+        rows[L.rowSpeedoError] = {
+            severity: speedoErr <= -5 ? "danger" : "warn",
+            message: L.warnSpeedoUnder,
+        };
+    } else if (speedoErr >= 10) {
+        rows[L.rowSpeedoError] = {
+            severity: "warn",
+            message: L.warnSpeedoOver,
+        };
+    }
+
+    // Tyre stretch / bulge for the new setup — rim width vs tyre section width.
+    // idealRim (inches) ≈ section_mm / 30 is a reasonable linear approximation.
+    const delta = n.rimWin - n.tw / 30;
+    const absDelta = Math.abs(delta);
+    if (absDelta > 1) {
+        setup.push({
+            severity: absDelta > 2 ? "danger" : "warn",
+            message: delta > 0 ? L.warnStretch : L.warnBulge,
+        });
+    }
+
+    return { rows, setup };
+}
+
 // ── Main calculate ────────────────────────────────────────────────────────────
 
 function calculate() {
@@ -193,14 +241,32 @@ function calculate() {
         [L.rowArchGap, "0.0 mm", `${fmt(rhGain)} mm`, signed(rhGain, "mm")],
     ];
 
+    const assess = assessFitment(o, n);
+
     document.getElementById("tbody").innerHTML = rows
         .map(([label, ov, nv, dv]) => {
             // label and tip are localized text → escape. ov/nv/dv contain
             // intentional <span> markup from signed() → leave as-is.
             const tip = escapeHTML(tips[label] || "");
-            return `<tr><th scope="row" data-tip="${tip}" title="${tip}">${escapeHTML(label)}</th><td>${ov}</td><td>${nv}</td><td>${dv}</td></tr>`;
+            const w = assess.rows[label];
+            const rowClass = w ? ` class="row-${w.severity}"` : "";
+            const reason = w
+                ? `<div class="row-reason">⚠ ${escapeHTML(w.message)}</div>`
+                : "";
+            return `<tr${rowClass}><th scope="row" data-tip="${tip}" title="${tip}">${escapeHTML(label)}${reason}</th><td>${ov}</td><td>${nv}</td><td>${dv}</td></tr>`;
         })
         .join("");
+
+    // Setup-level warnings (e.g. tyre stretch) — no comparison row to attach to
+    const warnEl = document.getElementById("fitment-warnings");
+    if (warnEl) {
+        warnEl.innerHTML = assess.setup
+            .map(
+                (w) =>
+                    `<p class="fitment-warning fitment-${w.severity}">⚠ ${escapeHTML(w.message)}</p>`,
+            )
+            .join("");
+    }
 
     document.getElementById("results").classList.add("show");
     drawDiagram(o, n, oCam, nCam);

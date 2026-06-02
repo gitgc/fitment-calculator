@@ -65,5 +65,10 @@
     "tipAt1": "Co pokazuje prędkościomierz, gdy faktycznie jedziesz 50 km/h z nowymi oponami. Większa opona oznacza mniej obrotów i niższe wskazanie prędkościomierza.",
     "tipAt2": "Co pokazuje prędkościomierz, gdy faktycznie jedziesz 100 km/h z nowymi oponami.",
     "tipRideHeight": "O ile podnosi się nadwozie samochodu z powodu zmiany promienia opony (mm). Wpływa na geometrię prowadzenia i ustawienie reflektorów.",
-    "tipArchGap": "Zmniejszenie prześwitu między bieżnikiem opony a nadkolem (mm). Dodatnie = mniejszy prześwit — uważaj na ocieranie na nierównościach."
+    "tipArchGap": "Zmniejszenie prześwitu między bieżnikiem opony a nadkolem (mm). Dodatnie = mniejszy prześwit — uważaj na ocieranie na nierównościach.",
+    "warnSpeedoUnder": "Prędkościomierz będzie zaniżać — rzeczywista prędkość jest wyższa niż wskazywana, co w wielu krajach jest niezgodne z prawem.",
+    "warnSpeedoOver": "Prędkościomierz zawyża o ponad 10%.",
+    "warnDiameter": "Średnica całkowita zmienia się o {pct}% — może wpływać na prędkościomierz, ABS/kontrolę trakcji i prześwity.",
+    "warnStretch": "Opona wygląda na rozciągniętą na tej szerokości felgi — zwiększa ryzyko zejścia stopki.",
+    "warnBulge": "Felga wygląda na wąską do tej opony — bieżnik może się wybrzuszyć."
 }

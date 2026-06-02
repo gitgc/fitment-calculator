@@ -65,5 +65,10 @@
     "tipAt1": "Lo que muestra tu velocímetro cuando realmente vas a 50 km/h con los nuevos neumáticos. Un neumático más grande significa menos revoluciones y una lectura del velocímetro más baja.",
     "tipAt2": "Lo que muestra tu velocímetro cuando realmente vas a 100 km/h con los nuevos neumáticos.",
     "tipRideHeight": "Cuánto sube la carrocería del coche debido al cambio en el radio del neumático (mm). Afecta la geometría de manejo y la dirección de los faros.",
-    "tipArchGap": "Reducción del espacio libre entre la banda de rodadura y el recubrimiento del paso de rueda (mm). Positivo = menos espacio — cuidado con el rozamiento en los baches."
+    "tipArchGap": "Reducción del espacio libre entre la banda de rodadura y el recubrimiento del paso de rueda (mm). Positivo = menos espacio — cuidado con el rozamiento en los baches.",
+    "warnSpeedoUnder": "El velocímetro marcará de menos — tu velocidad real es mayor que la mostrada, lo que no es legal en muchas regiones.",
+    "warnSpeedoOver": "El velocímetro marca de más en más del 10 %.",
+    "warnDiameter": "El diámetro total cambia un {pct} % — puede afectar al velocímetro, al ABS/control de tracción y a la holgura.",
+    "warnStretch": "El neumático parece estirado para este ancho de llanta — aumenta el riesgo de que el talón se salga.",
+    "warnBulge": "La llanta parece estrecha para este neumático — la banda de rodadura puede abombarse."
 }

@@ -65,5 +65,10 @@
     "tipAt1": "What your speedometer shows when actually doing 30 mph with the new tyres. A larger tyre means fewer revolutions and a lower speedo reading.",
     "tipAt2": "What your speedometer shows when actually doing 60 mph with the new tyres.",
     "tipRideHeight": "How much the car body rises due to the change in tyre radius (mm). Affects handling geometry and headlight aim.",
-    "tipArchGap": "Reduction in clearance between outer tyre tread and wheel arch liner (mm). Positive = less gap — watch for rubbing on bumps."
+    "tipArchGap": "Reduction in clearance between outer tyre tread and wheel arch liner (mm). Positive = less gap — watch for rubbing on bumps.",
+    "warnSpeedoUnder": "Speedometer will under-read — your true speed is higher than shown, which isn't road-legal in many regions.",
+    "warnSpeedoOver": "Speedometer over-reads by more than 10% — it shows well above your true speed.",
+    "warnDiameter": "Overall diameter changes by {pct}% — can affect the speedometer, ABS/traction control and clearance.",
+    "warnStretch": "Tyre looks stretched for this rim width — raises the risk of the bead unseating.",
+    "warnBulge": "Rim looks narrow for this tyre — the tread may bulge."
 }

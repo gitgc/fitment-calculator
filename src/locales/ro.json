@@ -65,5 +65,10 @@
     "tipAt1": "Ce afișează vitezometrul când mergi realmente cu 50 km/h cu noile anvelope. O anvelopă mai mare înseamnă mai puține rotații și o citire mai mică a vitezometrului.",
     "tipAt2": "Ce afișează vitezometrul când mergi realmente cu 100 km/h cu noile anvelope.",
     "tipRideHeight": "Cu cât se ridică caroseria din cauza schimbării razei anvelopei (mm). Afectează geometria de direcție și reglajul farurilor.",
-    "tipArchGap": "Reducerea spațiului dintre banda de rulare a anvelopei și carenajul pasajului roții (mm). Pozitiv = spațiu mai mic — atenție la frecare pe denivelări."
+    "tipArchGap": "Reducerea spațiului dintre banda de rulare a anvelopei și carenajul pasajului roții (mm). Pozitiv = spațiu mai mic — atenție la frecare pe denivelări.",
+    "warnSpeedoUnder": "Vitezometrul va indica mai puțin — viteza reală este mai mare decât cea afișată, ceea ce nu este legal în multe regiuni.",
+    "warnSpeedoOver": "Vitezometrul indică în plus cu peste 10%.",
+    "warnDiameter": "Diametrul total se modifică cu {pct}% — poate afecta vitezometrul, ABS/controlul tracțiunii și spațiile.",
+    "warnStretch": "Anvelopa pare întinsă pentru această lățime de jantă — crește riscul de dezmărginire.",
+    "warnBulge": "Janta pare îngustă pentru această anvelopă — banda de rulare se poate bomba."
 }

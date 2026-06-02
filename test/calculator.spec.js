@@ -42,6 +42,9 @@ const TD = {
 	speedoNew:    13,  // SpeedoError  new
 	reading1New:  16,  // Reading@ref1 new
 	rideNew:      22,  // RideHeight   new
+	// Row indices (into `#tbody tr`) for warning checks
+	diameterRow:  0,
+	speedoRow:    4,
 };
 
 // Fills all OD-affecting fields to the same values on both setups so the
@@ -593,5 +596,60 @@ test.describe('Tyre size parser', () => {
 		await page.fill('#o-d', '20');
 		await expect(page.locator('#o-size')).toHaveValue('225/45R20');
 		await expect(page.locator('#o-size')).not.toHaveAttribute('aria-invalid', 'true');
+	});
+});
+
+// ── Fitment warnings ──────────────────────────────────────────────────────────
+
+test.describe('Fitment warnings', () => {
+	let page;
+
+	test.beforeEach(async ({ makePage }) => {
+		page = await makePage('en');
+		await page.goto(localeUrl('en'), { waitUntil: 'domcontentloaded' });
+	});
+
+	test('default setup raises no warnings', async () => {
+		await expect(page.locator('#tbody tr.row-warn, #tbody tr.row-danger')).toHaveCount(0);
+		await expect(page.locator('#fitment-warnings')).toBeEmpty();
+	});
+
+	test('a large diameter increase flags Diameter (danger) + under-reading speedo', async () => {
+		await page.fill('#n-d', '20');
+		await page.fill('#n-tw', '245');
+		await page.fill('#n-pr', '40');
+		await page.click('button.calc-btn');
+
+		const rows = page.locator('#tbody tr');
+		await expect(rows.nth(TD.diameterRow)).toHaveClass(/row-danger/);
+		await expect(rows.nth(TD.diameterRow).locator('.row-reason')).toContainText('diameter changes');
+		await expect(rows.nth(TD.speedoRow)).toHaveClass(/row-danger/);
+		await expect(rows.nth(TD.speedoRow).locator('.row-reason')).toContainText('under-read');
+		await expect(page.locator('#fitment-warnings')).toBeEmpty(); // no stretch
+	});
+
+	test('a moderate diameter increase is a caution, not a danger', async () => {
+		// 18×241/40 → OD ≈ 650 mm, +2.5% over the 634.3 mm default
+		await page.fill('#n-tw', '241');
+		await page.click('button.calc-btn');
+		await expect(page.locator('#tbody tr').nth(TD.diameterRow)).toHaveClass(/row-warn/);
+	});
+
+	test('a wide rim for the tyre flags stretch (setup strip)', async () => {
+		await page.fill('#n-w', '11'); // 235 tyre on an 11" rim
+		await page.click('button.calc-btn');
+		const warn = page.locator('#fitment-warnings .fitment-danger');
+		await expect(warn).toHaveCount(1);
+		await expect(warn).toContainText('stretched');
+	});
+
+	test('a narrow rim for the tyre flags bulge, with no row warnings', async () => {
+		// 18×255/35 keeps OD ~unchanged; 5" rim is far too narrow for a 255
+		await page.fill('#n-w', '5');
+		await page.fill('#n-tw', '255');
+		await page.fill('#n-pr', '35');
+		await page.click('button.calc-btn');
+		await expect(page.locator('#tbody tr.row-warn, #tbody tr.row-danger')).toHaveCount(0);
+		await expect(page.locator('#fitment-warnings .fitment-danger')).toContainText('bulge');
 	});
 });

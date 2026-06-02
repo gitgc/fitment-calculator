@@ -65,5 +65,10 @@
     "tipAt1": "Hvad dit speedometer viser, når du faktisk kører 50 km/h med de nye dæk. Et større dæk betyder færre omdrejninger og en lavere speedometeraflæsning.",
     "tipAt2": "Hvad dit speedometer viser, når du faktisk kører 100 km/h med de nye dæk.",
     "tipRideHeight": "Hvor meget karrosseriet hæver sig på grund af ændringen i dækradius (mm). Påvirker køregeometrien og forlygtejusteringen.",
-    "tipArchGap": "Reduktion af afstanden mellem dækkets slidbane og hjulkassens beklædning (mm). Positiv = mindre afstand — pas på skrabning ved ujævnheder."
+    "tipArchGap": "Reduktion af afstanden mellem dækkets slidbane og hjulkassens beklædning (mm). Positiv = mindre afstand — pas på skrabning ved ujævnheder.",
+    "warnSpeedoUnder": "Speedometeret viser for lavt — din reelle hastighed er højere end vist, hvilket ikke er lovligt i mange lande.",
+    "warnSpeedoOver": "Speedometeret viser mere end 10% for højt.",
+    "warnDiameter": "Den samlede diameter ændres med {pct}% — kan påvirke speedometer, ABS/antispin og frigang.",
+    "warnStretch": "Dækket ser strakt ud til denne fælgbredde — øger risikoen for, at hælen springer af.",
+    "warnBulge": "Fælgen ser smal ud til dette dæk — slidbanen kan bule ud."
 }

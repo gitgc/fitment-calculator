@@ -35,6 +35,7 @@ const REQUIRED_KEYS = [
 	'canvasCurrent', 'canvasNew', 'canvasWide', 'canvasPoke',
 	'tipDiameter', 'tipCircumference', 'tipPoke', 'tipInset', 'tipSpeedoError',
 	'tipAt1', 'tipAt2', 'tipRideHeight', 'tipArchGap',
+	'warnSpeedoUnder', 'warnSpeedoOver', 'warnDiameter', 'warnStretch', 'warnBulge',
 ];
 
 const IMPERIAL     = new Set(['en']);
@@ -149,11 +150,20 @@ test.describe('Build output — HTML files', () => {
 		}
 	});
 
-	test('window.SITE.brand is injected from the canonical host', () => {
-		const brand = new URL(siteConfig.canonicalUrl).host; // e.g. fixthatgap.com
+	test('window.SITE.brand is injected, matching build.js (explicit brand or canonical host)', () => {
+		// Mirror build.js: an explicit `brand` wins, else the canonical URL's host,
+		// else empty (also when canonicalUrl is malformed).
+		let brand = siteConfig.brand || '';
+		if (!brand && siteConfig.canonicalUrl) {
+			try {
+				brand = new URL(siteConfig.canonicalUrl).host;
+			} catch {
+				brand = '';
+			}
+		}
 		for (const { code } of locales) {
 			const content = html(code);
-			if (!content) return;
+			expect(content, `${code} page exists`).not.toBeNull();
 			expect(content, `${code} window.SITE`).toContain('window.SITE=');
 			expect(content, `${code} brand`).toContain(`brand:"${brand}"`);
 		}

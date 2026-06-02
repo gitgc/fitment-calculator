@@ -65,5 +65,10 @@
     "tipAt1": "Cosa mostra il tachimetro quando viaggi realmente a 50 km/h con i nuovi pneumatici. Uno pneumatico più grande significa meno giri e una lettura del tachimetro più bassa.",
     "tipAt2": "Cosa mostra il tachimetro quando viaggi realmente a 100 km/h con i nuovi pneumatici.",
     "tipRideHeight": "Di quanto si alza la carrozzeria a causa della variazione del raggio dello pneumatico (mm). Influisce sulla geometria di guida e sull'orientamento dei fari.",
-    "tipArchGap": "Riduzione dello spazio tra il battistrada e il rivestimento del passaruota (mm). Positivo = meno spazio — attenzione agli sfregamenti sulle asperità."
+    "tipArchGap": "Riduzione dello spazio tra il battistrada e il rivestimento del passaruota (mm). Positivo = meno spazio — attenzione agli sfregamenti sulle asperità.",
+    "warnSpeedoUnder": "Il tachimetro segnerà in difetto — la velocità reale è superiore a quella mostrata, non a norma in molti Paesi.",
+    "warnSpeedoOver": "Il tachimetro segna in eccesso di oltre il 10%.",
+    "warnDiameter": "Il diametro totale cambia del {pct}% — può influire su tachimetro, ABS/controllo di trazione e spazi.",
+    "warnStretch": "Lo pneumatico sembra stirato per questa larghezza del cerchio — aumenta il rischio di stallonamento.",
+    "warnBulge": "Il cerchio sembra stretto per questo pneumatico — il battistrada può gonfiarsi."
 }

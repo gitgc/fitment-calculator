@@ -65,5 +65,10 @@
     "tipAt1": "O que o velocímetro mostra quando conduz realmente a 50 km/h com os novos pneus. Um pneu maior significa menos rotações e uma leitura mais baixa do velocímetro.",
     "tipAt2": "O que o velocímetro mostra quando conduz realmente a 100 km/h com os novos pneus.",
     "tipRideHeight": "Quanto a carroçaria sobe devido à alteração do raio do pneu (mm). Afeta a geometria de condução e o alinhamento dos faróis.",
-    "tipArchGap": "Redução do espaço entre a banda de rodagem do pneu e o revestimento da cava da roda (mm). Positivo = menos espaço — atenção ao atrito em lombas."
+    "tipArchGap": "Redução do espaço entre a banda de rodagem do pneu e o revestimento da cava da roda (mm). Positivo = menos espaço — atenção ao atrito em lombas.",
+    "warnSpeedoUnder": "O velocímetro vai marcar a menos — a sua velocidade real é superior à mostrada, o que não é legal em muitas regiões.",
+    "warnSpeedoOver": "O velocímetro marca a mais em mais de 10%.",
+    "warnDiameter": "O diâmetro total muda {pct}% — pode afetar o velocímetro, o ABS/controlo de tração e as folgas.",
+    "warnStretch": "O pneu parece esticado para esta largura de jante — aumenta o risco de o talão sair.",
+    "warnBulge": "A jante parece estreita para este pneu — o piso pode ficar abaulado."
 }

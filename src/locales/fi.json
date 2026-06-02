@@ -65,5 +65,10 @@
     "tipAt1": "Mitä nopeusmittarisi näyttää, kun ajat todellisuudessa 50 km/h uusilla renkailla. Suurempi rengas tarkoittaa vähemmän kierroksia ja matalampaa mittarilukemaa.",
     "tipAt2": "Mitä nopeusmittarisi näyttää, kun ajat todellisuudessa 100 km/h uusilla renkailla.",
     "tipRideHeight": "Kuinka paljon kori nousee renkaan säteen muutoksen vuoksi (mm). Vaikuttaa ajogeometriaan ja ajovalojen suuntaukseen.",
-    "tipArchGap": "Renkaan kulutuspinnan ja lokasuojan vuorauksen välisen välyksen pieneneminen (mm). Positiivinen = vähemmän välystä — varo hankausta töyssyissä."
+    "tipArchGap": "Renkaan kulutuspinnan ja lokasuojan vuorauksen välisen välyksen pieneneminen (mm). Positiivinen = vähemmän välystä — varo hankausta töyssyissä.",
+    "warnSpeedoUnder": "Nopeusmittari näyttää liian vähän — todellinen nopeutesi on näytettyä suurempi, mikä ei ole monilla alueilla laillista.",
+    "warnSpeedoOver": "Nopeusmittari näyttää yli 10 % liikaa.",
+    "warnDiameter": "Kokonaishalkaisija muuttuu {pct} % — voi vaikuttaa nopeusmittariin, ABS:ään/luistonestoon ja välyksiin.",
+    "warnStretch": "Rengas näyttää venytetyltä tälle vanneleveydelle — lisää reunan irtoamisen riskiä.",
+    "warnBulge": "Vanne näyttää kapealta tälle renkaalle — kulutuspinta voi pullistua."
 }

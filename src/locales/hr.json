@@ -65,5 +65,10 @@
     "tipAt1": "Što vaš brzinomjer pokazuje kada stvarno vozite 50 km/h s novim gumama. Veća guma znači manje okretaja i niže očitanje brzinomjera.",
     "tipAt2": "Što vaš brzinomjer pokazuje kada stvarno vozite 100 km/h s novim gumama.",
     "tipRideHeight": "Koliko se karoserija podiže zbog promjene polumjera gume (mm). Utječe na geometriju upravljanja i usmjerenje farova.",
-    "tipArchGap": "Smanjenje razmaka između gaznog sloja gume i obloge blatobrana (mm). Pozitivno = manji razmak — pazite na struganje na neravninama."
+    "tipArchGap": "Smanjenje razmaka između gaznog sloja gume i obloge blatobrana (mm). Pozitivno = manji razmak — pazite na struganje na neravninama.",
+    "warnSpeedoUnder": "Brzinomjer će pokazivati premalo — stvarna brzina je veća od prikazane, što u mnogim zemljama nije zakonito.",
+    "warnSpeedoOver": "Brzinomjer pokazuje više od 10% previše.",
+    "warnDiameter": "Ukupni promjer mijenja se za {pct}% — može utjecati na brzinomjer, ABS/kontrolu trakcije i zazore.",
+    "warnStretch": "Guma izgleda rastegnuto za ovu širinu naplatka — povećava rizik od skidanja stope.",
+    "warnBulge": "Naplatak izgleda usko za ovu gumu — gazni sloj može se ispupčiti."
 }

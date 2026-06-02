@@ -65,5 +65,10 @@
     "tipAt1": "Was Ihr Tachometer anzeigt, wenn Sie tatsächlich 50 km/h fahren. Ein größerer Reifen bedeutet weniger Umdrehungen und eine niedrigere Tacho-Anzeige.",
     "tipAt2": "Was Ihr Tachometer anzeigt, wenn Sie tatsächlich 100 km/h fahren.",
     "tipRideHeight": "Wie viel sich die Karosserie durch die Änderung des Reifenradius hebt (mm). Beeinflusst die Fahrwerksgeometrie und die Scheinwerferausrichtung.",
-    "tipArchGap": "Verringerung des Abstands zwischen Reifenlauffläche und Radkastenverkleidung (mm). Positiv = weniger Spalt — auf Reiben bei Bodenwellen achten."
+    "tipArchGap": "Verringerung des Abstands zwischen Reifenlauffläche und Radkastenverkleidung (mm). Positiv = weniger Spalt — auf Reiben bei Bodenwellen achten.",
+    "warnSpeedoUnder": "Der Tacho zeigt zu wenig an — Ihre tatsächliche Geschwindigkeit ist höher als angezeigt, was in vielen Ländern nicht zulässig ist.",
+    "warnSpeedoOver": "Der Tacho zeigt mehr als 10 % zu viel an.",
+    "warnDiameter": "Der Gesamtdurchmesser ändert sich um {pct} % — das kann Tacho, ABS/Traktionskontrolle und Freigängigkeit beeinflussen.",
+    "warnStretch": "Der Reifen wirkt für diese Felgenbreite gestreckt — erhöht das Risiko, dass der Wulst abspringt.",
+    "warnBulge": "Die Felge wirkt für diesen Reifen zu schmal — die Lauffläche kann sich wölben."
 }
