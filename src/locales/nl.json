@@ -13,6 +13,7 @@
     "rimSection": "Velg",
     "tireSection": "Band",
     "optionalSection": "Optioneel",
+    "tyreSizeLabel": "Bandenmaat",
     "diameterInches": "Diameter (inch)",
     "widthInches": "Breedte (inch)",
     "offsetET": "Offset / ET (mm)",

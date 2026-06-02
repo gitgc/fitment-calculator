@@ -38,6 +38,16 @@
                     aria-labelledby="current-heading"
                 >
                     <h2 id="current-heading">{{ currentSetup }}</h2>
+                    <div class="field">
+                        <label for="o-size">{{ tyreSizeLabel }}</label>
+                        <input
+                            type="text"
+                            id="o-size"
+                            autocomplete="off"
+                            spellcheck="false"
+                            placeholder="225/45R17"
+                        >
+                    </div>
                     <h3 class="section-label">{{ rimSection }}</h3>
                     <div class="field">
                         <label for="o-d">{{ diameterInches }}</label>
@@ -126,6 +136,16 @@
                     aria-labelledby="new-heading"
                 >
                     <h2 id="new-heading">{{ newSetup }}</h2>
+                    <div class="field">
+                        <label for="n-size">{{ tyreSizeLabel }}</label>
+                        <input
+                            type="text"
+                            id="n-size"
+                            autocomplete="off"
+                            spellcheck="false"
+                            placeholder="235/40R18"
+                        >
+                    </div>
                     <h3 class="section-label">{{ rimSection }}</h3>
                     <div class="field">
                         <label for="n-d">{{ diameterInches }}</label>

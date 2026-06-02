@@ -13,6 +13,7 @@
     "rimSection": "Llanta",
     "tireSection": "Neumático",
     "optionalSection": "Opcional",
+    "tyreSizeLabel": "Medida del neumático",
     "diameterInches": "Diámetro (pulgadas)",
     "widthInches": "Ancho (pulgadas)",
     "offsetET": "Offset / ET (mm)",

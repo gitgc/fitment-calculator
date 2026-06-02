@@ -13,6 +13,7 @@
     "rimSection": "Jante",
     "tireSection": "Pneu",
     "optionalSection": "Opcional",
+    "tyreSizeLabel": "Medida do pneu",
     "diameterInches": "Diâmetro (polegadas)",
     "widthInches": "Largura (polegadas)",
     "offsetET": "Offset / ET (mm)",

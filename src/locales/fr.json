@@ -13,6 +13,7 @@
     "rimSection": "Jante",
     "tireSection": "Pneu",
     "optionalSection": "Optionnel",
+    "tyreSizeLabel": "Dimension du pneu",
     "diameterInches": "Diamètre (pouces)",
     "widthInches": "Largeur (pouces)",
     "offsetET": "Déport / ET (mm)",

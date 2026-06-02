@@ -13,6 +13,7 @@
     "rimSection": "রিম",
     "tireSection": "টায়ার",
     "optionalSection": "ঐচ্ছিক",
+    "tyreSizeLabel": "টায়ার সাইজ",
     "diameterInches": "ব্যাস (ইঞ্চি)",
     "widthInches": "প্রস্থ (ইঞ্চি)",
     "offsetET": "অফসেট / ET (mm)",

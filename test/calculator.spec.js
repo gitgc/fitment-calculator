@@ -509,3 +509,54 @@ test.describe('URL parameters', () => {
 		await expect(page.locator('#results')).toBeVisible();
 	});
 });
+
+// ── Tyre size parser ──────────────────────────────────────────────────────────
+
+test.describe('Tyre size parser', () => {
+	let page;
+
+	test.beforeEach(async ({ makePage }) => {
+		page = await makePage('en');
+		await page.goto(localeUrl('en'), { waitUntil: 'domcontentloaded' });
+	});
+
+	test('size boxes are pre-filled from the default fields on load', async () => {
+		await expect(page.locator('#o-size')).toHaveValue('225/45R17');
+		await expect(page.locator('#n-size')).toHaveValue('235/40R18');
+	});
+
+	test('typing a size fills the fields and recalculates', async () => {
+		await page.fill('#n-size', '255/35R19');
+		await expect(page.locator('#n-tw')).toHaveValue('255');
+		await expect(page.locator('#n-pr')).toHaveValue('35');
+		await expect(page.locator('#n-d')).toHaveValue('19');
+		// OD = 19×25.4 + 2×(255×0.35) = 482.6 + 178.5 = 661.1 mm
+		await expect(page.locator('#tbody td').nth(TD.newOD)).toHaveText('661.1 mm');
+	});
+
+	test('accepts common notation variants', async () => {
+		for (const s of ['225/45R17', 'P225/45ZR17', '225/45-17', '225 / 45 r 17']) {
+			await page.fill('#o-size', s);
+			await expect(page.locator('#o-tw'), s).toHaveValue('225');
+			await expect(page.locator('#o-pr'), s).toHaveValue('45');
+			await expect(page.locator('#o-d'),  s).toHaveValue('17');
+			await expect(page.locator('#o-size')).not.toHaveAttribute('aria-invalid', 'true');
+		}
+	});
+
+	test('invalid input is flagged and leaves the fields untouched', async () => {
+		await page.fill('#o-d',  '18');
+		await page.fill('#o-tw', '205');
+		await page.fill('#o-size', 'not a size');
+		await expect(page.locator('#o-size')).toHaveAttribute('aria-invalid', 'true');
+		await expect(page.locator('#o-tw')).toHaveValue('205');
+		await expect(page.locator('#o-d')).toHaveValue('18');
+	});
+
+	test('editing the individual fields reflects back into the size box', async () => {
+		await page.fill('#n-d',  '19');
+		await page.fill('#n-tw', '255');
+		await page.fill('#n-pr', '35');
+		await expect(page.locator('#n-size')).toHaveValue('255/35R19');
+	});
+});

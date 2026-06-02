@@ -11,6 +11,29 @@ function v(id) {
     return val;
 }
 
+// ── Tyre size notation ──────────────────────────────────────────────────────────
+// Parses standard metric tyre codes into { tw, pr, rim }, e.g. "225/45R17",
+// "P225/45ZR17", "225/45-17", "225 / 45 r 17". Returns null if it doesn't look
+// like a tyre size or the values fall outside the input ranges.
+
+function parseTyreSize(str) {
+    const m = String(str).match(
+        /(\d{2,3})\s*\/\s*(\d{2,3})\s*(?:z?\s*r|-)\s*(\d{2}(?:\.\d)?)/i,
+    );
+    if (!m) return null;
+    const tw = parseInt(m[1], 10);
+    const pr = parseInt(m[2], 10);
+    const rim = parseFloat(m[3]);
+    if (tw < 100 || tw > 500) return null;
+    if (pr < 10 || pr > 100) return null;
+    if (rim < 12 || rim > 25) return null;
+    return { tw, pr, rim };
+}
+
+function formatTyreSize(tw, pr, rim) {
+    return `${tw}/${pr}R${rim}`;
+}
+
 // ── Core calculation ──────────────────────────────────────────────────────────
 
 function calc(rimIn, rimWin, et, tw, pr, spacer) {
@@ -914,10 +937,60 @@ function initLangSwitcher() {
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 
+// ── Tyre size quick-entry ───────────────────────────────────────────────────
+// Each setup has a free-text size box (e.g. 225/45R17). Typing a valid size fills
+// the diameter / width / profile fields and recalculates; editing those fields
+// reflects back into the box so the two stay in sync.
+
+function syncSizeFromFields(prefix) {
+    const el = document.getElementById(`${prefix}-size`);
+    if (!el) return;
+    const rim = parseFloat(document.getElementById(`${prefix}-d`).value);
+    const tw = parseFloat(document.getElementById(`${prefix}-tw`).value);
+    const pr = parseFloat(document.getElementById(`${prefix}-pr`).value);
+    el.value = tw > 0 && pr > 0 && rim > 0 ? formatTyreSize(tw, pr, rim) : "";
+    el.removeAttribute("aria-invalid");
+}
+
+function initSizeInputs() {
+    for (const prefix of ["o", "n"]) {
+        const sizeEl = document.getElementById(`${prefix}-size`);
+        if (!sizeEl) continue;
+
+        syncSizeFromFields(prefix);
+
+        sizeEl.addEventListener("input", () => {
+            const raw = sizeEl.value.trim();
+            if (!raw) {
+                sizeEl.removeAttribute("aria-invalid");
+                return;
+            }
+            const parsed = parseTyreSize(raw);
+            if (!parsed) {
+                sizeEl.setAttribute("aria-invalid", "true");
+                return;
+            }
+            sizeEl.removeAttribute("aria-invalid");
+            document.getElementById(`${prefix}-d`).value = parsed.rim;
+            document.getElementById(`${prefix}-tw`).value = parsed.tw;
+            document.getElementById(`${prefix}-pr`).value = parsed.pr;
+            calculate();
+        });
+
+        // Reflect manual edits of the individual fields back into the size box
+        for (const f of ["d", "tw", "pr"]) {
+            document
+                .getElementById(`${prefix}-${f}`)
+                .addEventListener("input", () => syncSizeFromFields(prefix));
+        }
+    }
+}
+
 window.onload = () => {
     loadFromParams();
     calculate();
     initLangSwitcher();
+    initSizeInputs();
 };
 
 // ── Service worker registration ───────────────────────────────────────────────
