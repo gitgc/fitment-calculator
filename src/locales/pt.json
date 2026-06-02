@@ -75,5 +75,6 @@
     "warnSpacer": "Espaçador grande — verifique se os pernos têm rosca suficiente e use espaçadores hub-centric.",
     "warnCamber": "Camber agressivo — acelera o desgaste do bordo interior e reduz a superfície de travagem.",
     "warnPoke": "Sobressai bastante mais do que a sua configuração atual — pode roçar na cava ou ficar saliente. Verifique a folga.",
-    "warnInset": "Fica bastante mais para dentro do que a sua configuração atual — pode roçar no amortecedor, no travão ou na cava interior. Verifique a folga."
+    "warnInset": "Fica bastante mais para dentro do que a sua configuração atual — pode roçar no amortecedor, no travão ou na cava interior. Verifique a folga.",
+    "warnArchGapOpen": "Esta configuração aumenta a folga da cava em vez de a reduzir."
 }

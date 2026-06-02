@@ -75,5 +75,6 @@
     "warnSpacer": "Distanziale spesso — verifica l'avvitamento sufficiente dei prigionieri e usa distanziali hub-centric.",
     "warnCamber": "Campanatura aggressiva — accelera l'usura del bordo interno e riduce la superficie frenante.",
     "warnPoke": "Sporge molto più della configurazione attuale — può toccare il passaruota o sporgere. Verifica gli spazi.",
-    "warnInset": "Rientra molto più della configurazione attuale — può toccare l'ammortizzatore, il freno o il passaruota interno. Verifica gli spazi."
+    "warnInset": "Rientra molto più della configurazione attuale — può toccare l'ammortizzatore, il freno o il passaruota interno. Verifica gli spazi.",
+    "warnArchGapOpen": "Questa configurazione aumenta lo spazio del passaruota invece di ridurlo."
 }

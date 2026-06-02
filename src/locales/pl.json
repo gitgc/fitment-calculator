@@ -75,5 +75,6 @@
     "warnSpacer": "Gruba przekładka — sprawdź wystarczające skręcenie szpilek i użyj przekładek hub-centric.",
     "warnCamber": "Agresywny kąt pochylenia — przyspiesza zużycie wewnętrznej krawędzi i zmniejsza powierzchnię hamowania.",
     "warnPoke": "Wystaje wyraźnie bardziej niż obecna konfiguracja — może ocierać o nadkole lub wystawać. Sprawdź prześwit.",
-    "warnInset": "Wchodzi wyraźnie głębiej niż obecna konfiguracja — może ocierać o amortyzator, hamulec lub wewnętrzne nadkole. Sprawdź prześwit."
+    "warnInset": "Wchodzi wyraźnie głębiej niż obecna konfiguracja — może ocierać o amortyzator, hamulec lub wewnętrzne nadkole. Sprawdź prześwit.",
+    "warnArchGapOpen": "Ta konfiguracja powiększa szczelinę nadkola, zamiast ją zmniejszać."
 }

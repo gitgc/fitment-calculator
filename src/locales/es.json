@@ -75,5 +75,6 @@
     "warnSpacer": "Separador grande — comprueba que los espárragos enrosquen lo suficiente y usa separadores hub-centric.",
     "warnCamber": "Caída agresiva — acelera el desgaste del borde interior y reduce la superficie de frenado.",
     "warnPoke": "Sobresale bastante más que tu configuración actual — puede rozar el paso de rueda o sobresalir. Comprueba la holgura.",
-    "warnInset": "Queda bastante más hacia dentro que tu configuración actual — puede rozar el amortiguador, el freno o el arco interior. Comprueba la holgura."
+    "warnInset": "Queda bastante más hacia dentro que tu configuración actual — puede rozar el amortiguador, el freno o el arco interior. Comprueba la holgura.",
+    "warnArchGapOpen": "Esta configuración aumenta el hueco del paso de rueda en lugar de cerrarlo."
 }

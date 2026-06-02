@@ -75,5 +75,6 @@
     "warnSpacer": "Tyk afstandsskive — tjek at hjulboltene har nok gevindindgreb og brug navcentrerede afstandsskiver.",
     "warnCamber": "Aggressiv camber — øger slitagen på inderkanten og reducerer bremsekontaktfladen.",
     "warnPoke": "Stikker mærkbart længere ud end din nuværende opsætning — kan skrabe mod hjulkassen eller stikke ud. Tjek frigangen.",
-    "warnInset": "Sidder mærkbart længere ind end din nuværende opsætning — kan skrabe mod fjederben, bremse eller inderskærm. Tjek frigangen."
+    "warnInset": "Sidder mærkbart længere ind end din nuværende opsætning — kan skrabe mod fjederben, bremse eller inderskærm. Tjek frigangen.",
+    "warnArchGapOpen": "Denne opsætning øger hjulkassemellemrummet i stedet for at lukke det."
 }

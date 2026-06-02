@@ -75,5 +75,6 @@
     "warnSpacer": "Veliki distancer — provjerite dovoljan zahvat vijaka i koristite hub-centric distancere.",
     "warnCamber": "Agresivan bočni nagib — ubrzava trošenje unutarnjeg ruba i smanjuje kontaktnu površinu pri kočenju.",
     "warnPoke": "Strši znatno više od trenutne konfiguracije — može strugati o blatobran ili viriti. Provjerite zazor.",
-    "warnInset": "Ulazi znatno dublje od trenutne konfiguracije — može strugati o amortizer, kočnicu ili unutarnji blatobran. Provjerite zazor."
+    "warnInset": "Ulazi znatno dublje od trenutne konfiguracije — može strugati o amortizer, kočnicu ili unutarnji blatobran. Provjerite zazor.",
+    "warnArchGapOpen": "Ova konfiguracija povećava razmak blatobrana umjesto da ga smanji."
 }

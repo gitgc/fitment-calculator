@@ -75,5 +75,6 @@
     "warnSpacer": "Tykk avstandsstykke — sjekk at hjulboltene har nok gjengegrep og bruk navsentrerte avstandsstykker.",
     "warnCamber": "Aggressiv camber — øker slitasjen på innerkanten og reduserer bremsekontaktflaten.",
     "warnPoke": "Stikker merkbart lenger ut enn ditt nåværende oppsett — kan skrape mot hjulbuen eller stikke ut. Sjekk klaringen.",
-    "warnInset": "Sitter merkbart lenger inn enn ditt nåværende oppsett — kan skrape mot fjærbein, brems eller innerskjerm. Sjekk klaringen."
+    "warnInset": "Sitter merkbart lenger inn enn ditt nåværende oppsett — kan skrape mot fjærbein, brems eller innerskjerm. Sjekk klaringen.",
+    "warnArchGapOpen": "Dette oppsettet øker hjulbuegapet i stedet for å lukke det."
 }

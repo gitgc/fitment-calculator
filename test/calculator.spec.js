@@ -47,6 +47,7 @@ const TD = {
 	pokeRowIdx:   2,
 	insetRowIdx:  3,
 	speedoRow:    4,
+	archGapRow:   8,
 };
 
 // Fills all OD-affecting fields to the same values on both setups so the
@@ -710,5 +711,14 @@ test.describe('Fitment warnings', () => {
 		const rows = page.locator('#tbody tr');
 		await expect(rows.nth(TD.insetRowIdx)).toHaveClass(/row-danger/);
 		await expect(rows.nth(TD.insetRowIdx).locator('.row-reason')).toContainText('strut');
+	});
+
+	test('a smaller tyre that opens the arch gap is flagged (against the goal)', async () => {
+		// Narrower tyre → smaller OD → arch gap grows (negative loss)
+		await page.fill('#n-tw', '205');
+		await page.click('button.calc-btn');
+		const archGap = page.locator('#tbody tr').nth(TD.archGapRow);
+		await expect(archGap).toHaveClass(/row-warn/);
+		await expect(archGap.locator('.row-reason')).toContainText('gap');
 	});
 });

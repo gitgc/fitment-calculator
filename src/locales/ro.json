@@ -75,5 +75,6 @@
     "warnSpacer": "Distanțier gros — verifică angajarea suficientă a prezoanelor și folosește distanțiere hub-centric.",
     "warnCamber": "Camber agresiv — accelerează uzura marginii interioare și reduce suprafața de frânare.",
     "warnPoke": "Iese în afară considerabil mai mult decât configurația actuală — poate freca pasajul roții sau ieși în afară. Verifică spațiul.",
-    "warnInset": "Intră considerabil mai mult decât configurația actuală — poate freca amortizorul, frâna sau pasajul interior. Verifică spațiul."
+    "warnInset": "Intră considerabil mai mult decât configurația actuală — poate freca amortizorul, frâna sau pasajul interior. Verifică spațiul.",
+    "warnArchGapOpen": "Această configurație mărește spațiul pasajului roții în loc să-l reducă."
 }

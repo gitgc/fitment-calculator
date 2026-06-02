@@ -156,6 +156,13 @@ function assessFitment(o, n, nCam) {
         };
     }
 
+    // Arch gap — the whole point of the tool is to *close* it. A taller tyre fills
+    // the arch (gap "lost", positive). A negative value means the new setup OPENS
+    // the gap, i.e. works against the goal — flag it (advisory, not unsafe).
+    if ((n.od - o.od) / 2 < -0.5) {
+        rows[L.rowArchGap] = { severity: "warn", message: L.warnArchGapOpen };
+    }
+
     // Tyre stretch / bulge for the new setup — rim width vs tyre section width.
     // idealRim (inches) ≈ section_mm / 30 is a reasonable linear approximation.
     const delta = n.rimWin - n.tw / 30;

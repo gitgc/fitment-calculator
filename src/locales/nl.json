@@ -75,5 +75,6 @@
     "warnSpacer": "Grote spacer — controleer of de wielbouten genoeg grip houden en gebruik hub-centric spacers.",
     "warnCamber": "Agressieve camber — versnelt slijtage aan de binnenkant en verkleint het remcontactvlak.",
     "warnPoke": "Steekt duidelijk verder uit dan je huidige opstelling — kan de wielkast raken of uitsteken. Controleer de speling.",
-    "warnInset": "Zit duidelijk verder naar binnen dan je huidige opstelling — kan het veerpoot, de rem of de binnenkant raken. Controleer de speling."
+    "warnInset": "Zit duidelijk verder naar binnen dan je huidige opstelling — kan het veerpoot, de rem of de binnenkant raken. Controleer de speling.",
+    "warnArchGapOpen": "Deze opstelling vergroot de wielkastspleet in plaats van die te verkleinen."
 }

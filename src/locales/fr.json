@@ -75,5 +75,6 @@
     "warnSpacer": "Entretoise épaisse — vérifiez que les goujons s'engagent suffisamment et utilisez des entretoises hub-centric.",
     "warnCamber": "Carrossage agressif — accélère l'usure du bord intérieur et réduit la surface de freinage.",
     "warnPoke": "Ressort nettement plus que votre configuration actuelle — peut frotter l'aile ou dépasser. Vérifiez le dégagement.",
-    "warnInset": "Rentre nettement plus que votre configuration actuelle — peut frotter la jambe de force, le frein ou l'aile intérieure. Vérifiez le dégagement."
+    "warnInset": "Rentre nettement plus que votre configuration actuelle — peut frotter la jambe de force, le frein ou l'aile intérieure. Vérifiez le dégagement.",
+    "warnArchGapOpen": "Cette configuration agrandit le jour de l'aile au lieu de le réduire."
 }

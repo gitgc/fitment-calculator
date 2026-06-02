@@ -75,5 +75,6 @@
     "warnSpacer": "Large wheel spacer — check that enough wheel-stud thread still engages and use hub-centric spacers.",
     "warnCamber": "Aggressive camber — accelerates inner-edge tyre wear and reduces the braking contact patch.",
     "warnPoke": "Pokes noticeably further out than your current setup — may foul the wheel arch or sit proud. Check clearance.",
-    "warnInset": "Sits noticeably further inboard than your current setup — may foul the strut, brake or inner arch. Check clearance."
+    "warnInset": "Sits noticeably further inboard than your current setup — may foul the strut, brake or inner arch. Check clearance.",
+    "warnArchGapOpen": "This setup widens the wheel-arch gap instead of closing it."
 }
