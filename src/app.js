@@ -1295,12 +1295,18 @@ const PARAMS = {
     "n-bp": "nbp",
 };
 
+// The genuinely optional inputs (centre bore, bolt pattern). Only these are
+// dropped from the share URL when blank — required fields are always encoded,
+// so deliberately clearing one round-trips faithfully instead of silently
+// reverting to its HTML default on reopen.
+const OPTIONAL_PARAMS = new Set(["o-cb", "n-cb", "o-bp", "n-bp"]);
+
 function buildShareUrl() {
     const p = new URLSearchParams();
     for (const [id, key] of Object.entries(PARAMS)) {
         const { value } = document.getElementById(id);
-        // Skip blank optional fields (centre bore) so they don't clutter the URL.
-        if (value !== "") p.set(key, value);
+        if (value === "" && OPTIONAL_PARAMS.has(id)) continue;
+        p.set(key, value);
     }
     return `${location.origin}${location.pathname}?${p}`;
 }

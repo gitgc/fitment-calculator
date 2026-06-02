@@ -501,6 +501,28 @@ test.describe('Share button', () => {
 		await expect(page.locator('#n-et')).toHaveValue('42');
 		await expect(page.locator('#n-sp')).toHaveValue('7');
 	});
+
+	test('encodes a cleared required field but omits blank optional fields', async () => {
+		await page.fill('#o-tw', ''); // a required numeric field, deliberately cleared
+		await page.evaluate(() => {
+			window.__copied = null;
+			navigator.clipboard.writeText = (t) => {
+				window.__copied = t;
+				return Promise.resolve();
+			};
+		});
+		await page.click('#share-btn');
+
+		const url = await page.evaluate(() => window.__copied);
+		// Cleared required field is still encoded (as empty) so the state round-trips…
+		expect(url).toMatch(/[?&]otw=(&|$)/);
+		// …while blank optional fields (centre bore, bolt pattern) stay out of the URL.
+		expect(url).not.toContain('ocb=');
+		expect(url).not.toContain('obp=');
+
+		await page.goto(url, { waitUntil: 'domcontentloaded' });
+		await expect(page.locator('#o-tw')).toHaveValue('');
+	});
 });
 
 // ── URL parameters ────────────────────────────────────────────────────────────
