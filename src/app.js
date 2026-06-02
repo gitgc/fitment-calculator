@@ -35,9 +35,7 @@ function withinInputRange(id, val) {
     const el = document.getElementById(id);
     const lo = parseFloat(el.min);
     const hi = parseFloat(el.max);
-    return (
-        (Number.isNaN(lo) || val >= lo) && (Number.isNaN(hi) || val <= hi)
-    );
+    return (Number.isNaN(lo) || val >= lo) && (Number.isNaN(hi) || val <= hi);
 }
 
 function formatTyreSize(tw, pr, rim) {
