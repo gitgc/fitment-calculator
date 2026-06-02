@@ -534,8 +534,12 @@ test.describe('Tyre size parser', () => {
 		await expect(page.locator('#tbody td').nth(TD.newOD)).toHaveText('661.1 mm');
 	});
 
-	test('accepts common notation variants', async () => {
-		for (const s of ['225/45R17', 'P225/45ZR17', '225/45-17', '225 / 45 r 17']) {
+	test('accepts common notation variants, prefixes and trailing load/speed', async () => {
+		const variants = [
+			'225/45R17', 'P225/45ZR17', 'LT225/45R17', '225/45-17',
+			'225 / 45 r 17', '225/45R17 91W',
+		];
+		for (const s of variants) {
 			await page.fill('#o-size', s);
 			await expect(page.locator('#o-tw'), s).toHaveValue('225');
 			await expect(page.locator('#o-pr'), s).toHaveValue('45');
@@ -551,6 +555,14 @@ test.describe('Tyre size parser', () => {
 		await expect(page.locator('#o-size')).toHaveAttribute('aria-invalid', 'true');
 		await expect(page.locator('#o-tw')).toHaveValue('205');
 		await expect(page.locator('#o-d')).toHaveValue('18');
+	});
+
+	test('a longer leading number is not mis-parsed as a substring', async () => {
+		await page.fill('#o-tw', '205');
+		// "1225/45R17" must NOT be read as the "225/45R17" substring
+		await page.fill('#o-size', '1225/45R17');
+		await expect(page.locator('#o-size')).toHaveAttribute('aria-invalid', 'true');
+		await expect(page.locator('#o-tw')).toHaveValue('205');
 	});
 
 	test('a well-formed size outside the field ranges is rejected', async () => {

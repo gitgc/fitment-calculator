@@ -13,14 +13,16 @@ function v(id) {
 
 // ── Tyre size notation ──────────────────────────────────────────────────────────
 // Parses standard metric tyre codes into { tw, pr, rim }, e.g. "225/45R17",
-// "P225/45ZR17", "225/45-17", "225 / 45 r 17". Returns null if the string doesn't
-// match the notation. Value ranges are NOT checked here — the call site validates
-// each number against the matching <input>'s own min/max so the bounds can never
-// drift from the UI constraints.
+// "P225/45ZR17", "225/45-17", "225 / 45 r 17", "225/45R17 91W". Returns null if
+// the string doesn't match. The pattern is anchored to the start (after an
+// optional P/LT/ST/T service prefix) so a longer leading number like "1225/45R17"
+// can't sneak through as a substring; trailing load/speed text is ignored. Value
+// ranges are NOT checked here — the call site validates each number against the
+// matching <input>'s own min/max so the bounds can never drift from the UI.
 
 function parseTyreSize(str) {
     const m = String(str).match(
-        /(\d{2,3})\s*\/\s*(\d{2,3})\s*(?:z?\s*r|-)\s*(\d{2}(?:\.\d)?)/i,
+        /^\s*(?:lt|st|p|t)?\s*(\d{2,3})\s*\/\s*(\d{2,3})\s*(?:z?\s*r|-)\s*(\d{2}(?:\.\d)?)(?!\d)/i,
     );
     if (!m) return null;
     return {
