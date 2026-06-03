@@ -42,6 +42,13 @@ const TD = {
 	speedoNew:    13,  // SpeedoError  new
 	reading1New:  16,  // Reading@ref1 new
 	rideNew:      22,  // RideHeight   new
+	// Row indices (into `#tbody tr`) for warning checks
+	diameterRow:  0,
+	pokeRowIdx:   2,
+	insetRowIdx:  3,
+	speedoRow:    4,
+	archGapRow:   8,
+	boreRow:      9, // only present when a centre bore is entered (appended last)
 };
 
 // Fills all OD-affecting fields to the same values on both setups so the
@@ -494,6 +501,28 @@ test.describe('Share button', () => {
 		await expect(page.locator('#n-et')).toHaveValue('42');
 		await expect(page.locator('#n-sp')).toHaveValue('7');
 	});
+
+	test('encodes a cleared required field but omits blank optional fields', async () => {
+		await page.fill('#o-tw', ''); // a required numeric field, deliberately cleared
+		await page.evaluate(() => {
+			window.__copied = null;
+			navigator.clipboard.writeText = (t) => {
+				window.__copied = t;
+				return Promise.resolve();
+			};
+		});
+		await page.click('#share-btn');
+
+		const url = await page.evaluate(() => window.__copied);
+		// Cleared required field is still encoded (as empty) so the state round-trips…
+		expect(url).toMatch(/[?&]otw=(&|$)/);
+		// …while blank optional fields (centre bore, bolt pattern) stay out of the URL.
+		expect(url).not.toContain('ocb=');
+		expect(url).not.toContain('obp=');
+
+		await page.goto(url, { waitUntil: 'domcontentloaded' });
+		await expect(page.locator('#o-tw')).toHaveValue('');
+	});
 });
 
 // ── URL parameters ────────────────────────────────────────────────────────────
@@ -593,5 +622,291 @@ test.describe('Tyre size parser', () => {
 		await page.fill('#o-d', '20');
 		await expect(page.locator('#o-size')).toHaveValue('225/45R20');
 		await expect(page.locator('#o-size')).not.toHaveAttribute('aria-invalid', 'true');
+	});
+});
+
+// ── Fitment warnings ──────────────────────────────────────────────────────────
+
+test.describe('Fitment warnings', () => {
+	let page;
+
+	test.beforeEach(async ({ makePage }) => {
+		page = await makePage('en');
+		await page.goto(localeUrl('en'), { waitUntil: 'domcontentloaded' });
+	});
+
+	test('default setup raises no warnings', async () => {
+		await expect(page.locator('#tbody tr.row-warn, #tbody tr.row-danger')).toHaveCount(0);
+		await expect(page.locator('#fitment-warnings')).toBeEmpty();
+	});
+
+	test('a large diameter increase flags Diameter (danger) + under-reading speedo', async () => {
+		await page.fill('#n-d', '20');
+		await page.fill('#n-tw', '245');
+		await page.fill('#n-pr', '40');
+		await page.click('button.calc-btn');
+
+		const rows = page.locator('#tbody tr');
+		await expect(rows.nth(TD.diameterRow)).toHaveClass(/row-danger/);
+		await expect(rows.nth(TD.diameterRow).locator('.row-reason')).toContainText('diameter changes');
+		await expect(rows.nth(TD.speedoRow)).toHaveClass(/row-danger/);
+		await expect(rows.nth(TD.speedoRow).locator('.row-reason')).toContainText('under-read');
+		await expect(page.locator('#fitment-warnings')).toBeEmpty(); // no stretch
+	});
+
+	test('a moderate diameter increase is a caution, not a danger', async () => {
+		// 18×241/40 → OD ≈ 650 mm, +2.5% over the 634.3 mm default
+		await page.fill('#n-tw', '241');
+		await page.click('button.calc-btn');
+		await expect(page.locator('#tbody tr').nth(TD.diameterRow)).toHaveClass(/row-warn/);
+	});
+
+	test('a wide rim for the tyre flags stretch (setup strip)', async () => {
+		await page.fill('#n-w', '11'); // 235 tyre on an 11" rim
+		await page.click('button.calc-btn');
+		const warn = page.locator('#fitment-warnings .fitment-danger');
+		await expect(warn).toHaveCount(1);
+		await expect(warn).toContainText('stretched');
+	});
+
+	test('a narrow rim for the tyre flags bulge, with no row warnings', async () => {
+		// 18×255/35 keeps OD ~unchanged; 5" rim is far too narrow for a 255
+		await page.fill('#n-w', '5');
+		await page.fill('#n-tw', '255');
+		await page.fill('#n-pr', '35');
+		await page.click('button.calc-btn');
+		await expect(page.locator('#tbody tr.row-warn, #tbody tr.row-danger')).toHaveCount(0);
+		await expect(page.locator('#fitment-warnings .fitment-danger')).toContainText('bulge');
+	});
+
+	// ── Tier 2 (setup-level, no row) ──────────────────────────────────────────
+	test('a large wheel spacer is a danger', async () => {
+		// (A 30 mm spacer also pushes poke out, so the Poke row warns too — correct.)
+		await page.fill('#n-sp', '30');
+		await page.click('button.calc-btn');
+		await expect(page.locator('#fitment-warnings .fitment-danger')).toContainText('spacer');
+	});
+
+	test('a moderate wheel spacer is a caution', async () => {
+		await page.fill('#n-sp', '20');
+		await page.click('button.calc-btn');
+		await expect(page.locator('#fitment-warnings .fitment-warn')).toContainText('spacer');
+	});
+
+	test('aggressive camber is flagged (no row warnings)', async () => {
+		await page.fill('#n-cam', '5');
+		await page.click('button.calc-btn');
+		await expect(page.locator('#tbody tr.row-warn, #tbody tr.row-danger')).toHaveCount(0);
+		await expect(page.locator('#fitment-warnings .fitment-danger')).toContainText('camber');
+	});
+
+	test('a very low-profile tyre is flagged', async () => {
+		await page.fill('#n-pr', '20');
+		await page.click('button.calc-btn');
+		await expect(page.locator('#fitment-warnings')).toContainText('low-profile');
+	});
+
+	test('danger warnings sort ahead of cautions in the strip', async () => {
+		// Caution spacer (20) + danger camber (5) → danger should render first
+		await page.fill('#n-sp', '20');
+		await page.fill('#n-cam', '5');
+		await page.click('button.calc-btn');
+		const warnings = page.locator('#fitment-warnings .fitment-warning');
+		await expect(warnings).toHaveCount(2);
+		await expect(warnings.first()).toHaveClass(/fitment-danger/);
+	});
+
+	// ── Tier 3 (poke / inset rows) ────────────────────────────────────────────
+	test('a big poke increase flags the Poke row (danger)', async () => {
+		// Low ET pushes the wheel out without changing OD/stretch/etc.
+		await page.fill('#n-et', '20');
+		await page.click('button.calc-btn');
+		const rows = page.locator('#tbody tr');
+		await expect(rows.nth(TD.pokeRowIdx)).toHaveClass(/row-danger/);
+		await expect(rows.nth(TD.pokeRowIdx).locator('.row-reason')).toContainText('proud');
+		await expect(page.locator('#fitment-warnings')).toBeEmpty();
+	});
+
+	test('a big inset increase flags the Inset row (danger)', async () => {
+		// High ET pulls the wheel inboard
+		await page.fill('#n-et', '80');
+		await page.click('button.calc-btn');
+		const rows = page.locator('#tbody tr');
+		await expect(rows.nth(TD.insetRowIdx)).toHaveClass(/row-danger/);
+		await expect(rows.nth(TD.insetRowIdx).locator('.row-reason')).toContainText('strut');
+	});
+
+	test('a smaller tyre that opens the arch gap is flagged (against the goal)', async () => {
+		// Narrower tyre → smaller OD → arch gap grows (negative loss)
+		await page.fill('#n-tw', '205');
+		await page.click('button.calc-btn');
+		const archGap = page.locator('#tbody tr').nth(TD.archGapRow);
+		await expect(archGap).toHaveClass(/row-warn/);
+		await expect(archGap.locator('.row-reason')).toContainText('gap');
+	});
+
+	// ── Centre bore (optional, its own table row) ────────────────────────────
+	test('no centre-bore row appears by default', async () => {
+		await page.click('button.calc-btn');
+		await expect(page.locator('#tbody tr')).toHaveCount(9);
+	});
+
+	test('entering both bores adds a row with current, new and difference', async () => {
+		await page.fill('#o-cb', '57.1');
+		await page.fill('#n-cb', '72.6');
+		await page.click('button.calc-btn');
+		const rows = page.locator('#tbody tr');
+		await expect(rows).toHaveCount(10);
+		const cells = rows.nth(TD.boreRow).locator('td'); // current, new, difference
+		await expect(cells.nth(0)).toContainText('57.1');
+		await expect(cells.nth(1)).toContainText('72.6');
+		await expect(cells.nth(2)).toContainText('+15.5');
+	});
+
+	test('a smaller new centre bore flags the Centre Bore row (danger)', async () => {
+		await page.fill('#o-cb', '70.1');
+		await page.fill('#n-cb', '64.1');
+		await page.click('button.calc-btn');
+		const bore = page.locator('#tbody tr').nth(TD.boreRow);
+		await expect(bore).toHaveClass(/row-danger/);
+		await expect(bore.locator('.row-reason')).toContainText('fit');
+		// Warning lives in the row now, not the strip
+		await expect(page.locator('#fitment-warnings')).toBeEmpty();
+	});
+
+	test('an out-of-range centre bore is clamped to the input limits', async () => {
+		await page.fill('#o-cb', '9999'); // above max 120
+		await page.fill('#n-cb', '10'); // below min 40
+		await page.click('button.calc-btn');
+		const cells = page.locator('#tbody tr').nth(TD.boreRow).locator('td');
+		await expect(cells.nth(0)).toContainText('120.0');
+		await expect(cells.nth(1)).toContainText('40.0');
+	});
+
+	test('a larger new centre bore is a caution on the row (hub-centric rings)', async () => {
+		await page.fill('#o-cb', '64.1');
+		await page.fill('#n-cb', '72.6');
+		await page.click('button.calc-btn');
+		const bore = page.locator('#tbody tr').nth(TD.boreRow);
+		await expect(bore).toHaveClass(/row-warn/);
+		await expect(bore.locator('.row-reason')).toContainText('rings');
+	});
+
+	test('matching or partial centre bore shows the row without a warning', async () => {
+		// Equal bores → row present, no warning class
+		await page.fill('#o-cb', '64.1');
+		await page.fill('#n-cb', '64.1');
+		await page.click('button.calc-btn');
+		const bore = page.locator('#tbody tr').nth(TD.boreRow);
+		await expect(bore).toHaveCount(1);
+		await expect(bore).not.toHaveClass(/row-warn|row-danger/);
+		// Only one side filled → row still shows (difference dashed), still silent
+		await page.fill('#n-cb', '');
+		await page.click('button.calc-btn');
+		await expect(page.locator('#tbody tr')).toHaveCount(10);
+		await expect(page.locator('#tbody tr').nth(TD.boreRow)).not.toHaveClass(/row-warn|row-danger/);
+	});
+
+	// ── Bolt pattern (optional, its own table row) ───────────────────────────
+	// With no centre bore set, the bolt row is the only extra row → index 9.
+	const BOLT_ROW = 9;
+
+	test('no bolt-pattern row appears by default', async () => {
+		await page.click('button.calc-btn');
+		await expect(page.locator('#tbody tr')).toHaveCount(9);
+	});
+
+	test('a small bolt-pattern change is a caution with an "old → new" difference', async () => {
+		// Current unset (assumes 5x114.3), new 5x100 → same studs, small PCD change
+		await page.selectOption('#n-bp', '5x100');
+		await page.click('button.calc-btn');
+		const rows = page.locator('#tbody tr');
+		await expect(rows).toHaveCount(10);
+		const bolt = rows.nth(BOLT_ROW);
+		await expect(bolt).toHaveClass(/row-warn/);
+		await expect(bolt.locator('.row-reason')).toContainText('adapters');
+		const cells = bolt.locator('td'); // current, new, difference
+		await expect(cells.nth(0)).toContainText('5×114.3');
+		await expect(cells.nth(1)).toContainText('5×100');
+		await expect(cells.nth(2)).toContainText('5×114.3 → 5×100');
+		await expect(page.locator('#fitment-warnings')).toBeEmpty();
+	});
+
+	test('a large bolt-pattern change is a danger (not adaptable)', async () => {
+		await page.selectOption('#o-bp', '4x100');
+		await page.selectOption('#n-bp', '6x139.7');
+		await page.click('button.calc-btn');
+		const bolt = page.locator('#tbody tr').nth(BOLT_ROW);
+		await expect(bolt).toHaveClass(/row-danger/);
+		await expect(bolt.locator('.row-reason')).toContainText('bolt on');
+	});
+
+	test('matching bolt pattern shows the row without a warning', async () => {
+		await page.selectOption('#o-bp', '5x112');
+		await page.selectOption('#n-bp', '5x112');
+		await page.click('button.calc-btn');
+		const bolt = page.locator('#tbody tr').nth(BOLT_ROW);
+		await expect(bolt).toHaveCount(1);
+		await expect(bolt).not.toHaveClass(/row-warn|row-danger/);
+		await expect(bolt.locator('td').nth(2)).toContainText('—');
+	});
+});
+
+// ── Wheel design (per-wheel spokes) ───────────────────────────────────────────
+
+test.describe('Wheel design — spoke controls', () => {
+	test('default values and clamp attributes for both wheels', async ({ makePage }) => {
+		const page = await makePage('en');
+		await page.goto(localeUrl('en'), { waitUntil: 'domcontentloaded' });
+		for (const id of ['o-spokes', 'n-spokes']) {
+			await expect(page.locator(`#${id}`)).toHaveValue('6');
+			await expect(page.locator(`#${id}`)).toHaveAttribute('min', '3');
+			await expect(page.locator(`#${id}`)).toHaveAttribute('max', '12');
+		}
+		for (const id of ['o-spokew', 'n-spokew']) {
+			await expect(page.locator(`#${id}`)).toHaveValue('13');
+			await expect(page.locator(`#${id}`)).toHaveAttribute('min', '5');
+			await expect(page.locator(`#${id}`)).toHaveAttribute('max', '30');
+		}
+	});
+
+	test('spoke design round-trips through the share URL', async ({ makePage }) => {
+		const page = await makePage('en');
+		await page.goto(localeUrl('en'), { waitUntil: 'domcontentloaded' });
+		await page.fill('#n-spokes', '8');
+		await page.fill('#o-spokew', '20');
+		await page.evaluate(() => {
+			window.__copied = null;
+			navigator.clipboard.writeText = (t) => {
+				window.__copied = t;
+				return Promise.resolve();
+			};
+		});
+		await page.click('#share-btn');
+
+		const url = await page.evaluate(() => window.__copied);
+		expect(url).toContain('nsc=8');
+		expect(url).toContain('osw=20');
+		// Fields left at their default are dropped to keep the URL short.
+		expect(url).not.toContain('osc='); // o-spokes still 6
+		expect(url).not.toContain('nsw='); // n-spokew still 13
+
+		await page.goto(url, { waitUntil: 'domcontentloaded' });
+		await expect(page.locator('#n-spokes')).toHaveValue('8');
+		await expect(page.locator('#o-spokew')).toHaveValue('20');
+		// Skipped defaults round-trip back to their default values.
+		await expect(page.locator('#o-spokes')).toHaveValue('6');
+		await expect(page.locator('#n-spokew')).toHaveValue('13');
+	});
+
+	test('editing a spoke field live-redraws the face canvas', async ({ makePage }) => {
+		const page = await makePage('en');
+		await page.goto(localeUrl('en'), { waitUntil: 'domcontentloaded' });
+		await page.click('button.calc-btn');
+		// Changing spokes should re-run calculate() without another button press.
+		await page.fill('#n-spokes', '10');
+		await expect(page.locator('#cv2')).toBeVisible();
+		// The diagram is canvas-drawn; assert no error and the value stuck.
+		await expect(page.locator('#n-spokes')).toHaveValue('10');
 	});
 });

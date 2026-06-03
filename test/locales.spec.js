@@ -22,19 +22,25 @@ const REQUIRED_KEYS = [
 	'lang', 'flag', 'siteTitle', 'pageTitle', 'metaDescription', 'footerText', 'disclaimer',
 	'skipToMain', 'subtitle', 'currentSetup', 'newSetup',
 	'rimSection', 'tireSection', 'optionalSection', 'tireSizeLabel',
-	'diameterInches', 'widthInches', 'offsetET', 'tireWidth', 'profile', 'spacer', 'camber',
+	'diameterInches', 'widthInches', 'offsetET', 'tireWidth', 'profile', 'spacer', 'camber', 'centreBore', 'boltPattern',
 	'calcBtn', 'shareBtn', 'shareBtnAriaLabel',
 	'tableAriaLabel', 'colMeasurement', 'colCurrent', 'colNew', 'colDifference',
 	'crossSectionTitle', 'faceTitle', 'suspensionNote', 'legendCurrent', 'legendNew',
+	'wheelDesign', 'spokeCount', 'spokeWidth',
 	'canvasAriaLabelStatic', 'githubAriaLabel', 'switchLang', 'langName',
 	'shareCopied',
 	'rowDiameter', 'rowCircumference', 'rowPoke', 'rowInset', 'rowSpeedoError',
-	'rowAt1', 'rowAt2', 'rowRideHeight', 'rowArchGap',
+	'rowAt1', 'rowAt2', 'rowRideHeight', 'rowArchGap', 'rowBore', 'rowBolt',
 	'refSpeed1', 'refSpeed2', 'speedUnit',
 	'calcStatus', 'canvasAriaLabelDynamic',
 	'canvasCurrent', 'canvasNew', 'canvasWide', 'canvasPoke',
 	'tipDiameter', 'tipCircumference', 'tipPoke', 'tipInset', 'tipSpeedoError',
-	'tipAt1', 'tipAt2', 'tipRideHeight', 'tipArchGap',
+	'tipAt1', 'tipAt2', 'tipRideHeight', 'tipArchGap', 'tipBore', 'tipBolt',
+	'warnSpeedoUnder', 'warnSpeedoOver', 'warnDiameter', 'warnStretch', 'warnBulge',
+	'warnLowProfile', 'warnSpacer', 'warnCamber',
+	'warnPoke', 'warnInset', 'warnArchGapOpen',
+	'warnBoreSmaller', 'warnBoreLarger',
+	'warnBoltAmber', 'warnBoltRed',
 ];
 
 const IMPERIAL     = new Set(['en']);
@@ -149,11 +155,20 @@ test.describe('Build output — HTML files', () => {
 		}
 	});
 
-	test('window.SITE.brand is injected from the canonical host', () => {
-		const brand = new URL(siteConfig.canonicalUrl).host; // e.g. fixthatgap.com
+	test('window.SITE.brand is injected, matching build.js (explicit brand or canonical host)', () => {
+		// Mirror build.js: an explicit `brand` wins, else the canonical URL's host,
+		// else empty (also when canonicalUrl is malformed).
+		let brand = siteConfig.brand || '';
+		if (!brand && siteConfig.canonicalUrl) {
+			try {
+				brand = new URL(siteConfig.canonicalUrl).host;
+			} catch {
+				brand = '';
+			}
+		}
 		for (const { code } of locales) {
 			const content = html(code);
-			if (!content) return;
+			expect(content, `${code} page exists`).not.toBeNull();
 			expect(content, `${code} window.SITE`).toContain('window.SITE=');
 			expect(content, `${code} brand`).toContain(`brand:"${brand}"`);
 		}

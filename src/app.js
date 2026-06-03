@@ -15,6 +15,22 @@ function v(id) {
     return val;
 }
 
+// Like v(), but a blank field stays 0 ("unspecified") instead of clamping up to
+// the minimum. Any value that *is* provided is still clamped to the input's
+// declared min/max, so an out-of-range entry (e.g. via a crafted share URL or
+// manual edit) can't bypass the stated limits.
+function vOptional(id) {
+    const el = document.getElementById(id);
+    if (el.value.trim() === "") return 0;
+    const val = parseFloat(el.value);
+    if (Number.isNaN(val)) return 0;
+    const lo = parseFloat(el.min);
+    const hi = parseFloat(el.max);
+    if (!Number.isNaN(lo) && val < lo) return lo;
+    if (!Number.isNaN(hi) && val > hi) return hi;
+    return val;
+}
+
 // ── Tyre size notation ──────────────────────────────────────────────────────────
 // Parses standard metric tyre codes into { tw, pr, rim }, e.g. "225/45R17",
 // "P225/45ZR17", "225/45-17", "225 / 45 r 17", "225/45R17 91W". Returns null if
@@ -102,6 +118,157 @@ function escapeHTML(s) {
         .replace(/"/g, "&quot;");
 }
 
+// A typical modern PCD, assumed when no bolt pattern is selected.
+const DEFAULT_BOLT = "5x114.3";
+
+// "5x114.3" → { count: 5, pcd: 114.3 }; null if it can't be parsed.
+function parseBolt(s) {
+    const m = /^(\d+)x([\d.]+)$/.exec(s);
+    return m ? { count: +m[1], pcd: parseFloat(m[2]) } : null;
+}
+
+// Display form, e.g. "5x114.3" → "5×114.3".
+function fmtBolt(s) {
+    return s.replace("x", "×");
+}
+
+// ── Fitment assessment (Tier 1 + 2 warnings) ───────────────────────────────────
+// Returns { rows: { [rowLabel]: {severity, message} }, setup: [{severity, message}] }
+// where severity is "warn" (caution) or "danger". Thresholds are deliberately
+// lenient so that common, sensible setups don't trip false alarms. Row-bound
+// checks tint the matching table row; setup-level checks (which have no
+// comparison row) collect into `setup` and render in the strip below the table.
+function assessFitment(
+    o,
+    n,
+    nCam,
+    oBore = 0,
+    nBore = 0,
+    oBolt = "",
+    nBolt = "",
+) {
+    const L = window.L;
+    const rows = {};
+    const setup = [];
+
+    // Rolling-diameter change — affects speedo, ABS/traction control, gearing,
+    // clearance. (Circumference change is identical, so we key it to Diameter.)
+    const absPct = Math.abs(((n.od - o.od) / o.od) * 100);
+    if (absPct >= 2) {
+        rows[L.rowDiameter] = {
+            severity: absPct > 3 ? "danger" : "warn",
+            message: L.warnDiameter.replace("{pct}", fmt(absPct, 1)),
+        };
+    }
+
+    // Speedometer accuracy. speedoErr < 0 means the dial under-reads (true speed
+    // higher than shown) — the legally relevant, riskier direction.
+    const speedoErr = (o.circ / n.circ - 1) * 100;
+    if (speedoErr <= -2) {
+        rows[L.rowSpeedoError] = {
+            severity: speedoErr <= -5 ? "danger" : "warn",
+            message: L.warnSpeedoUnder,
+        };
+    } else if (speedoErr >= 10) {
+        rows[L.rowSpeedoError] = {
+            severity: "warn",
+            message: L.warnSpeedoOver,
+        };
+    }
+
+    // Poke / inset clearance — car-specific (depends on the actual arch and
+    // suspension), so judged on how much further out/in the new setup sits than
+    // the current one, and worded as advisory ("check clearance").
+    const pokeUp = n.poke - o.poke;
+    if (pokeUp > 20) {
+        rows[L.rowPoke] = {
+            severity: pokeUp > 30 ? "danger" : "warn",
+            message: L.warnPoke,
+        };
+    }
+    const insetUp = n.inset - o.inset;
+    if (insetUp > 15) {
+        rows[L.rowInset] = {
+            severity: insetUp > 25 ? "danger" : "warn",
+            message: L.warnInset,
+        };
+    }
+
+    // Arch gap — the whole point of the tool is to *close* it. A taller tyre fills
+    // the arch (gap "lost", positive). A negative value means the new setup OPENS
+    // the gap, i.e. works against the goal — flag it (advisory, not unsafe).
+    if ((n.od - o.od) / 2 < -0.5) {
+        rows[L.rowArchGap] = { severity: "warn", message: L.warnArchGapOpen };
+    }
+
+    // Tyre stretch / bulge for the new setup — rim width vs tyre section width.
+    // idealRim (inches) ≈ section_mm / 30 is a reasonable linear approximation.
+    const delta = n.rimWin - n.tw / 30;
+    const absDelta = Math.abs(delta);
+    if (absDelta > 1) {
+        setup.push({
+            severity: absDelta > 2 ? "danger" : "warn",
+            message: delta > 0 ? L.warnStretch : L.warnBulge,
+        });
+    }
+
+    // ── Tier 2 — new-setup properties ──────────────────────────────────────────
+    // Low-profile tyre — harsher ride, higher pothole/wheel damage risk.
+    if (n.pr < 30) {
+        setup.push({
+            severity: n.pr < 25 ? "danger" : "warn",
+            message: L.warnLowProfile,
+        });
+    }
+    // Large wheel spacer — stud engagement / hub-centric concerns.
+    if (n.sp > 15) {
+        setup.push({
+            severity: n.sp > 25 ? "danger" : "warn",
+            message: L.warnSpacer,
+        });
+    }
+    // Aggressive camber — inner-edge wear, reduced braking contact patch.
+    const absCam = Math.abs(nCam);
+    if (absCam > 2.5) {
+        setup.push({
+            severity: absCam > 4 ? "danger" : "warn",
+            message: L.warnCamber,
+        });
+    }
+    // Centre bore (optional — only when both are given). The current wheel fits
+    // the hub, so its bore is the reference. A smaller new bore won't clear the
+    // hub at all (danger); a larger one fits but needs hub-centric rings (caution).
+    // Bound to its own table row, which calculate() only shows when bore is set.
+    if (oBore > 0 && nBore > 0 && nBore !== oBore) {
+        rows[L.rowBore] =
+            nBore < oBore
+                ? { severity: "danger", message: L.warnBoreSmaller }
+                : { severity: "warn", message: L.warnBoreLarger };
+    }
+
+    // Bolt pattern (optional). Unspecified sides assume the typical default, so a
+    // genuine mismatch only shows when at least one side was chosen. A small
+    // change in stud count and PCD is commonly bridged by off-the-shelf adapters
+    // (caution); a large change usually isn't safely adaptable (danger).
+    const oPat = parseBolt(oBolt || DEFAULT_BOLT);
+    const nPat = parseBolt(nBolt || DEFAULT_BOLT);
+    if (oPat && nPat && (oPat.count !== nPat.count || oPat.pcd !== nPat.pcd)) {
+        const adaptable =
+            Math.abs(oPat.count - nPat.count) <= 1 &&
+            Math.abs(oPat.pcd - nPat.pcd) <= 30;
+        rows[L.rowBolt] = adaptable
+            ? { severity: "warn", message: L.warnBoltAmber }
+            : { severity: "danger", message: L.warnBoltRed };
+    }
+
+    // Danger before caution, so the most serious advice leads the strip.
+    setup.sort((a, b) =>
+        a.severity === b.severity ? 0 : a.severity === "danger" ? -1 : 1,
+    );
+
+    return { rows, setup };
+}
+
 // ── Main calculate ────────────────────────────────────────────────────────────
 
 function calculate() {
@@ -123,6 +290,18 @@ function calculate() {
     );
     const oCam = v("o-cam");
     const nCam = v("n-cam");
+    // Centre bore is optional and not used in any geometry — read it raw so an
+    // empty field stays 0 ("not specified"); any provided value is clamped.
+    const oBore = vOptional("o-cb");
+    const nBore = vOptional("n-cb");
+    // Bolt pattern is optional; an unset side falls back to the typical default.
+    const oBolt = document.getElementById("o-bp").value;
+    const nBolt = document.getElementById("n-bp").value;
+    // Per-wheel spoke design (count + width %). Clamped by the input helper.
+    const oSpokes = Math.round(v("o-spokes"));
+    const nSpokes = Math.round(v("n-spokes"));
+    const oSpokeW = v("o-spokew") / 100;
+    const nSpokeW = v("n-spokew") / 100;
 
     const L = window.L;
     const ref1 = L.refSpeed1;
@@ -193,18 +372,81 @@ function calculate() {
         [L.rowArchGap, "0.0 mm", `${fmt(rhGain)} mm`, signed(rhGain, "mm")],
     ];
 
+    // Optional centre-bore row — only shown when the user supplied a bore. Each
+    // side falls back to "—" when blank, and the difference only when both exist.
+    if (oBore > 0 || nBore > 0) {
+        const dash = '<span class="neu">—</span>';
+        tips[L.rowBore] = L.tipBore;
+        rows.push([
+            L.rowBore,
+            oBore > 0 ? `${fmt(oBore)} mm` : dash,
+            nBore > 0 ? `${fmt(nBore)} mm` : dash,
+            oBore > 0 && nBore > 0 ? signed(nBore - oBore, "mm") : dash,
+        ]);
+    }
+
+    // Optional bolt-pattern row — shown when either side was chosen. Unset sides
+    // display the assumed default; the difference reads "old → new" when they vary.
+    if (oBolt || nBolt) {
+        const oEff = oBolt || DEFAULT_BOLT;
+        const nEff = nBolt || DEFAULT_BOLT;
+        tips[L.rowBolt] = L.tipBolt;
+        rows.push([
+            L.rowBolt,
+            fmtBolt(oEff),
+            fmtBolt(nEff),
+            oEff === nEff
+                ? '<span class="neu">—</span>'
+                : `${fmtBolt(oEff)} → ${fmtBolt(nEff)}`,
+        ]);
+    }
+
+    const assess = assessFitment(o, n, nCam, oBore, nBore, oBolt, nBolt);
+
     document.getElementById("tbody").innerHTML = rows
         .map(([label, ov, nv, dv]) => {
             // label and tip are localized text → escape. ov/nv/dv contain
             // intentional <span> markup from signed() → leave as-is.
             const tip = escapeHTML(tips[label] || "");
-            return `<tr><th scope="row" data-tip="${tip}" title="${tip}">${escapeHTML(label)}</th><td>${ov}</td><td>${nv}</td><td>${dv}</td></tr>`;
+            const w = assess.rows[label];
+            const rowClass = w ? ` class="row-${w.severity}"` : "";
+            const reason = w
+                ? `<div class="row-reason">⚠ ${escapeHTML(w.message)}</div>`
+                : "";
+            return `<tr${rowClass}><th scope="row" data-tip="${tip}" title="${tip}">${escapeHTML(label)}${reason}</th><td>${ov}</td><td>${nv}</td><td>${dv}</td></tr>`;
         })
         .join("");
 
+    // Setup-level warnings (e.g. tyre stretch) — no comparison row to attach to
+    const warnEl = document.getElementById("fitment-warnings");
+    if (warnEl) {
+        warnEl.innerHTML = assess.setup
+            .map(
+                (w) =>
+                    `<p class="fitment-warning fitment-${w.severity}">⚠ ${escapeHTML(w.message)}</p>`,
+            )
+            .join("");
+    }
+
     document.getElementById("results").classList.add("show");
     drawDiagram(o, n, oCam, nCam);
-    drawFaceDiagram(o, n, oCam, nCam);
+    // Stash the render args so the spin animation can redraw the wheel at any
+    // angle without recalculating, then draw at the current rotation.
+    faceArgs = [
+        o,
+        n,
+        oCam,
+        nCam,
+        oBore,
+        nBore,
+        oBolt || DEFAULT_BOLT,
+        nBolt || DEFAULT_BOLT,
+        oSpokes,
+        nSpokes,
+        oSpokeW,
+        nSpokeW,
+    ];
+    renderFace();
 
     document
         .getElementById("cv")
@@ -672,11 +914,159 @@ function drawDiagram(o, n, oCam, nCam) {
 // wheel face, so each setup is a set of concentric circles (tyre outer = OD,
 // inner = rim). Camber foreshortens the circle vertically into an ellipse.
 
-function drawFace(ctx, w, cx, cy, scale, color, camberDeg) {
+// Best rotation (radians) for the rear spoke set so the two overlaid wheels show
+// their spokes as evenly spread as possible — i.e. maximise the smallest gap
+// between any two spokes in the combined set. For equal counts this is exactly
+// half a pitch (e.g. 30° for two 6-spoke wheels); for mismatched counts (5 vs 6)
+// it settles on the best compromise.
+function bestSpokeOffset(rearCount, frontCount) {
+    const front = [];
+    for (let j = 0; j < frontCount; j++) {
+        front.push((j * 2 * Math.PI) / frontCount);
+    }
+    const period = (2 * Math.PI) / rearCount; // rear set repeats every pitch
+    const steps = 360;
+    let best = 0;
+    let bestGap = -1;
+    for (let s = 0; s < steps; s++) {
+        const rot = (s / steps) * period;
+        const all = front.slice();
+        for (let i = 0; i < rearCount; i++) {
+            all.push((rot + (i * 2 * Math.PI) / rearCount) % (2 * Math.PI));
+        }
+        all.sort((a, b) => a - b);
+        let minGap = 2 * Math.PI - (all[all.length - 1] - all[0]); // wrap gap
+        for (let k = 1; k < all.length; k++) {
+            minGap = Math.min(minGap, all[k] - all[k - 1]);
+        }
+        if (minGap > bestGap) {
+            bestGap = minGap;
+            best = rot;
+        }
+    }
+    return best;
+}
+
+// A clean alloy face (Rays TE37 style): `count` equal-width spokes running from a
+// central hub out to the rim lip, with curved ends that follow the rim and large
+// open windows between them. `hubR` is the hub radius — sized by the caller to
+// enclose the lug nuts so the spokes never overlap them.
+function drawAlloySpokes(
+    ctx,
+    cx,
+    cy,
+    rRim,
+    color,
+    count,
+    hubR,
+    rot = 0,
+    widthFrac = 0.13,
+) {
+    const rLip = rRim * 0.92; // inner edge of the rim barrel
+    const rHub = hubR;
+    const w = rRim * widthFrac; // constant spoke width (parallel sides)
+    const dIn = Math.asin(Math.min(1, w / 2 / rHub)); // half-angle at the hub
+    const dOut = Math.asin(Math.min(1, w / 2 / rLip)); // half-angle at the rim
+
+    // Metallic shading — a radial gradient with an off-centre highlight so the
+    // alloy reads as a lit, dished surface, clearly distinct from the dark tyre.
+    const metal = ctx.createRadialGradient(
+        cx - rRim * 0.35,
+        cy - rRim * 0.35,
+        rRim * 0.05,
+        cx,
+        cy,
+        rRim,
+    );
+    metal.addColorStop(0, `${color}c4`);
+    metal.addColorStop(0.55, `${color}6a`);
+    metal.addColorStop(1, `${color}3a`);
+
+    // The hub, spokes and outer rim lip are one continuous casting, all filled
+    // with the same gradient so they merge seamlessly (no pasted-on rectangles).
+
+    // Outer rim lip band — between the spoke tips and the tyre bead.
+    ctx.fillStyle = metal;
+    ctx.beginPath();
+    ctx.arc(cx, cy, rRim, 0, Math.PI * 2);
+    ctx.arc(cx, cy, rLip, 0, Math.PI * 2, true);
+    ctx.fill();
+
+    // Equal-width spokes — two parallel edges joined by arcs that sit on the hub
+    // and rim circles, so each end blends flush into the hub and the rim lip.
+    for (let i = 0; i < count; i++) {
+        const a = -Math.PI / 2 + rot + (i * 2 * Math.PI) / count;
+        ctx.beginPath();
+        ctx.moveTo(
+            cx + rHub * Math.cos(a + dIn),
+            cy + rHub * Math.sin(a + dIn),
+        );
+        ctx.lineTo(
+            cx + rLip * Math.cos(a + dOut),
+            cy + rLip * Math.sin(a + dOut),
+        );
+        ctx.arc(cx, cy, rLip, a + dOut, a - dOut, true); // outer cap on the rim
+        ctx.lineTo(
+            cx + rHub * Math.cos(a - dIn),
+            cy + rHub * Math.sin(a - dIn),
+        );
+        ctx.arc(cx, cy, rHub, a - dIn, a + dIn, false); // inner cap on the hub
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    // Hub face — same metal; lug nuts and the centre bore render on top later.
+    ctx.beginPath();
+    ctx.arc(cx, cy, rHub, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Definition strokes: only the spoke *sides* (the window edges), in the full
+    // wheel colour so blue vs orange reads crisply. The hub and rim ends are left
+    // unstroked so the spokes flow into them as one shape.
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    for (let i = 0; i < count; i++) {
+        const a = -Math.PI / 2 + rot + (i * 2 * Math.PI) / count;
+        ctx.beginPath();
+        ctx.moveTo(
+            cx + rHub * Math.cos(a + dIn),
+            cy + rHub * Math.sin(a + dIn),
+        );
+        ctx.lineTo(
+            cx + rLip * Math.cos(a + dOut),
+            cy + rLip * Math.sin(a + dOut),
+        );
+        ctx.moveTo(
+            cx + rHub * Math.cos(a - dIn),
+            cy + rHub * Math.sin(a - dIn),
+        );
+        ctx.lineTo(
+            cx + rLip * Math.cos(a - dOut),
+            cy + rLip * Math.sin(a - dOut),
+        );
+        ctx.stroke();
+    }
+}
+
+function drawFace(
+    ctx,
+    w,
+    cx,
+    cy,
+    scale,
+    color,
+    camberDeg,
+    spokeCount = 0,
+    hubR = 0,
+    rot = 0,
+    alpha = 1,
+    widthFrac = 0.13,
+) {
     const rOD = (w.od / 2) * scale;
     const rRim = (w.rimDmm / 2) * scale;
 
     ctx.save();
+    ctx.globalAlpha = alpha; // recede the current (rear) wheel, emphasise the new
     if (camberDeg) {
         ctx.translate(cx, cy);
         ctx.scale(1, Math.cos((camberDeg * Math.PI) / 180));
@@ -708,14 +1098,29 @@ function drawFace(ctx, w, cx, cy, scale, color, camberDeg) {
     ctx.arc(cx, cy, rOD, 0, Math.PI * 2);
     ctx.stroke();
 
-    // Rim face
-    ctx.fillStyle = `${color}14`;
+    // Rim face — a 6-spoke alloy. `rot` lets the rear wheel's spokes be offset by
+    // half a pitch so they sit in the front wheel's window gaps (both stay visible).
     ctx.strokeStyle = `${color}55`;
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.arc(cx, cy, rRim, 0, Math.PI * 2);
-    ctx.fill();
     ctx.stroke();
+    if (spokeCount > 0) {
+        drawAlloySpokes(
+            ctx,
+            cx,
+            cy,
+            rRim,
+            color,
+            spokeCount,
+            hubR,
+            rot,
+            widthFrac,
+        );
+    } else {
+        ctx.fillStyle = `${color}14`;
+        ctx.fill();
+    }
 
     ctx.restore(); // undo camber foreshorten
 }
@@ -762,7 +1167,58 @@ function drawSidewallText(
     ctx.restore();
 }
 
-function drawFaceDiagram(o, n, oCam, nCam) {
+// Draws a single hexagonal bolt head (point-up) at (x, y). `r` is the
+// circumradius (centre to corner).
+function drawHexBolt(ctx, x, y, r, color) {
+    ctx.beginPath();
+    for (let k = 0; k < 6; k++) {
+        const a = -Math.PI / 2 + (k * Math.PI) / 3;
+        const px = x + r * Math.cos(a);
+        const py = y + r * Math.sin(a);
+        if (k === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fillStyle = `${color}40`;
+    ctx.fill();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+}
+
+// Lays out a wheel's bolt heads on its PCD circle, to scale. `bolt` is a parsed
+// { count, pcd }. Each lug is a 19 mm hex (across the flats).
+function drawBoltPattern(ctx, cx, cy, bolt, scale, color) {
+    if (!bolt) return;
+    const pcdR = (bolt.pcd / 2) * scale;
+    const boltR = Math.max(2.5, (19 / Math.sqrt(3)) * scale); // 19 mm across flats
+    for (let i = 0; i < bolt.count; i++) {
+        const a = -Math.PI / 2 + (i * 2 * Math.PI) / bolt.count;
+        drawHexBolt(
+            ctx,
+            cx + pcdR * Math.cos(a),
+            cy + pcdR * Math.sin(a),
+            boltR,
+            color,
+        );
+    }
+}
+
+function drawFaceDiagram(
+    o,
+    n,
+    oCam,
+    nCam,
+    oBore = 0,
+    nBore = 0,
+    oBolt = "",
+    nBolt = "",
+    oSpokes = 6,
+    nSpokes = 6,
+    oSpokeW = 0.13,
+    nSpokeW = 0.13,
+    spin = 0,
+) {
     const canvas = document.getElementById("cv2");
     if (!canvas) return;
     const W = canvas.width,
@@ -784,9 +1240,61 @@ function drawFaceDiagram(o, n, oCam, nCam) {
     const cx = W / 2;
     const cy = topPad + availH / 2;
 
-    // Concentric wheel faces — current then new
-    drawFace(ctx, o, cx, cy, scale, "#58a6ff", oCam);
-    drawFace(ctx, n, cx, cy, scale, "#f78166", nCam);
+    // Both wheels render as the 6-spoke alloy. Each hub is sized to enclose its
+    // own lug nuts (bolt PCD + lug radius) so the spokes start outboard of them,
+    // with a sensible floor and ceiling relative to that wheel's rim.
+    const lugR = (19 / Math.sqrt(3)) * scale;
+    const hubFor = (w, bolt) => {
+        const rRimPx = (w.rimDmm / 2) * scale;
+        const pat = parseBolt(bolt);
+        const pcdRpx = pat ? (pat.pcd / 2) * scale : 0;
+        return Math.min(
+            rRimPx * 0.58,
+            Math.max(rRimPx * 0.3, pcdRpx + lugR * 1.5 + 4),
+        );
+    };
+
+    // Concentric wheel faces. The current wheel sits behind; its spokes are
+    // rotated by the offset that best interleaves them with the new wheel's
+    // spokes (half a pitch for matching counts) so both stay visible.
+    const rearRot = bestSpokeOffset(oSpokes, nSpokes);
+
+    // Everything from here until the matching restore() spins as one group when
+    // the user flicks the wheel — the wheels, sidewall text, bores and bolts. The
+    // diameter callouts and legend are drawn afterwards so they stay put.
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(spin);
+    ctx.translate(-cx, -cy);
+
+    drawFace(
+        ctx,
+        o,
+        cx,
+        cy,
+        scale,
+        "#58a6ff",
+        oCam,
+        oSpokes,
+        hubFor(o, oBolt),
+        rearRot,
+        0.5, // current sits behind — clearly ghosted as the "before"
+        oSpokeW,
+    );
+    drawFace(
+        ctx,
+        n,
+        cx,
+        cy,
+        scale,
+        "#f78166",
+        nCam,
+        nSpokes,
+        hubFor(n, nBolt),
+        0,
+        1,
+        nSpokeW,
+    );
 
     // Tyre markings along each sidewall. The size code is in the wheel's colour
     // (new across the top, current across the bottom); the brand sits on the new
@@ -851,15 +1359,52 @@ function drawFaceDiagram(o, n, oCam, nCam) {
         ); // left
     }
 
-    // Shared hub centre
-    const hubR = Math.max(8, (Math.min(o.rimDmm, n.rimDmm) / 2) * scale * 0.16);
-    ctx.fillStyle = "#253044";
-    ctx.strokeStyle = "#4a6080";
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.arc(cx, cy, hubR, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
+    // Hub centre. When centre-bore sizes are given we draw the actual bores to
+    // scale (one ring per setup, in its colour) so their relative size — and any
+    // mismatch — is visible; the smaller bore is punched through as the hole.
+    // Otherwise fall back to a small stylised stub.
+    if (oBore > 0 || nBore > 0) {
+        const bores = [oBore, nBore].filter((b) => b > 0);
+        const holeR = (Math.min(...bores) / 2) * scale;
+        ctx.fillStyle = "#0d1117"; // empty hole = canvas background
+        ctx.strokeStyle = "#4a6080";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(cx, cy, holeR, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.lineWidth = 2;
+        if (oBore > 0) {
+            ctx.strokeStyle = "#58a6ffcc";
+            ctx.beginPath();
+            ctx.arc(cx, cy, (oBore / 2) * scale, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+        if (nBore > 0) {
+            ctx.strokeStyle = "#f78166cc";
+            ctx.beginPath();
+            ctx.arc(cx, cy, (nBore / 2) * scale, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+    } else {
+        const hubR = Math.max(
+            8,
+            (Math.min(o.rimDmm, n.rimDmm) / 2) * scale * 0.16,
+        );
+        ctx.fillStyle = "#253044";
+        ctx.strokeStyle = "#4a6080";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(cx, cy, hubR, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+    }
+
+    // Bolt heads on each setup's PCD circle, to scale (current blue, new orange).
+    drawBoltPattern(ctx, cx, cy, parseBolt(oBolt), scale, "#58a6ff");
+    drawBoltPattern(ctx, cx, cy, parseBolt(nBolt), scale, "#f78166");
+
+    ctx.restore(); // end spin group — callouts/legend below stay fixed
 
     // Diameter callouts — current left, new right
     const oR = (o.od / 2) * scale;
@@ -904,6 +1449,111 @@ function drawDiameterTick(ctx, cx, cy, rv, maxR, color, side, odMm) {
     ctx.font = "bold 16px monospace";
     ctx.textAlign = side < 0 ? "right" : "left";
     ctx.fillText(`Ø${odMm.toFixed(0)} mm`, ax + side * 6, cy + 6);
+}
+
+// ── Spinnable face wheel ───────────────────────────────────────────────────────
+// The face diagram can be grabbed and flung like an iPod click wheel. We keep the
+// last render args so the animation loop can redraw the wheel at any angle without
+// re-running the whole calculation; only the wheel group spins (see drawFaceDiagram).
+
+let faceArgs = null; // last args for drawFaceDiagram (sans spin angle)
+let spinAngle = 0; // current wheel rotation (radians)
+let spinVel = 0; // angular velocity carried after a flick (radians/frame)
+let spinRAF = 0; // active requestAnimationFrame id, 0 when idle
+
+function renderFace() {
+    if (faceArgs) drawFaceDiagram(...faceArgs, spinAngle);
+}
+
+const SPIN_FRICTION = 0.97; // free-spin momentum decay per frame
+const SPIN_ENGAGE = 0.13; // below this speed the "weight" starts pulling upright
+const SPIN_SPRING = 0.05; // restoring pull toward the nearest upright orientation
+const SPIN_SETTLE_DAMP = 0.8; // heavier damping while settling, so it eases in
+
+// Momentum decay with a weighted finish: it free-spins under friction, then as it
+// slows a restoring spring rolls it to a stop the right way up — the nearest
+// orientation where the labels read normally (a whole number of turns).
+function spinDecay() {
+    const target = Math.round(spinAngle / (2 * Math.PI)) * (2 * Math.PI);
+    const settling = Math.abs(spinVel) < SPIN_ENGAGE;
+    if (settling) spinVel += (target - spinAngle) * SPIN_SPRING;
+    spinVel *= settling ? SPIN_SETTLE_DAMP : SPIN_FRICTION;
+    spinAngle += spinVel;
+    renderFace();
+
+    if (Math.abs(spinVel) > 0.001 || Math.abs(spinAngle - target) > 0.003) {
+        spinRAF = requestAnimationFrame(spinDecay);
+    } else {
+        spinAngle = target; // snap exactly upright and stop
+        spinVel = 0;
+        renderFace();
+        spinRAF = 0;
+    }
+}
+
+function initFaceSpin() {
+    const canvas = document.getElementById("cv2");
+    if (!canvas) return;
+
+    let dragging = false;
+    let lastAngle = 0;
+    let lastTime = 0;
+
+    // Pointer angle around the wheel centre (which is also the canvas centre).
+    const pointerAngle = (e) => {
+        const r = canvas.getBoundingClientRect();
+        return Math.atan2(
+            e.clientY - (r.top + r.height / 2),
+            e.clientX - (r.left + r.width / 2),
+        );
+    };
+
+    canvas.addEventListener("pointerdown", (e) => {
+        dragging = true;
+        spinVel = 0;
+        if (spinRAF) {
+            cancelAnimationFrame(spinRAF);
+            spinRAF = 0;
+        }
+        lastAngle = pointerAngle(e);
+        lastTime = e.timeStamp;
+        canvas.setPointerCapture(e.pointerId);
+        canvas.classList.add("grabbing");
+    });
+
+    canvas.addEventListener("pointermove", (e) => {
+        if (!dragging) return;
+        const a = pointerAngle(e);
+        let delta = a - lastAngle;
+        if (delta > Math.PI)
+            delta -= 2 * Math.PI; // take the shortest way round
+        else if (delta < -Math.PI) delta += 2 * Math.PI;
+        spinAngle += delta;
+        const dt = e.timeStamp - lastTime;
+        if (dt > 0) spinVel = (delta * 16) / dt; // ≈ radians per 16 ms frame
+        lastAngle = a;
+        lastTime = e.timeStamp;
+        renderFace();
+    });
+
+    const release = (e) => {
+        if (!dragging) return;
+        dragging = false;
+        canvas.classList.remove("grabbing");
+        // A paused finger before lift shouldn't throw the wheel.
+        if (e.timeStamp - lastTime > 80) spinVel = 0;
+        spinVel = Math.max(-0.6, Math.min(0.6, spinVel)); // clamp wild flicks
+        // Always run the decay if there's momentum, or if the wheel was let go
+        // off-upright — so it still rolls to rest the right way up.
+        const target = Math.round(spinAngle / (2 * Math.PI)) * (2 * Math.PI);
+        const needsSettle =
+            Math.abs(spinVel) > 0.0006 || Math.abs(spinAngle - target) > 0.003;
+        if (needsSettle && !spinRAF) {
+            spinRAF = requestAnimationFrame(spinDecay);
+        }
+    };
+    canvas.addEventListener("pointerup", release);
+    canvas.addEventListener("pointercancel", release);
 }
 
 // ── Floating tooltip ──────────────────────────────────────────────────────────
@@ -987,6 +1637,10 @@ const PARAMS = {
     "o-pr": "opr",
     "o-sp": "osp",
     "o-cam": "ocam",
+    "o-cb": "ocb",
+    "o-bp": "obp",
+    "o-spokes": "osc",
+    "o-spokew": "osw",
     "n-d": "nd",
     "n-w": "nw",
     "n-et": "net",
@@ -994,12 +1648,34 @@ const PARAMS = {
     "n-pr": "npr",
     "n-sp": "nsp",
     "n-cam": "ncam",
+    "n-cb": "ncb",
+    "n-bp": "nbp",
+    "n-spokes": "nsc",
+    "n-spokew": "nsw",
+};
+
+// The genuinely optional inputs (centre bore, bolt pattern). Only these are
+// dropped from the share URL when blank — required fields are always encoded,
+// so deliberately clearing one round-trips faithfully instead of silently
+// reverting to its HTML default on reopen.
+const OPTIONAL_PARAMS = new Set(["o-cb", "n-cb", "o-bp", "n-bp"]);
+
+// Cosmetic-only fields dropped from the share URL while at their default, to keep
+// the link short. Absent → loadFromParams leaves the HTML default, so unchanged.
+const DEFAULT_SKIP = {
+    "o-spokes": "6",
+    "o-spokew": "13",
+    "n-spokes": "6",
+    "n-spokew": "13",
 };
 
 function buildShareUrl() {
     const p = new URLSearchParams();
     for (const [id, key] of Object.entries(PARAMS)) {
-        p.set(key, document.getElementById(id).value);
+        const { value } = document.getElementById(id);
+        if (value === "" && OPTIONAL_PARAMS.has(id)) continue;
+        if (DEFAULT_SKIP[id] === value) continue;
+        p.set(key, value);
     }
     return `${location.origin}${location.pathname}?${p}`;
 }
@@ -1156,6 +1832,11 @@ window.onload = () => {
     calculate();
     initLangSwitcher();
     initSizeInputs();
+    initFaceSpin();
+    // Live-update the face diagram as the spoke design is tweaked.
+    for (const id of ["o-spokes", "o-spokew", "n-spokes", "n-spokew"]) {
+        document.getElementById(id).addEventListener("input", calculate);
+    }
 };
 
 // ── Service worker registration ───────────────────────────────────────────────

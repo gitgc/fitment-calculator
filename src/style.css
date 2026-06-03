@@ -10,6 +10,7 @@
     --muted: #8b949e;
     --pos: #3fb950;
     --neg: #f78166;
+    --danger: #f85149;
 }
 
 * {
@@ -209,7 +210,22 @@ main {
     gap: 1.25rem;
     margin-bottom: 1.5rem;
 }
-@media (max-width: 640px) {
+/* Keep Current and New side by side on phones — it's the natural comparison and
+   halves the scrolling. The labels are short and values tiny, so two columns fit;
+   just tighten the spacing on narrow screens. */
+@media (max-width: 560px) {
+    .inputs {
+        gap: 0.6rem;
+    }
+    .card {
+        padding: 0.85rem;
+    }
+    .field {
+        margin-bottom: 0.55rem;
+    }
+}
+/* Safety net for very small devices (≈320px): fall back to a single column. */
+@media (max-width: 340px) {
     .inputs {
         grid-template-columns: 1fr;
     }
@@ -269,7 +285,8 @@ main {
     color: var(--muted);
     margin-bottom: 0.3rem;
 }
-.field input {
+.field input,
+.field select {
     width: 100%;
     background: var(--card);
     border: 1px solid var(--border);
@@ -279,7 +296,24 @@ main {
     font-size: 0.95rem;
     transition: border-color 0.15s;
 }
-.field input:focus-visible {
+.field select {
+    /* Match the inputs but keep the native dropdown affordance legible. */
+    appearance: none;
+    cursor: pointer;
+    padding-inline-end: 1.75rem;
+    background-image:
+        linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+        linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+    background-position:
+        calc(100% - 1rem) center,
+        calc(100% - 0.7rem) center;
+    background-size:
+        0.3rem 0.3rem,
+        0.3rem 0.3rem;
+    background-repeat: no-repeat;
+}
+.field input:focus-visible,
+.field select:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 1px;
     border-color: var(--accent);
@@ -447,6 +481,57 @@ tbody tr:hover {
     color: var(--muted);
 }
 
+/* ── Fitment warnings ───────────────────────────────────── */
+
+/* Row tints (defined after tr:hover so they persist on hover) */
+tbody tr.row-warn {
+    background: rgba(240, 180, 41, 0.1);
+}
+tbody tr.row-danger {
+    background: rgba(248, 81, 73, 0.12);
+}
+.row-reason {
+    margin-top: 0.3rem;
+    font-size: 0.72rem;
+    font-weight: 400;
+    line-height: 1.4;
+    text-transform: none;
+    letter-spacing: 0;
+}
+tr.row-warn .row-reason {
+    color: var(--accent);
+}
+tr.row-danger .row-reason {
+    color: var(--danger);
+}
+
+/* Setup-level warning strip below the table */
+.fitment-warnings {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+.fitment-warnings:empty {
+    display: none;
+}
+.fitment-warning {
+    font-size: 0.8rem;
+    line-height: 1.5;
+    padding: 0.6rem 0.85rem;
+    border-radius: 8px;
+}
+.fitment-warning.fitment-warn {
+    color: var(--accent);
+    background: rgba(240, 180, 41, 0.08);
+    border-inline-start: 3px solid var(--accent);
+}
+.fitment-warning.fitment-danger {
+    color: var(--danger);
+    background: rgba(248, 81, 73, 0.1);
+    border-inline-start: 3px solid var(--danger);
+}
+
 /* ── Diagram ────────────────────────────────────────────── */
 
 .diagram-wrap {
@@ -468,6 +553,24 @@ tbody tr:hover {
     color: var(--muted);
     margin-bottom: 0.75rem;
 }
+/* Optional per-wheel spoke design controls, beneath the face diagram. Reuses the
+   two-column .inputs/.card layout from the top so it matches the main form. */
+.wheel-design {
+    margin-top: 1.25rem;
+}
+.wheel-design-title {
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+}
+.wheel-design .inputs {
+    margin-bottom: 0;
+}
+
 .legend {
     display: flex;
     justify-content: center;
@@ -492,6 +595,15 @@ canvas {
     margin: 0 auto;
     max-width: 100%;
     border-radius: 8px;
+}
+/* The face wheel is grabbable and flickable — hint it, and stop touch-drags from
+   scrolling the page while spinning the wheel. */
+#cv2 {
+    cursor: grab;
+    touch-action: none;
+}
+#cv2.grabbing {
+    cursor: grabbing;
 }
 
 /* ── Tooltip ────────────────────────────────────────────── */
