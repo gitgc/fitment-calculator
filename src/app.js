@@ -613,13 +613,14 @@ function pokeRow(
     sub,
     maxX,
     ts = 1,
+    fts = ts,
 ) {
     const rightX = (maxX !== undefined ? maxX : outerX + 8) - 4;
     const minX = hubX + 8 * ts; // the label may use the whole span from here to rightX
-    const yo = 5 * ts; // vertical text/​tick offset, scaled with the font
+    const yo = 5 * ts; // vertical text/​tick offset
 
-    // Width label sits on the arrow line; shrink from 16·ts px only if it can't fit
-    let fontPx = 16 * ts;
+    // Width label sits on the arrow line; shrink from 16·fts px only if it can't fit
+    let fontPx = 16 * fts;
     ctx.font = `${fontPx}px monospace`;
     const avail = rightX - minX;
     while (ctx.measureText(widthLabel).width > avail && fontPx > 10) {
@@ -644,7 +645,7 @@ function pokeRow(
 
     // Tag — right-aligned just left of the hub tick
     ctx.fillStyle = `${color}cc`;
-    ctx.font = `${16 * ts}px monospace`;
+    ctx.font = `${16 * fts}px monospace`;
     ctx.textAlign = "right";
     ctx.fillText(tag, hubX - 8 * ts, y + yo);
 
@@ -655,7 +656,7 @@ function pokeRow(
 
     // ET / poke — a dimmer, smaller second line right-aligned beneath the width
     ctx.fillStyle = `${color}99`;
-    ctx.font = `${13 * ts}px monospace`;
+    ctx.font = `${13 * fts}px monospace`;
     ctx.textAlign = "right";
     ctx.fillText(sub, rightX, y + yo + 20 * ts);
 }
@@ -826,6 +827,11 @@ function drawDiagram(o, n, oCam, nCam) {
     // narrow phones. 1 on desktop, up to ~1.7 on a phone.
     const dispW = canvas.getBoundingClientRect().width || W;
     const ts = Math.max(1, Math.min(1.7, 720 / dispW));
+    // Font scale: `ts` is tuned for the face view's 900-wide buffer, but this
+    // buffer may be narrower (portrait on phones), which would render the same
+    // font larger on screen. Correct for the buffer width so the on-screen text
+    // matches the face view. (W/900 = 1 on desktop, so desktop is unchanged.)
+    const fts = ts * (W / 900);
 
     const sidePad = 90 + 150 * (ts - 1);
     const topPad = 46;
@@ -878,10 +884,10 @@ function drawDiagram(o, n, oCam, nCam) {
 
     arrow(ctx, aL, cy + oTH / 2, aL, cy - oTH / 2, "#58a6ffaa");
     ctx.fillStyle = "#58a6ff";
-    ctx.font = `bold ${16 * ts}px monospace`;
+    ctx.font = `bold ${16 * fts}px monospace`;
     ctx.textAlign = "right";
     ctx.fillText(`Ø${o.od.toFixed(0)} mm`, aL - 6 * ts, cy - 3 * ts);
-    ctx.font = `${13 * ts}px monospace`;
+    ctx.font = `${13 * fts}px monospace`;
     ctx.fillText(
         formatTyreSize(o.tw, o.pr, o.rimIn),
         aL - 6 * ts,
@@ -905,10 +911,10 @@ function drawDiagram(o, n, oCam, nCam) {
 
     arrow(ctx, aR, cy + nTH / 2, aR, cy - nTH / 2, "#f78166aa");
     ctx.fillStyle = "#f78166";
-    ctx.font = `bold ${16 * ts}px monospace`;
+    ctx.font = `bold ${16 * fts}px monospace`;
     ctx.textAlign = "left";
     ctx.fillText(`Ø${n.od.toFixed(0)} mm`, aR + 6 * ts, cy - 3 * ts);
-    ctx.font = `${13 * ts}px monospace`;
+    ctx.font = `${13 * fts}px monospace`;
     ctx.fillText(
         formatTyreSize(n.tw, n.pr, n.rimIn),
         aR + 6 * ts,
@@ -935,6 +941,7 @@ function drawDiagram(o, n, oCam, nCam) {
         `${oETlabel}   ${L.canvasPoke} ${o.poke.toFixed(1)} mm`,
         W - 8,
         ts,
+        fts,
     );
     pokeRow(
         ctx,
@@ -947,15 +954,16 @@ function drawDiagram(o, n, oCam, nCam) {
         `${nETlabel}   ${L.canvasPoke} ${n.poke.toFixed(1)} mm`,
         W - 8,
         ts,
+        fts,
     );
 
     // Legend
-    ctx.font = `bold ${16 * ts}px sans-serif`;
+    ctx.font = `bold ${16 * fts}px sans-serif`;
     ctx.textAlign = "center";
     ctx.fillStyle = "#58a6ff";
-    ctx.fillText(`■ ${L.canvasCurrent}`, W / 2 - 60 * ts, 20 + 9 * ts);
+    ctx.fillText(`■ ${L.canvasCurrent}`, W / 2 - 60 * fts, 20 + 9 * fts);
     ctx.fillStyle = "#f78166";
-    ctx.fillText(`■ ${L.canvasNew}`, W / 2 + 48 * ts, 20 + 9 * ts);
+    ctx.fillText(`■ ${L.canvasNew}`, W / 2 + 48 * fts, 20 + 9 * fts);
 }
 
 // ── Face-on view ───────────────────────────────────────────────────────────────
