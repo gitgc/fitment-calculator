@@ -491,17 +491,30 @@ tbody tr.row-danger {
     background: rgba(248, 81, 73, 0.12);
 }
 .row-reason {
-    margin-top: 0.3rem;
     font-size: 0.72rem;
     font-weight: 400;
     line-height: 1.4;
     text-transform: none;
     letter-spacing: 0;
 }
-tr.row-warn .row-reason {
+/* Full-width reason row beneath its measurement row — same tint, and joined to
+   the row above (no separating border) so they read as one block. */
+.reason-row.reason-warn {
+    background: rgba(240, 180, 41, 0.1);
+}
+.reason-row.reason-danger {
+    background: rgba(248, 81, 73, 0.12);
+}
+.reason-row td {
+    border-top: 0;
+    padding-top: 0;
+    padding-bottom: 0.6rem;
+    text-align: start; /* read from the leading edge, not right-aligned like data */
+}
+.reason-row.reason-warn .row-reason {
     color: var(--accent);
 }
-tr.row-danger .row-reason {
+.reason-row.reason-danger .row-reason {
     color: var(--danger);
 }
 

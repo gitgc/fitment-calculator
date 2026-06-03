@@ -646,11 +646,12 @@ test.describe('Fitment warnings', () => {
 		await page.fill('#n-pr', '40');
 		await page.click('button.calc-btn');
 
-		const rows = page.locator('#tbody tr');
+		const rows = page.locator('#tbody tr:not(.reason-row)');
 		await expect(rows.nth(TD.diameterRow)).toHaveClass(/row-danger/);
-		await expect(rows.nth(TD.diameterRow).locator('.row-reason')).toContainText('diameter changes');
 		await expect(rows.nth(TD.speedoRow)).toHaveClass(/row-danger/);
-		await expect(rows.nth(TD.speedoRow).locator('.row-reason')).toContainText('under-read');
+		// Reasons render as their own full-width rows beneath the measurement rows.
+		await expect(page.locator('.reason-row', { hasText: 'diameter changes' })).toHaveCount(1);
+		await expect(page.locator('.reason-row', { hasText: 'under-read' })).toHaveCount(1);
 		await expect(page.locator('#fitment-warnings')).toBeEmpty(); // no stretch
 	});
 
@@ -658,7 +659,7 @@ test.describe('Fitment warnings', () => {
 		// 18×241/40 → OD ≈ 650 mm, +2.5% over the 634.3 mm default
 		await page.fill('#n-tw', '241');
 		await page.click('button.calc-btn');
-		await expect(page.locator('#tbody tr').nth(TD.diameterRow)).toHaveClass(/row-warn/);
+		await expect(page.locator('#tbody tr:not(.reason-row)').nth(TD.diameterRow)).toHaveClass(/row-warn/);
 	});
 
 	test('a wide rim for the tyre flags stretch (setup strip)', async () => {
@@ -721,9 +722,11 @@ test.describe('Fitment warnings', () => {
 		// Low ET pushes the wheel out without changing OD/stretch/etc.
 		await page.fill('#n-et', '20');
 		await page.click('button.calc-btn');
-		const rows = page.locator('#tbody tr');
+		const rows = page.locator('#tbody tr:not(.reason-row)');
 		await expect(rows.nth(TD.pokeRowIdx)).toHaveClass(/row-danger/);
-		await expect(rows.nth(TD.pokeRowIdx).locator('.row-reason')).toContainText('proud');
+		await expect(page.locator('.reason-row .row-reason')).toContainText('proud');
+		// The reason row spans the full table width (all four columns).
+		await expect(page.locator('.reason-row td')).toHaveAttribute('colspan', '4');
 		await expect(page.locator('#fitment-warnings')).toBeEmpty();
 	});
 
@@ -731,18 +734,18 @@ test.describe('Fitment warnings', () => {
 		// High ET pulls the wheel inboard
 		await page.fill('#n-et', '80');
 		await page.click('button.calc-btn');
-		const rows = page.locator('#tbody tr');
+		const rows = page.locator('#tbody tr:not(.reason-row)');
 		await expect(rows.nth(TD.insetRowIdx)).toHaveClass(/row-danger/);
-		await expect(rows.nth(TD.insetRowIdx).locator('.row-reason')).toContainText('strut');
+		await expect(page.locator('.reason-row .row-reason')).toContainText('strut');
 	});
 
 	test('a smaller tyre that opens the arch gap is flagged (against the goal)', async () => {
 		// Narrower tyre → smaller OD → arch gap grows (negative loss)
 		await page.fill('#n-tw', '205');
 		await page.click('button.calc-btn');
-		const archGap = page.locator('#tbody tr').nth(TD.archGapRow);
+		const archGap = page.locator('#tbody tr:not(.reason-row)').nth(TD.archGapRow);
 		await expect(archGap).toHaveClass(/row-warn/);
-		await expect(archGap.locator('.row-reason')).toContainText('gap');
+		await expect(page.locator('.reason-row', { hasText: 'gap' })).toHaveCount(1);
 	});
 
 	// ── Centre bore (optional, its own table row) ────────────────────────────
@@ -755,7 +758,7 @@ test.describe('Fitment warnings', () => {
 		await page.fill('#o-cb', '57.1');
 		await page.fill('#n-cb', '72.6');
 		await page.click('button.calc-btn');
-		const rows = page.locator('#tbody tr');
+		const rows = page.locator('#tbody tr:not(.reason-row)');
 		await expect(rows).toHaveCount(10);
 		const cells = rows.nth(TD.boreRow).locator('td'); // current, new, difference
 		await expect(cells.nth(0)).toContainText('57.1');
@@ -767,9 +770,9 @@ test.describe('Fitment warnings', () => {
 		await page.fill('#o-cb', '70.1');
 		await page.fill('#n-cb', '64.1');
 		await page.click('button.calc-btn');
-		const bore = page.locator('#tbody tr').nth(TD.boreRow);
+		const bore = page.locator('#tbody tr:not(.reason-row)').nth(TD.boreRow);
 		await expect(bore).toHaveClass(/row-danger/);
-		await expect(bore.locator('.row-reason')).toContainText('fit');
+		await expect(page.locator('.reason-row .row-reason')).toContainText('fit');
 		// Warning lives in the row now, not the strip
 		await expect(page.locator('#fitment-warnings')).toBeEmpty();
 	});
@@ -778,7 +781,7 @@ test.describe('Fitment warnings', () => {
 		await page.fill('#o-cb', '9999'); // above max 120
 		await page.fill('#n-cb', '10'); // below min 40
 		await page.click('button.calc-btn');
-		const cells = page.locator('#tbody tr').nth(TD.boreRow).locator('td');
+		const cells = page.locator('#tbody tr:not(.reason-row)').nth(TD.boreRow).locator('td');
 		await expect(cells.nth(0)).toContainText('120.0');
 		await expect(cells.nth(1)).toContainText('40.0');
 	});
@@ -787,9 +790,9 @@ test.describe('Fitment warnings', () => {
 		await page.fill('#o-cb', '64.1');
 		await page.fill('#n-cb', '72.6');
 		await page.click('button.calc-btn');
-		const bore = page.locator('#tbody tr').nth(TD.boreRow);
+		const bore = page.locator('#tbody tr:not(.reason-row)').nth(TD.boreRow);
 		await expect(bore).toHaveClass(/row-warn/);
-		await expect(bore.locator('.row-reason')).toContainText('rings');
+		await expect(page.locator('.reason-row .row-reason')).toContainText('rings');
 	});
 
 	test('matching or partial centre bore shows the row without a warning', async () => {
@@ -820,11 +823,11 @@ test.describe('Fitment warnings', () => {
 		// Current unset (assumes 5x114.3), new 5x100 → same studs, small PCD change
 		await page.selectOption('#n-bp', '5x100');
 		await page.click('button.calc-btn');
-		const rows = page.locator('#tbody tr');
+		const rows = page.locator('#tbody tr:not(.reason-row)');
 		await expect(rows).toHaveCount(10);
 		const bolt = rows.nth(BOLT_ROW);
 		await expect(bolt).toHaveClass(/row-warn/);
-		await expect(bolt.locator('.row-reason')).toContainText('adapters');
+		await expect(page.locator('.reason-row .row-reason')).toContainText('adapters');
 		const cells = bolt.locator('td'); // current, new, difference
 		await expect(cells.nth(0)).toContainText('5×114.3');
 		await expect(cells.nth(1)).toContainText('5×100');
@@ -836,9 +839,9 @@ test.describe('Fitment warnings', () => {
 		await page.selectOption('#o-bp', '4x100');
 		await page.selectOption('#n-bp', '6x139.7');
 		await page.click('button.calc-btn');
-		const bolt = page.locator('#tbody tr').nth(BOLT_ROW);
+		const bolt = page.locator('#tbody tr:not(.reason-row)').nth(BOLT_ROW);
 		await expect(bolt).toHaveClass(/row-danger/);
-		await expect(bolt.locator('.row-reason')).toContainText('bolt on');
+		await expect(page.locator('.reason-row .row-reason')).toContainText('bolt on');
 	});
 
 	test('matching bolt pattern shows the row without a warning', async () => {
