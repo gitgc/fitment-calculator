@@ -621,11 +621,11 @@ function pokeRow(
 
     // Width label sits on the arrow line; shrink from 16·fts px only if it can't fit
     let fontPx = 16 * fts;
-    ctx.font = `${fontPx}px monospace`;
+    ctx.font = `bold ${fontPx}px monospace`;
     const avail = rightX - minX;
     while (ctx.measureText(widthLabel).width > avail && fontPx > 10) {
         fontPx -= 1;
-        ctx.font = `${fontPx}px monospace`;
+        ctx.font = `bold ${fontPx}px monospace`;
     }
     const widthLeft = rightX - ctx.measureText(widthLabel).width;
 
@@ -645,18 +645,18 @@ function pokeRow(
 
     // Tag — right-aligned just left of the hub tick
     ctx.fillStyle = `${color}cc`;
-    ctx.font = `${16 * fts}px monospace`;
+    ctx.font = `bold ${16 * fts}px monospace`;
     ctx.textAlign = "right";
     ctx.fillText(tag, hubX - 8 * ts, y + yo);
 
     // Width — right-aligned at the margin, on the arrow line
-    ctx.font = `${fontPx}px monospace`;
+    ctx.font = `bold ${fontPx}px monospace`;
     ctx.textAlign = "left";
     ctx.fillText(widthLabel, widthLeft, y + yo);
 
     // ET / poke — a dimmer, smaller second line right-aligned beneath the width
     ctx.fillStyle = `${color}99`;
-    ctx.font = `${13 * fts}px monospace`;
+    ctx.font = `bold ${13 * fts}px monospace`;
     ctx.textAlign = "right";
     ctx.fillText(sub, rightX, y + yo + 20 * ts);
 }
@@ -887,7 +887,7 @@ function drawDiagram(o, n, oCam, nCam) {
     ctx.font = `bold ${16 * fts}px monospace`;
     ctx.textAlign = "right";
     ctx.fillText(`Ø${o.od.toFixed(0)} mm`, aL - 6 * ts, cy - 3 * ts);
-    ctx.font = `${13 * fts}px monospace`;
+    ctx.font = `bold ${13 * fts}px monospace`;
     ctx.fillText(
         formatTyreSize(o.tw, o.pr, o.rimIn),
         aL - 6 * ts,
@@ -914,7 +914,7 @@ function drawDiagram(o, n, oCam, nCam) {
     ctx.font = `bold ${16 * fts}px monospace`;
     ctx.textAlign = "left";
     ctx.fillText(`Ø${n.od.toFixed(0)} mm`, aR + 6 * ts, cy - 3 * ts);
-    ctx.font = `${13 * fts}px monospace`;
+    ctx.font = `bold ${13 * fts}px monospace`;
     ctx.fillText(
         formatTyreSize(n.tw, n.pr, n.rimIn),
         aR + 6 * ts,
