@@ -410,10 +410,13 @@ function calculate() {
             const tip = escapeHTML(tips[label] || "");
             const w = assess.rows[label];
             const rowClass = w ? ` class="row-${w.severity}"` : "";
-            const reason = w
-                ? `<div class="row-reason">⚠ ${escapeHTML(w.message)}</div>`
+            const main = `<tr${rowClass}><th scope="row" data-tip="${tip}" title="${tip}">${escapeHTML(label)}</th><td>${ov}</td><td>${nv}</td><td>${dv}</td></tr>`;
+            // The reason gets its own full-width row beneath, so it reads cleanly
+            // on narrow screens instead of being crammed into the label column.
+            const reasonRow = w
+                ? `<tr class="reason-row reason-${w.severity}"><td colspan="4"><span class="row-reason">⚠ ${escapeHTML(w.message)}</span></td></tr>`
                 : "";
-            return `<tr${rowClass}><th scope="row" data-tip="${tip}" title="${tip}">${escapeHTML(label)}${reason}</th><td>${ov}</td><td>${nv}</td><td>${dv}</td></tr>`;
+            return main + reasonRow;
         })
         .join("");
 
@@ -599,44 +602,62 @@ function drawHub(ctx, hubX, cy, rHH) {
 //          off-canvas. For short labels the detail stays right of the wheel and
 //          the full hub→rim arrow is drawn, as before.
 
-function pokeRow(ctx, hubX, outerX, y, color, tag, detail, maxX) {
+function pokeRow(
+    ctx,
+    hubX,
+    outerX,
+    y,
+    color,
+    tag,
+    widthLabel,
+    sub,
+    maxX,
+    ts = 1,
+) {
     const rightX = (maxX !== undefined ? maxX : outerX + 8) - 4;
-    const minX = hubX + 8; // detail may use the whole span from here to rightX
+    const minX = hubX + 8 * ts; // the label may use the whole span from here to rightX
+    const yo = 5 * ts; // vertical text/​tick offset, scaled with the font
 
-    // Size the detail to fit the available width, shrinking from 16px if needed
-    let fontPx = 16;
+    // Width label sits on the arrow line; shrink from 16·ts px only if it can't fit
+    let fontPx = 16 * ts;
     ctx.font = `${fontPx}px monospace`;
     const avail = rightX - minX;
-    while (ctx.measureText(detail).width > avail && fontPx > 10) {
+    while (ctx.measureText(widthLabel).width > avail && fontPx > 10) {
         fontPx -= 1;
         ctx.font = `${fontPx}px monospace`;
     }
-    const detailLeft = rightX - ctx.measureText(detail).width;
+    const widthLeft = rightX - ctx.measureText(widthLabel).width;
 
-    // Ticks + arrow — arrow stops before the detail text so they never overlap
+    // Ticks + arrow — arrow stops before the width label so they never overlap
     ctx.strokeStyle = `${color}88`;
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(hubX, y - 5);
-    ctx.lineTo(hubX, y + 5);
-    if (outerX < detailLeft - 2) {
-        ctx.moveTo(outerX, y - 5);
-        ctx.lineTo(outerX, y + 5);
+    ctx.moveTo(hubX, y - yo);
+    ctx.lineTo(hubX, y + yo);
+    if (outerX < widthLeft - 2) {
+        ctx.moveTo(outerX, y - yo);
+        ctx.lineTo(outerX, y + yo);
     }
     ctx.stroke();
-    const arrowEnd = Math.min(outerX, detailLeft - 6);
+    const arrowEnd = Math.min(outerX, widthLeft - 6);
     if (arrowEnd > hubX + 2) arrow(ctx, hubX, y, arrowEnd, y, `${color}aa`);
 
     // Tag — right-aligned just left of the hub tick
     ctx.fillStyle = `${color}cc`;
-    ctx.font = "16px monospace";
+    ctx.font = `${16 * ts}px monospace`;
     ctx.textAlign = "right";
-    ctx.fillText(tag, hubX - 8, y + 5);
+    ctx.fillText(tag, hubX - 8 * ts, y + yo);
 
-    // Detail — right-aligned at the margin, drawn last so it sits above the arrow
+    // Width — right-aligned at the margin, on the arrow line
     ctx.font = `${fontPx}px monospace`;
     ctx.textAlign = "left";
-    ctx.fillText(detail, detailLeft, y + 5);
+    ctx.fillText(widthLabel, widthLeft, y + yo);
+
+    // ET / poke — a dimmer, smaller second line right-aligned beneath the width
+    ctx.fillStyle = `${color}99`;
+    ctx.font = `${13 * ts}px monospace`;
+    ctx.textAlign = "right";
+    ctx.fillText(sub, rightX, y + yo + 20 * ts);
 }
 
 // ── Suspension components (illustrative) ─────────────────────────────────────
@@ -783,6 +804,15 @@ function drawSuspension(ctx, hubX, cy, avgRHH, topPad) {
 
 function drawDiagram(o, n, oCam, nCam) {
     const canvas = document.getElementById("cv");
+    // The cross-section is a tall, narrow shape, so on a wide buffer the wheel is
+    // height-limited and leaves black bars at the sides. On phones use a taller
+    // (portrait) buffer instead — it doesn't have to match the face view — so the
+    // wheel becomes width-limited and fills the frame.
+    const portrait = window.innerWidth <= 600;
+    const wantW = portrait ? 560 : 900;
+    const wantH = portrait ? 760 : 620;
+    if (canvas.width !== wantW) canvas.width = wantW;
+    if (canvas.height !== wantH) canvas.height = wantH;
     const W = canvas.width,
         H = canvas.height;
     const ctx = canvas.getContext("2d");
@@ -791,9 +821,15 @@ function drawDiagram(o, n, oCam, nCam) {
     ctx.fillStyle = "#0d1117";
     ctx.fillRect(0, 0, W, H);
 
-    const sidePad = 90;
+    // Same idea as the face view: the canvas is a fixed buffer scaled down by CSS,
+    // so scale the labels (and the padding that reserves room for them) up on
+    // narrow phones. 1 on desktop, up to ~1.7 on a phone.
+    const dispW = canvas.getBoundingClientRect().width || W;
+    const ts = Math.max(1, Math.min(1.7, 720 / dispW));
+
+    const sidePad = 90 + 150 * (ts - 1);
     const topPad = 46;
-    const botPad = 110;
+    const botPad = 120 + 100 * (ts - 1); // room for the two-line info rows below
     const availW = W - 2 * sidePad;
     const availH = H - topPad - botPad;
 
@@ -826,7 +862,7 @@ function drawDiagram(o, n, oCam, nCam) {
     const nRimCX = hubX - n.effectiveET * scale;
 
     const oDLeft = oRimCX - (o.tw / 2) * scale;
-    const aL = oDLeft - 26;
+    const aL = oDLeft - 26 * ts;
 
     ctx.save();
     ctx.setLineDash([2, 4]);
@@ -842,14 +878,18 @@ function drawDiagram(o, n, oCam, nCam) {
 
     arrow(ctx, aL, cy + oTH / 2, aL, cy - oTH / 2, "#58a6ffaa");
     ctx.fillStyle = "#58a6ff";
-    ctx.font = "bold 16px monospace";
+    ctx.font = `bold ${16 * ts}px monospace`;
     ctx.textAlign = "right";
-    ctx.fillText(`Ø${o.od.toFixed(0)} mm`, aL - 6, cy - 3);
-    ctx.font = "13px monospace";
-    ctx.fillText(formatTyreSize(o.tw, o.pr, o.rimIn), aL - 6, cy + 15);
+    ctx.fillText(`Ø${o.od.toFixed(0)} mm`, aL - 6 * ts, cy - 3 * ts);
+    ctx.font = `${13 * ts}px monospace`;
+    ctx.fillText(
+        formatTyreSize(o.tw, o.pr, o.rimIn),
+        aL - 6 * ts,
+        cy + 15 * ts,
+    );
 
     const nDRight = nRimCX + (n.tw / 2) * scale;
-    const aR = nDRight + 26;
+    const aR = nDRight + 26 * ts;
 
     ctx.save();
     ctx.setLineDash([2, 4]);
@@ -865,15 +905,20 @@ function drawDiagram(o, n, oCam, nCam) {
 
     arrow(ctx, aR, cy + nTH / 2, aR, cy - nTH / 2, "#f78166aa");
     ctx.fillStyle = "#f78166";
-    ctx.font = "bold 16px monospace";
+    ctx.font = `bold ${16 * ts}px monospace`;
     ctx.textAlign = "left";
-    ctx.fillText(`Ø${n.od.toFixed(0)} mm`, aR + 6, cy - 3);
-    ctx.font = "13px monospace";
-    ctx.fillText(formatTyreSize(n.tw, n.pr, n.rimIn), aR + 6, cy + 15);
+    ctx.fillText(`Ø${n.od.toFixed(0)} mm`, aR + 6 * ts, cy - 3 * ts);
+    ctx.font = `${13 * ts}px monospace`;
+    ctx.fillText(
+        formatTyreSize(n.tw, n.pr, n.rimIn),
+        aR + 6 * ts,
+        cy + 15 * ts,
+    );
 
-    // Info rows below — width + ET (+ spacer if any) + poke
-    const py1 = cy + maxTH / 2 + 28;
-    const py2 = py1 + 44;
+    // Info rows below — each setup gets two lines: "<tag> → <width>" on top and
+    // "ET … poke …" beneath, so the width label has room to breathe on mobile.
+    const py1 = cy + maxTH / 2 + 26 * ts;
+    const py2 = py1 + 52 * ts;
 
     const oETlabel = o.sp ? `ET${o.et} -${o.sp}sp` : `ET${o.et}`;
     const nETlabel = n.sp ? `ET${n.et} -${n.sp}sp` : `ET${n.et}`;
@@ -886,8 +931,10 @@ function drawDiagram(o, n, oCam, nCam) {
         py1,
         "#58a6ff",
         L.canvasCurrent,
-        `${o.tw} mm ${L.canvasWide}   ${oETlabel}   ${L.canvasPoke} ${o.poke.toFixed(1)} mm`,
+        `${o.tw} mm ${L.canvasWide}`,
+        `${oETlabel}   ${L.canvasPoke} ${o.poke.toFixed(1)} mm`,
         W - 8,
+        ts,
     );
     pokeRow(
         ctx,
@@ -896,17 +943,19 @@ function drawDiagram(o, n, oCam, nCam) {
         py2,
         "#f78166",
         L.canvasNew,
-        `${n.tw} mm ${L.canvasWide}   ${nETlabel}   ${L.canvasPoke} ${n.poke.toFixed(1)} mm`,
+        `${n.tw} mm ${L.canvasWide}`,
+        `${nETlabel}   ${L.canvasPoke} ${n.poke.toFixed(1)} mm`,
         W - 8,
+        ts,
     );
 
     // Legend
-    ctx.font = "bold 16px sans-serif";
+    ctx.font = `bold ${16 * ts}px sans-serif`;
     ctx.textAlign = "center";
     ctx.fillStyle = "#58a6ff";
-    ctx.fillText(`■ ${L.canvasCurrent}`, W / 2 - 60, 28);
+    ctx.fillText(`■ ${L.canvasCurrent}`, W / 2 - 60 * ts, 20 + 9 * ts);
     ctx.fillStyle = "#f78166";
-    ctx.fillText(`■ ${L.canvasNew}`, W / 2 + 48, 28);
+    ctx.fillText(`■ ${L.canvasNew}`, W / 2 + 48 * ts, 20 + 9 * ts);
 }
 
 // ── Face-on view ───────────────────────────────────────────────────────────────
@@ -1229,7 +1278,14 @@ function drawFaceDiagram(
     ctx.fillStyle = "#0d1117";
     ctx.fillRect(0, 0, W, H);
 
-    const sidePad = 90;
+    // The canvas is a fixed 900×620 buffer scaled down by CSS, so on a narrow
+    // phone every label shrinks with it. Scale the text — and the padding that
+    // reserves room for it — up as the on-screen width drops. 1 on desktop, up to
+    // ~1.7 on phones; the wheel gives up a little size so the labels stay legible.
+    const dispW = canvas.getBoundingClientRect().width || W;
+    const ts = Math.max(1, Math.min(1.7, 720 / dispW));
+
+    const sidePad = 90 + 150 * (ts - 1);
     const topPad = 46;
     const botPad = 46;
     const availW = W - 2 * sidePad;
@@ -1305,8 +1361,8 @@ function drawFaceDiagram(
 
     const oMid = midRadius(o);
     const nMid = midRadius(n);
-    const oFont = Math.max(13, Math.min(26, sidewallPx(o) * 0.55));
-    const nFont = Math.max(13, Math.min(26, sidewallPx(n) * 0.55));
+    const oFont = Math.max(13, Math.min(26 * ts, sidewallPx(o) * 0.55));
+    const nFont = Math.max(13, Math.min(26 * ts, sidewallPx(n) * 0.55));
 
     const oSize = formatTyreSize(o.tw, o.pr, o.rimIn);
     const nSize = formatTyreSize(n.tw, n.pr, n.rimIn);
@@ -1335,7 +1391,7 @@ function drawFaceDiagram(
 
     // Brand down the new tyre's left & right sidewalls (italic, grey, racy)
     if (BRAND) {
-        const brandPx = Math.max(11, Math.min(22, sidewallPx(n) * 0.45));
+        const brandPx = Math.max(11, Math.min(22 * ts, sidewallPx(n) * 0.45));
         const brandFont = `italic bold ${brandPx}px sans-serif`;
         drawSidewallText(
             ctx,
@@ -1413,23 +1469,23 @@ function drawFaceDiagram(
     const nRv = nR * Math.cos((nCam * Math.PI) / 180);
     const maxR = Math.max(oR, nR);
 
-    drawDiameterTick(ctx, cx, cy, oRv, maxR, "#58a6ff", -1, o.od);
-    drawDiameterTick(ctx, cx, cy, nRv, maxR, "#f78166", +1, n.od);
+    drawDiameterTick(ctx, cx, cy, oRv, maxR, "#58a6ff", -1, o.od, ts);
+    drawDiameterTick(ctx, cx, cy, nRv, maxR, "#f78166", +1, n.od, ts);
 
     // Legend
     const L = window.L;
-    ctx.font = "bold 16px sans-serif";
+    ctx.font = `bold ${16 * ts}px sans-serif`;
     ctx.textAlign = "center";
     ctx.fillStyle = "#58a6ff";
-    ctx.fillText(`■ ${L.canvasCurrent}`, W / 2 - 60, 28);
+    ctx.fillText(`■ ${L.canvasCurrent}`, W / 2 - 60 * ts, 20 + 9 * ts);
     ctx.fillStyle = "#f78166";
-    ctx.fillText(`■ ${L.canvasNew}`, W / 2 + 48, 28);
+    ctx.fillText(`■ ${L.canvasNew}`, W / 2 + 48 * ts, 20 + 9 * ts);
 }
 
 // Vertical Ø arrow + dashed leaders at the side of a face-view circle.
 // `side` = -1 (left/current) or +1 (right/new).
-function drawDiameterTick(ctx, cx, cy, rv, maxR, color, side, odMm) {
-    const ax = cx + side * (maxR + 26);
+function drawDiameterTick(ctx, cx, cy, rv, maxR, color, side, odMm, ts = 1) {
+    const ax = cx + side * (maxR + 26 * ts);
 
     // Dashed leaders from the circle's vertical extremes (cx, cy ± rv) to the arrow
     ctx.save();
@@ -1446,9 +1502,9 @@ function drawDiameterTick(ctx, cx, cy, rv, maxR, color, side, odMm) {
 
     arrow(ctx, ax, cy + rv, ax, cy - rv, `${color}aa`);
     ctx.fillStyle = color;
-    ctx.font = "bold 16px monospace";
+    ctx.font = `bold ${16 * ts}px monospace`;
     ctx.textAlign = side < 0 ? "right" : "left";
-    ctx.fillText(`Ø${odMm.toFixed(0)} mm`, ax + side * 6, cy + 6);
+    ctx.fillText(`Ø${odMm.toFixed(0)} mm`, ax + side * 6 * ts, cy + 6 * ts);
 }
 
 // ── Spinnable face wheel ───────────────────────────────────────────────────────
@@ -1837,6 +1893,12 @@ window.onload = () => {
     for (const id of ["o-spokes", "o-spokew", "n-spokes", "n-spokew"]) {
         document.getElementById(id).addEventListener("input", calculate);
     }
+    // Redraw both diagrams on resize/orientation change so the text scale adapts.
+    let resizeT;
+    window.addEventListener("resize", () => {
+        clearTimeout(resizeT);
+        resizeT = setTimeout(calculate, 120);
+    });
 };
 
 // ── Service worker registration ───────────────────────────────────────────────
