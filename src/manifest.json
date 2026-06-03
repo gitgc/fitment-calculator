@@ -1,6 +1,6 @@
 {
     "name": "Fix That Gap!",
-    "short_name": "Fitment",
+    "short_name": "Fix That Gap!",
     "description": "Compare wheel and tire fitment setups side by side.",
     "start_url": "/",
     "display": "standalone",
