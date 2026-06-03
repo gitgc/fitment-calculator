@@ -774,6 +774,15 @@ test.describe('Fitment warnings', () => {
 		await expect(page.locator('#fitment-warnings')).toBeEmpty();
 	});
 
+	test('an out-of-range centre bore is clamped to the input limits', async () => {
+		await page.fill('#o-cb', '9999'); // above max 120
+		await page.fill('#n-cb', '10'); // below min 40
+		await page.click('button.calc-btn');
+		const cells = page.locator('#tbody tr').nth(TD.boreRow).locator('td');
+		await expect(cells.nth(0)).toContainText('120.0');
+		await expect(cells.nth(1)).toContainText('40.0');
+	});
+
 	test('a larger new centre bore is a caution on the row (hub-centric rings)', async () => {
 		await page.fill('#o-cb', '64.1');
 		await page.fill('#n-cb', '72.6');

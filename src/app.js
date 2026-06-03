@@ -15,6 +15,22 @@ function v(id) {
     return val;
 }
 
+// Like v(), but a blank field stays 0 ("unspecified") instead of clamping up to
+// the minimum. Any value that *is* provided is still clamped to the input's
+// declared min/max, so an out-of-range entry (e.g. via a crafted share URL or
+// manual edit) can't bypass the stated limits.
+function vOptional(id) {
+    const el = document.getElementById(id);
+    if (el.value.trim() === "") return 0;
+    const val = parseFloat(el.value);
+    if (Number.isNaN(val)) return 0;
+    const lo = parseFloat(el.min);
+    const hi = parseFloat(el.max);
+    if (!Number.isNaN(lo) && val < lo) return lo;
+    if (!Number.isNaN(hi) && val > hi) return hi;
+    return val;
+}
+
 // ── Tyre size notation ──────────────────────────────────────────────────────────
 // Parses standard metric tyre codes into { tw, pr, rim }, e.g. "225/45R17",
 // "P225/45ZR17", "225/45-17", "225 / 45 r 17", "225/45R17 91W". Returns null if
@@ -275,9 +291,9 @@ function calculate() {
     const oCam = v("o-cam");
     const nCam = v("n-cam");
     // Centre bore is optional and not used in any geometry — read it raw so an
-    // empty field stays 0 ("not specified") rather than being clamped to the min.
-    const oBore = parseFloat(document.getElementById("o-cb").value) || 0;
-    const nBore = parseFloat(document.getElementById("n-cb").value) || 0;
+    // empty field stays 0 ("not specified"); any provided value is clamped.
+    const oBore = vOptional("o-cb");
+    const nBore = vOptional("n-cb");
     // Bolt pattern is optional; an unset side falls back to the typical default.
     const oBolt = document.getElementById("o-bp").value;
     const nBolt = document.getElementById("n-bp").value;
